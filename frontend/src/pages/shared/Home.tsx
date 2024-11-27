@@ -19,7 +19,7 @@ const Home: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="bg-transparent shadow-md rounded-lg overflow-hidden max-w-4xl mx-auto flex items-center justify-center space-x-4 py-4">
+                {/* <div className="bg-transparent shadow-md rounded-lg overflow-hidden max-w-4xl mx-auto flex items-center justify-center space-x-4 py-4">
         
                     <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
                         Post Task
@@ -28,7 +28,7 @@ const Home: React.FC = () => {
                     <button className="border-2 border-blue-600  text-white px-6 py-3 rounded-lg hover:bg-blue-100">
                         Find Talent
                     </button>
-                </div>
+                </div> */}
 
                 {/* Stats Section */}
                 <div className="flex justify-center mt-8 text-white space-x-12">

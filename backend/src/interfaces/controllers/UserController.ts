@@ -11,6 +11,17 @@ export const UserController = {
             next (error);
         }
     },
+
+    verifyOtp: async (req: Req, res: Res, next: Next) => {
+        try {
+            const {email, otp} = req.body;
+            const result = await userUseCase.verifyOtp(email,otp);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+    
     login: async (req: Req, res: Res, next: Next)=> {
         try {
             const {email, password}  = req.body;

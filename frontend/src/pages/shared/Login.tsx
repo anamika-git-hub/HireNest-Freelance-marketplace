@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import axiosConfig from '../service/axios';
+import axiosConfig from '../../service/axios';
 import { useDispatch } from 'react-redux';
-import { loginUser } from '../store/userSlice';
+import { loginUser } from '../../store/userSlice';
 
 const Login: React.FC = () => {
    const [email, setEmail] = useState("");
@@ -16,6 +16,7 @@ const Login: React.FC = () => {
       if(response.status === 200) {
         dispatch(loginUser(response.data));
         alert("User logged in successfully");
+        window.location.href = "/";
         localStorage.setItem(response.data.token,'accessToken');
         localStorage.setItem(response.data.user.role,'role');
         localStorage.setItem(response.data.user.email,'email');

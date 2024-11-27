@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import axios from 'axios';
 import { loginUser } from "../../store/userSlice";
 import axiosConfig from "../../service/axios";
 

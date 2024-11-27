@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Home from './pages/shared/Home';
+import Login from './pages/shared/Login';
+import Register from './pages/shared/Register';
 import LayoutWrapper from './components/LayoutWrapper';
 import AdminLogin from './pages/admin/Login';
 import AdminLayout from './components/admin/adminLayout';
