@@ -22,7 +22,7 @@ const Signup: React.FC = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/users/signup', newUser);
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         dispatch(registerUser(response.data));
         alert("User registered successfully");
         window.location.href = '/login';

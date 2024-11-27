@@ -1,25 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { getClients } from "../../store/userSlice";
+import axiosConfig from "../../service/axios";
 
 const ManageUsers: React.FC = () => {
-  const users = [
-    {
-      name: "Duran Clayton",
-      email: "Duran@Example.Com",
-      company: "Supertech Ltd",
-      position: "CEO & Founder",
-      date: "11 Jun 2020",
-      status: "Active",
-    },
-    {
-      name: "David Milar",
-      email: "David@Example.Com",
-      company: "Realestate Solution",
-      position: "Lead Developer",
-      date: "31 May 2021",
-      status: "Deactive",
-    },
-    // Add more users
-  ];
+  const [clients, setClients] = useState([]); // State to store the clients
+  const dispatch = useDispatch();
+
+  const fetchClients = async () => {
+    try {
+      const response = await axiosConfig.get("admin/clients");
+      console.log("Response:", response.data);
+
+      // Assuming the response has a structure { clients: [...] }
+      const clientsData = response.data.clients || [];
+      setClients(clientsData); // Set the extracted array to state
+      dispatch(getClients(clientsData));
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients(); // Fetch clients on component mount
+  }, []);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -29,34 +33,38 @@ const ManageUsers: React.FC = () => {
           <tr className="bg-gray-800 text-white text-left text-sm">
             <th className="p-4">User</th>
             <th className="p-4">Email</th>
-            <th className="p-4">Company</th>
-            <th className="p-4">Position</th>
+            <th className="p-4">Role</th>
             <th className="p-4">Join Date</th>
             <th className="p-4">Status</th>
             <th className="p-4">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user, index) => (
+          {clients.map((client: any, index) => (
             <tr
               key={index}
               className="border-b text-sm hover:bg-gray-100 transition-colors"
             >
-              <td className="p-4">{user.name}</td>
-              <td className="p-4">{user.email}</td>
-              <td className="p-4">{user.company}</td>
-              <td className="p-4">{user.position}</td>
-              <td className="p-4">{user.date}</td>
+              <td className="p-4">{client.name || "N/A"}</td>
+              <td className="p-4">{client.email || "N/A"}</td>
+              <td className="p-4">{client.role || "N/A"}</td>
+              <td className="p-4">
+                {new Date(client.createdAt).toLocaleDateString() || "N/A"}
+              </td>
               <td
                 className={`p-4 font-semibold ${
-                  user.status === "Active"
+                  client.isBlocked
+                    ? "text-red-600"
+                    : client.isVerified
                     ? "text-green-600"
-                    : user.status === "Deactive"
-                    ? "text-orange-600"
-                    : "text-red-600"
+                    : "text-orange-600"
                 }`}
               >
-                {user.status}
+                {client.isBlocked
+                  ? "Blocked"
+                  : client.isVerified
+                  ? "Verified"
+                  : "Pending"}
               </td>
               <td className="p-4">
                 <button className="text-blue-500 hover:underline">Edit</button>

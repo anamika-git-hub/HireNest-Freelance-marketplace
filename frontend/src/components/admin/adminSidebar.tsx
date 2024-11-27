@@ -22,13 +22,13 @@ const AdminSidebar: React.FC = () => {
           <FaUsers className="mr-3" /> Clients
         </NavLink>
         <NavLink
-          to="/admin/messages"
+          to="/admin/freelancers"
           className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white"
         >
           <FaEnvelope className="mr-3" /> Freelancers
         </NavLink>
         <NavLink
-          to="/admin/calendar"
+          to="/admin/categories"
           className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white"
         >
           <FaCalendar className="mr-3" /> Categories

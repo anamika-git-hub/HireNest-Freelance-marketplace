@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axiosConfig from '../service/axios';
+import { useDispatch } from 'react-redux';
+import { loginUser } from '../store/userSlice';
 
 const Login: React.FC = () => {
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const dispatch = useDispatch();
+
+   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {email, password}
+    try {
+      const response = await axiosConfig.post('users/login', payload)
+      if(response.status === 200) {
+        dispatch(loginUser(response.data));
+        alert("User logged in successfully");
+        localStorage.setItem(response.data.token,'accessToken');
+        localStorage.setItem(response.data.user.role,'role');
+        localStorage.setItem(response.data.user.email,'email');
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }
+   }
   return (
+    <>
     <div
       className="bg-cover bg-center h-screen flex items-center justify-center"
       style={{
@@ -17,12 +42,14 @@ const Login: React.FC = () => {
                 Register
             </a>
         </p>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-white text-sm font-semibold mb-2">Email</label>
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
@@ -31,6 +58,8 @@ const Login: React.FC = () => {
             <input
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
           </div>
@@ -53,6 +82,7 @@ const Login: React.FC = () => {
        
       </div>
     </div>
+    </>
   );
 };
 

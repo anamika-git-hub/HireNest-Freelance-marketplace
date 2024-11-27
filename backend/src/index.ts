@@ -11,10 +11,11 @@ const port = Config.PORT ;
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:3000', 
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }));
+
 app.use(express.json());
 
 
