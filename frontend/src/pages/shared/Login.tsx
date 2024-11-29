@@ -14,18 +14,23 @@ const Login: React.FC = () => {
     try {
       const response = await axiosConfig.post('users/login', payload)
       if(response.status === 200) {
-        dispatch(loginUser(response.data));
+        const user = response.data.user;
+
+        localStorage.setItem('accessToken', response.data.token);
+        localStorage.setItem('role', response.data.user.role);
+        localStorage.setItem('email', response.data.user.email);
+
+        dispatch(loginUser(user));
         alert("User logged in successfully");
         window.location.href = "/";
-        localStorage.setItem(response.data.token,'accessToken');
-        localStorage.setItem(response.data.user.role,'role');
-        localStorage.setItem(response.data.user.email,'email');
+      }else{
+        console.log(response)
       }
     } catch (error) {
-      console.log(error);
+      console.log('Login failed:',error);
       
     }
-   }
+   };
   return (
     <>
     <div
@@ -37,9 +42,9 @@ const Login: React.FC = () => {
     >
       <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg max-w-md w-full">
         <h2 className="text-2xl font-bold text-center mb-6 text-white">Login</h2>
-        <p className="text-sm text-gray-600 text-center mt-4">
+        <p className="text-sm text-white text-center mt-4">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-600 hover:underline">
+            <a href="/register" className="text-blue-500 hover:underline">
                 Register
             </a>
         </p>

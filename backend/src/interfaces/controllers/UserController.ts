@@ -15,13 +15,24 @@ export const UserController = {
     verifyOtp: async (req: Req, res: Res, next: Next) => {
         try {
             const {email, otp} = req.body;
+            console.log('rrrrrrrrrrrr',req.body)
             const result = await userUseCase.verifyOtp(email,otp);
             res.status(200).json(result);
         } catch (error) {
             next(error);
         }
     },
-    
+
+    resendOtp: async(req: Req, res: Res, next: Next) => {
+        try {
+            const {email} = req.body;
+            const result = await userUseCase.resendOtp(email);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
     login: async (req: Req, res: Res, next: Next)=> {
         try {
             const {email, password}  = req.body;

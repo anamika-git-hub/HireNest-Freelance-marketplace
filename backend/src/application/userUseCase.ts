@@ -1,5 +1,6 @@
 import {Iuser} from '../entities/User';
 import { JwtService } from '../infrastructure/services/JwtService';
+import { TempUserRepository } from '../infrastructure/repositories/tempUserRepository';
 import { UserRepository } from '../infrastructure/repositories/UserRepository';
 import { hashPassword, comparePassword } from '../infrastructure/services/HashPassword';
 import { OtpService } from '../infrastructure/services/OtpService';
@@ -21,13 +22,26 @@ export const userUseCase = {
         const updatedUser = await UserRepository.updateUserVerification(email, true);
         return {message:'Otp verified successfully', user: updatedUser};
     },
-    
+
+    resendOtp: async (email: string) => {
+        const user = await UserRepository.findUserByEmail(email);
+        if(!user) throw new Error('User not found');
+        
+        if(user.isVerified) throw new Error('User is already verified');
+
+        await OtpService.generateAndSendOtp(email);
+        return {message: 'Otp resent successfully to the email'};
+    },
+
     login: async (email: string, password: string) =>{
         const user = await UserRepository.findUserByEmail(email);
         if(!user) throw new Error('User not found');
+
         const isValidPassword = await comparePassword(password,user.password);
         if(!isValidPassword) throw new Error ('Invalid credentials');
-
+        if(!user.isVerified){
+            throw new Error('User not verified yet')
+        }
         const token = JwtService.generateToken({id: user.id, email:user.email});
         return {token, user};
         

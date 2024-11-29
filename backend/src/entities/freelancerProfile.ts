@@ -1,5 +1,5 @@
 export interface IFreelancerProfile {
-    freelancerId: string; 
+    freelancerId?: string; 
     fullName: string;
     phone: string;
     location: string;

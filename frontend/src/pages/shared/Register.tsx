@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../store/userSlice";
 import axios from "axios";
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("freelancer"); 
+  const [role, setRole] = useState("freelancer");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +30,9 @@ const Signup: React.FC = () => {
 
       if (response.status === 201) {
         dispatch(registerUser(response.data));
-        alert("User registered successfully");
-        window.location.href = "/login";
+        alert("User registered successfully. Redirecting to OTP page...");
+        navigate("/otp", { state: { email } }); // Navigate to OTP page and pass email
+        localStorage.setItem('email',email)
       }
     } catch (error) {
       console.error("Error during signup:", error);
@@ -46,7 +49,9 @@ const Signup: React.FC = () => {
       }}
     >
       <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center mb-6 text-white">Signup</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-white">
+          Signup
+        </h2>
         <p className="text-sm text-white text-center mt-4">
           Already have an account?{" "}
           <a href="/login" className="text-blue-600 hover:underline">
@@ -128,16 +133,6 @@ const Signup: React.FC = () => {
             Register
           </button>
         </form>
-
-        <div className="text-center my-4 text-white">or</div>
-        <div className="flex justify-between">
-          <button className="w-1/2 bg-blue-50 text-blue-700 border border-blue-500 py-2 rounded-md mr-2">
-            <i className="fab fa-facebook"></i> Register via Facebook
-          </button>
-          <button className="w-1/2 bg-red-50 text-red-700 border border-red-500 py-2 rounded-md ml-2">
-            <i className="fab fa-google"></i> Register via Google
-          </button>
-        </div>
       </div>
     </div>
   );
