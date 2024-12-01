@@ -22,9 +22,9 @@ const AdminLogin: React.FC = () => {
         dispatch(loginUser(response.data));
         navigate('/admin/dashboard')
         alert('Admin logged in successfully');
-        localStorage.setItem(response.data.token,'accessToken');
-        localStorage.setItem(response.data.user.role,'role');
-        localStorage.setItem(response.data.user.email,'email');
+        localStorage.setItem('accessToken',response.data.token);
+        localStorage.setItem('role',response.data.user.role);
+        localStorage.setItem('email',response.data.user.email);
         
       }
     } catch (error) {

@@ -1,15 +1,11 @@
 import React, { useState , useEffect} from 'react';
 import { useLocation , useNavigate} from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const currentUser = useSelector((state: RootState)=> state.user.currentUser);
-  const userRole = currentUser?.role || 'guest';
+  const userRole = localStorage.getItem('role') || 'guest';
 
   const getNavLinks = () => {
     if (userRole === "freelancer") {
@@ -47,7 +43,7 @@ const Header: React.FC = () => {
 
   useEffect(()=> {
 
-  },[currentUser])
+  },[userRole])
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">

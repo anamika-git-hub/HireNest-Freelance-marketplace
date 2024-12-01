@@ -3,5 +3,5 @@ export interface Icategory {
     name: string;
     description?: string;
     createdAt?: Date;
-    updatedAt?: Date;
+    state?: 'active' | 'inactive';
 }

@@ -1,5 +1,6 @@
 import axios from "axios";
-console.log(process.env.BASE_URL)
+import dotenv from 'dotenv';
+console.log('aaaaaaaa', process.env.BASE_URL)
 
 const axiosConfig  = axios.create({
     baseURL: process.env.BASE_URL ||"http://localhost:5000/api/",

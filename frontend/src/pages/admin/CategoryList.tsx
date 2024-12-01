@@ -1,34 +1,49 @@
-
-import React , { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store"; // Update with the correct path to your store
+import {
+  getCategories,
+  deleteCategory,
+  updateCategory,
+} from "../../store/categorySlice";
+import axiosConfig from "../../service/axios";
 import { useNavigate } from "react-router-dom";
 
 const ManageCategories: React.FC = () => {
-    const navigate = useNavigate();
-  const categories = [
-    {
-      name: "Web development",
-      description: "Lorem ipsum dolor sit amet lorem non consectetur adipiscing elit amet.Devices and gadgets",
-      date: "15 Jul 2021",
-      status: "Active",
-    },
-    {
-      name: "Designining",
-      description: "Lorem ipsum dolor sit amet lorem non consectetur adipiscing elit amet.",
-      date: "23 Oct 2020",
-      status: "Inactive",
-    },
-    {
-      name: "Marketing",
-      description: "Lorem ipsum dolor sit amet lorem non consectetur adipiscing elit amet.",
-      date: "05 Mar 2022",
-      status: "Active",
-    },
-  ];
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const categories = useSelector((state: RootState) => state.category.categories);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosConfig.get("/admin/categories");
+        dispatch(getCategories(response.data));
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, [dispatch]);
+
+  const handleDeleteCategory = async (id: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this category?");
+    if (confirmed) {
+      try {
+        await axiosConfig.delete(`/admin/categories/${id}`);
+        dispatch(deleteCategory(id));
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      }
+    }
+  };
 
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   return (
     <div className="p-6 bg-gray-100 ">
       <div className="flex items-center justify-between mb-4">
@@ -56,7 +71,6 @@ const ManageCategories: React.FC = () => {
           <tr className="bg-gray-800 text-white text-left text-sm">
             <th className="p-4">Category Name</th>
             <th className="p-4">Description</th>
-            <th className="p-4">Created Date</th>
             <th className="p-4">Status</th>
             <th className="p-4">Actions</th>
           </tr>
@@ -64,22 +78,29 @@ const ManageCategories: React.FC = () => {
         <tbody>
           {filteredCategories.map((category, index) => (
             <tr
-              key={index}
+              key={category.id  || `${category.name}-${index}`}
               className="border-b text-sm hover:bg-gray-100 transition-colors"
             >
               <td className="p-4">{category.name}</td>
               <td className="p-4">{category.description}</td>
-              <td className="p-4">{category.date}</td>
               <td
                 className={`p-4 font-semibold ${
-                  category.status === "Active" ? "text-green-600" : "text-orange-600"
+                  category.state === "active" ? "text-green-600" : "text-orange-600"
                 }`}
               >
-                {category.status}
+                {category.state}
               </td>
               <td className="p-4">
-                <button className="text-blue-500 hover:underline">Edit</button>
-                <button className="text-red-500 hover:underline ml-4">
+                <button
+                  className="text-blue-500 hover:underline"
+                  onClick={() => navigate(`/admin/edit-category/${category.id}`)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="text-red-500 hover:underline ml-4"
+                  onClick={() => handleDeleteCategory(category.id!)}
+                >
                   Delete
                 </button>
               </td>
@@ -88,7 +109,6 @@ const ManageCategories: React.FC = () => {
         </tbody>
       </table>
 
-      {/* Show message if no categories match the search */}
       {filteredCategories.length === 0 && (
         <div className="text-center text-gray-600 mt-4">No categories found.</div>
       )}
