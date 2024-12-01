@@ -5,7 +5,7 @@ import Home from './pages/shared/Home';
 import Login from './pages/shared/Login';
 import Register from './pages/shared/Register';
 import OTPVerification from './pages/shared/Otp';
-import LayoutWrapper from './components/LayoutWrapper';
+import LayoutWrapper from './components/shared/LayoutWrapper';
 import AdminLogin from './pages/admin/Login';
 import AdminLayout from './components/admin/adminLayout';
 import Dashboard from './pages/admin/Dashboard';

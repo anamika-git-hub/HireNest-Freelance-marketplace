@@ -3,22 +3,23 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../store/userSlice";
 import axios from "axios";
+import { signupValidationSchema } from "../../components/Schemas/signUpValidationSchema"; // Import the schema
+import { Formik, Field, Form, ErrorMessage } from "formik"; // Import Formik
 
 const Signup: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("freelancer");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const dispatch = useDispatch();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Initial form values
+  const initialValues = {
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "freelancer", // default role
+  };
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
+  const handleSubmit = async (values: any) => {
+    const { email, password, role } = values;
 
     const newUser = { email, password, role };
 
@@ -31,8 +32,8 @@ const Signup: React.FC = () => {
       if (response.status === 201) {
         dispatch(registerUser(response.data));
         alert("User registered successfully. Redirecting to OTP page...");
-        navigate("/otp", { state: { email } }); // Navigate to OTP page and pass email
-        localStorage.setItem('email',email)
+        navigate("/otp", { state: { email } });
+        localStorage.setItem("email", email);
       }
     } catch (error) {
       console.error("Error during signup:", error);
@@ -59,80 +60,101 @@ const Signup: React.FC = () => {
           </a>
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role Selector */}
-          <div className="mt-6">
-            <div className="flex gap-x-4">
-              <label
-                className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
-                  role === "freelancer"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                <input
-                  type="radio"
-                  value="freelancer"
-                  checked={role === "freelancer"}
-                  onChange={() => setRole("freelancer")}
-                  className="hidden"
-                />
-                Freelancer
-              </label>
-              <label
-                className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
-                  role === "client"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                <input
-                  type="radio"
-                  value="client"
-                  checked={role === "client"}
-                  onChange={() => setRole("client")}
-                  className="hidden"
-                />
-                Client
-              </label>
-            </div>
-          </div>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={signupValidationSchema} // Attach validation schema
+          onSubmit={handleSubmit}
+        >
+          {({ setFieldValue, values }) => (
+            <Form className="space-y-5">
+              {/* Role Selector */}
+              <div className="mt-6">
+                <div className="flex gap-x-4">
+                  <label
+                    className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
+                      values.role === "freelancer"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    <Field
+                      type="radio"
+                      name="role"
+                      value="freelancer"
+                      className="hidden"
+                    />
+                    Freelancer
+                  </label>
+                  <label
+                    className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
+                      values.role === "client"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    <Field
+                      type="radio"
+                      name="role"
+                      value="client"
+                      className="hidden"
+                    />
+                    Client
+                  </label>
+                </div>
+              </div>
 
-          {/* Other Fields */}
-          <div>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Repeat Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Register
-          </button>
-        </form>
+              {/* Other Fields */}
+              <div>
+                <Field
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <ErrorMessage
+                  name="email"
+                  component="div"
+                  className="text-red-500 text-xs mt-1"
+                />
+              </div>
+
+              <div>
+                <Field
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="text-red-500 text-xs mt-1"
+                />
+              </div>
+
+              <div>
+                <Field
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Repeat Password"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <ErrorMessage
+                  name="confirmPassword"
+                  component="div"
+                  className="text-red-500 text-xs mt-1"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Register
+              </button>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );

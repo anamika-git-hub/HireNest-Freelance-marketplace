@@ -1,8 +1,10 @@
-import React, { useState , useEffect} from 'react';
-import { useLocation , useNavigate} from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null); // Ref for the profile dropdown menu
   const location = useLocation();
   const navigate = useNavigate();
   const userRole = localStorage.getItem('role') || 'guest';
@@ -28,7 +30,6 @@ const Header: React.FC = () => {
         </>
       );
     } else {
-      // Guest (non-logged-in user)
       return (
         <>
           <a href="#home" className="text-gray-700 hover:text-blue-600">Home</a>
@@ -41,14 +42,30 @@ const Header: React.FC = () => {
     }
   };
 
-  useEffect(()=> {
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false); // Close the dropdown if clicked outside
+      }
+    };
 
-  },[userRole])
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('role');
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-6 flex justify-between items-center h-16">
-        
         <div className="text-2xl font-bold text-blue-600 flex items-center">
           <span className="mr-2">🔷</span> HireNest
         </div>
@@ -76,17 +93,40 @@ const Header: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             <button className="relative text-gray-700 hover:text-blue-600">🔔</button>
             <button className="relative text-gray-700 hover:text-blue-600">✉️</button>
-            <div className="relative">
+            <div className="relative" ref={profileMenuRef}>
               <img
                 src="https://via.placeholder.com/40"
                 alt="User Avatar"
-                className="w-10 h-10 rounded-full border-2 border-green-500"
+                className="w-10 h-10 rounded-full border-2 border-green-500 cursor-pointer"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               />
               <span className="absolute bottom-0 right-0 bg-green-500 rounded-full w-3 h-3"></span>
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-lg">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={() => navigate('/settings')}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
-        
+
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="md:hidden text-gray-700 focus:outline-none"
@@ -95,7 +135,6 @@ const Header: React.FC = () => {
         </button>
       </div>
 
-      {/* Mobile Dropdown Menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white shadow-md p-4">
           {getNavLinks()}
