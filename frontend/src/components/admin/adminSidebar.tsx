@@ -16,13 +16,13 @@ const AdminSidebar: React.FC = () => {
           <MdDashboard className="mr-3" /> Dashboard
         </NavLink>
         <NavLink
-          to="/admin/users"
+          to="/admin/client"
           className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white"
         >
           <FaUsers className="mr-3" /> Clients
         </NavLink>
         <NavLink
-          to="/admin/freelancers"
+          to="/admin/freelancer"
           className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white"
         >
           <FaEnvelope className="mr-3" /> Freelancers

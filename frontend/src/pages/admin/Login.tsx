@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../store/userSlice";
+import { useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 
 
@@ -8,6 +9,7 @@ const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,8 +17,10 @@ const AdminLogin: React.FC = () => {
     try {
       const response = await axiosConfig.post("admin/login",payload);
       if(response.status === 200){
+        console.log(response.data);
+        
         dispatch(loginUser(response.data));
-        window.location.href = '/admin/dashboard'
+        navigate('/admin/dashboard')
         alert('Admin logged in successfully');
         localStorage.setItem(response.data.token,'accessToken');
         localStorage.setItem(response.data.user.role,'role');

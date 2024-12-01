@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import axiosConfig from '../../service/axios';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../store/userSlice';
 
 const Login: React.FC = () => {
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const dispatch = useDispatch();
+   const navigate = useNavigate()
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,7 +16,10 @@ const Login: React.FC = () => {
     try {
       const response = await axiosConfig.post('users/login', payload)
       if(response.status === 200) {
+
         const user = response.data.user;
+        console.log('user:', response.data);
+        
 
         localStorage.setItem('accessToken', response.data.token);
         localStorage.setItem('role', response.data.user.role);
@@ -22,7 +27,7 @@ const Login: React.FC = () => {
 
         dispatch(loginUser(user));
         alert("User logged in successfully");
-        window.location.href = "/";
+        navigate('/')
       }else{
         console.log(response)
       }

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { log } from "console";
 console.log(process.env.BASE_URL)
 
 const axiosConfig  = axios.create({

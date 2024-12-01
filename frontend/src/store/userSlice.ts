@@ -32,20 +32,25 @@ const userSlice = createSlice({
         },
         loginUser: (state, action: PayloadAction<User>) => {
             state.currentUser = action.payload;
-            localStorage.setItem('currentUser',JSON.stringify(action.payload))
+            localStorage.setItem("currentUser", JSON.stringify(action.payload));
         },
         logoutUser: (state) => {
             state.currentUser = null;
-            localStorage.removeItem('currentUser')
+            localStorage.removeItem("currentUser");
         },
-        getClients: (state) => {
-            state.clients = state.users.filter(user => user.role === "client");
-        },
-        getFreelancers: (state) => {
-            state.freelancers = state.users.filter(user => user.role === "freelancer");
+        setUsersByType: (
+            state,
+            action: PayloadAction<{ userType: "client" | "freelancer"; users: User[] }>
+        ) => {
+            const { userType, users } = action.payload;
+            if (userType === "client") {
+                state.clients = users;
+            } else if (userType === "freelancer") {
+                state.freelancers = users;
+            }
         },
     },
 });
 
-export const { registerUser, loginUser,logoutUser, getClients, getFreelancers } = userSlice.actions;
+export const { registerUser, loginUser, logoutUser, setUsersByType } = userSlice.actions;
 export default userSlice.reducer;

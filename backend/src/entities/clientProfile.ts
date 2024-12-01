@@ -1,5 +1,5 @@
 export interface IClientProfile {
-    clientId: string;
+    clientId?: string;
     fullName: string;
     phone: string;
     location: string;

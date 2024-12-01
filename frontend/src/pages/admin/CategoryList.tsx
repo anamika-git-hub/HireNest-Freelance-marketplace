@@ -30,7 +30,7 @@ const ManageCategories: React.FC = () => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100 ">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Category Management</h1>
         <button
