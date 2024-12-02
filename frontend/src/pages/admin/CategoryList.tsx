@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store"; // Update with the correct path to your store
+import { RootState } from "../../store/store"; 
 import {
   getCategories,
-  deleteCategory,
-  updateCategory,
+  deleteCategory
 } from "../../store/categorySlice";
 import axiosConfig from "../../service/axios";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +42,7 @@ const ManageCategories: React.FC = () => {
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  console.log('fffffffffffff',filteredCategories)
 
   return (
     <div className="p-6 bg-gray-100 ">
@@ -91,12 +91,16 @@ const ManageCategories: React.FC = () => {
                 {category.state}
               </td>
               <td className="p-4">
-                <button
-                  className="text-blue-500 hover:underline"
-                  onClick={() => navigate(`/admin/edit-category/${category.id}`)}
-                >
-                  Edit
-                </button>
+              <button
+                className="text-blue-500 hover:underline"
+                onClick={() => {
+                  console.log('iddididi', category.id); // Log category.id to the console
+                  navigate(`/admin/categories/edit/${category.id}`);
+                }}
+              >
+                Edit
+              </button>
+
                 <button
                   className="text-red-500 hover:underline ml-4"
                   onClick={() => handleDeleteCategory(category.id!)}

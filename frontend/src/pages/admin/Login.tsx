@@ -17,7 +17,6 @@ const AdminLogin: React.FC = () => {
     try {
       const response = await axiosConfig.post("admin/login",payload);
       if(response.status === 200){
-        console.log(response.data);
         
         dispatch(loginUser(response.data));
         navigate('/admin/dashboard')

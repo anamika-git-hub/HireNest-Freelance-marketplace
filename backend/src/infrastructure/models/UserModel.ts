@@ -12,6 +12,7 @@ const UserSchema = new Schema ({
     role: {
         type: String,
         enum: ['client', 'freelancer', 'admin'],
+        default: 'client',
         required: true
     },
     isBlocked: {

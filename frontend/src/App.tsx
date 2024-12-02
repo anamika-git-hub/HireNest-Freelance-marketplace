@@ -14,7 +14,7 @@ import ManageCategories from './pages/admin/CategoryList';
 import FreelancerProfileSetup from './pages/freelancer/profileSetup';
 import ClientProfileSetup from './pages/clients/profileSetup';
 import SettingsPage from './pages/freelancer/Settings';
-import CreateCategory from './pages/admin/CreateCategory';
+import CategoryForm from './pages/admin/categoryForm';
 
 const App: React.FC = () => {
   return (
@@ -44,7 +44,8 @@ const App: React.FC = () => {
         />
        
         <Route path="/admin/categories" element={<AdminLayout><ManageCategories /></AdminLayout>} />
-        <Route path="/admin/create-category" element={<AdminLayout><CreateCategory /></AdminLayout>} />
+        <Route path="/admin/categories/new" element={<AdminLayout><CategoryForm /></AdminLayout>} />
+        <Route path="/admin/categories/edit/:id" element={<AdminLayout><CategoryForm/></AdminLayout>} />
       </Routes>
     </Router>
   );

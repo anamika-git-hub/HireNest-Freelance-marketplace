@@ -10,12 +10,11 @@ const Signup: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Initial form values
   const initialValues = {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "freelancer", // default role
+    role: "freelancer", 
   };
 
   const handleSubmit = async (values: any) => {

@@ -14,9 +14,7 @@ export const OtpService = {
         sendOtpEmail(email,otp);
     },
     verifyOtp: async(email: string, otp: string) => {
-     console.log('eeee',email, 'ooo', otp)
         const otpRecord = await OtpModel.findOne({email});
-       console.log('ooooooooooooo',otpRecord)
         if(!otpRecord) {
             throw new Error ("Invalid OTP")
         }

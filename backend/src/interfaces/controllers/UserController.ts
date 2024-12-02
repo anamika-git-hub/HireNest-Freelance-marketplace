@@ -4,7 +4,6 @@ import { userUseCase } from "../../application/userUseCase";
 export const UserController = {
     signUp: async (req: Req, res: Res, next: Next)=> {
         try {
-            console.log('Request body:', req.body)
             const result = await userUseCase.signUp(req.body);
             res.status(201).json(result);
         } catch (error) {
@@ -15,7 +14,6 @@ export const UserController = {
     verifyOtp: async (req: Req, res: Res, next: Next) => {
         try {
             const {email, otp} = req.body;
-            console.log('rrrrrrrrrrrr',req.body)
             const result = await userUseCase.verifyOtp(email,otp);
             res.status(200).json(result);
         } catch (error) {

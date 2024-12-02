@@ -15,7 +15,6 @@ const ManageUsers: React.FC = () => {
     try {
       const endpoint = userType === "freelancer" ? "admin/freelancers" : "admin/clients";
       const response = await axiosConfig.get(endpoint);
-      console.log(response.data);
 
       const usersData = userType === "freelancer" ? response.data.freelancers : response.data.clients;
       setUsers(usersData);

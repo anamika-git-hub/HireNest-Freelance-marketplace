@@ -1,6 +1,7 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { CategoryUseCase } from '../../application/categoryUseCase';
 
+
 export const CategoryController = {
     createCategory: async (req: Req, res: Res, next: Next) => {
         try {
@@ -22,6 +23,9 @@ export const CategoryController = {
         try {
             const {id} = req.params;
             const category = await CategoryUseCase.getCategoryById(id);
+            if(!category){
+                return res.status(404).json({error: "category not found"})
+            }
             res.status(200).json(category);
         } catch (error) {
             next(error);
@@ -32,6 +36,9 @@ export const CategoryController = {
             const {id} = req.params;
             const updates = req.body;
             const updateCategory = await CategoryUseCase.updateCategory(id, updates);
+            if(!updateCategory){
+                return res.status(404).json({error: "Category not found"})
+            }
             res.status(200).json(updateCategory);
         }catch(error){
             next(error)
