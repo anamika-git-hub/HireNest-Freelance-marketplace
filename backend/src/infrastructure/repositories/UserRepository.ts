@@ -12,5 +12,13 @@ export const UserRepository = {
             {isVerified},
             {new: true}
         );
-    }
+    },
+    toggleBlockUser: async (userId: string, isBlocked: boolean) => {
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            {isBlocked: !isBlocked},
+            {new: true}
+        );
+        return updatedUser;
+    },
 };

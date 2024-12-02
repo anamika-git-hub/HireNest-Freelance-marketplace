@@ -21,5 +21,9 @@ export const adminUseCase = {
     },
     getAllClients: async () => {
         return await UserRepository.findUserByRole('client');
-    }
+    },
+    toggleBlockUser: async (userId: string, isBlocked: boolean) => {
+        const updatedUser = await UserRepository.toggleBlockUser(userId, isBlocked);
+        return updatedUser;
+    },
 }

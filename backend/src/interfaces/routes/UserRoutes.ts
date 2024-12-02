@@ -13,4 +13,5 @@ router.post('/setup', ProfileController.setupProfile);
 router.put ('/update', ProfileController.updateProfile);
 router.get('/:userId/:role', ProfileController.getProfile);
 
+
 export default router;

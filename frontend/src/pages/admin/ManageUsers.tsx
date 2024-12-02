@@ -36,15 +36,16 @@ const ManageUsers: React.FC = () => {
     );
     
     if (confirmed) {
+      console.log('userId:',userId, 'isblocked:', typeof(isBlocked))
       try {
-        const response = await axiosConfig.put(`/admin/users/${userId}/${action}`);
+        const response = await axiosConfig.put(`/admin/${userId}/${isBlocked}`);
         
-        fetchUsers();
+        fetchUsers(); 
       } catch (error) {
         console.error(`Error during ${action} action:`, error);
       }
     }
-  };
+}
 
   useEffect(() => {
     fetchUsers();
@@ -60,7 +61,6 @@ const ManageUsers: React.FC = () => {
           <tr className="bg-gray-800 text-white text-left text-sm">
             <th className="p-4">User</th>
             <th className="p-4">Email</th>
-            <th className="p-4">Role</th>
             <th className="p-4">Join Date</th>
             <th className="p-4">Status</th>
             <th className="p-4">Actions</th>
@@ -74,7 +74,6 @@ const ManageUsers: React.FC = () => {
             >
               <td className="p-4">{user.name || "N/A"}</td>
               <td className="p-4">{user.email || "N/A"}</td>
-              <td className="p-4">{user.role || "N/A"}</td>
               <td className="p-4">
                 {new Date(user.createdAt).toLocaleDateString() || "N/A"}
               </td>

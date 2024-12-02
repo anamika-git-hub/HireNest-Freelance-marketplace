@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../store/userSlice";
 import axios from "axios";
-import { signupValidationSchema } from "../../components/Schemas/signUpValidationSchema"; // Import the schema
-import { Formik, Field, Form, ErrorMessage } from "formik"; // Import Formik
+import { signupValidationSchema } from "../../components/Schemas/signUpValidationSchema"; 
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
@@ -61,12 +61,11 @@ const Signup: React.FC = () => {
 
         <Formik
           initialValues={initialValues}
-          validationSchema={signupValidationSchema} // Attach validation schema
+          validationSchema={signupValidationSchema} 
           onSubmit={handleSubmit}
         >
           {({ setFieldValue, values }) => (
             <Form className="space-y-5">
-              {/* Role Selector */}
               <div className="mt-6">
                 <div className="flex gap-x-4">
                   <label
@@ -102,7 +101,6 @@ const Signup: React.FC = () => {
                 </div>
               </div>
 
-              {/* Other Fields */}
               <div>
                 <Field
                   type="email"

@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Home from './pages/shared/Home';
 import Login from './pages/shared/Login';
@@ -15,30 +15,28 @@ import FreelancerProfileSetup from './pages/freelancer/profileSetup';
 import ClientProfileSetup from './pages/clients/profileSetup';
 import SettingsPage from './pages/freelancer/Settings';
 import CategoryForm from './pages/admin/categoryForm';
+import PrivateRoute from './context/privateRoute';
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/* Shared Routes */}
         <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
         <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
         <Route path="/otp" element={<LayoutWrapper><OTPVerification /></LayoutWrapper>} />
-        <Route path="/freelancer/profile-setup" element={<LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper>} />
-        <Route path="/freelancer/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
-        <Route path="/client/profile-setup" element={<LayoutWrapper><ClientProfileSetup /></LayoutWrapper>} />
+        <Route path="/freelancer/profile-setup" element={<PrivateRoute><LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper></PrivateRoute>} />
+        <Route path="/freelancer/settings" element={<PrivateRoute><LayoutWrapper><SettingsPage /></LayoutWrapper></PrivateRoute>} />
+        <Route path="/client/profile-setup" element={<PrivateRoute><LayoutWrapper><ClientProfileSetup /></LayoutWrapper></PrivateRoute>} />
 
-        {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
         
-        {/* Dynamic ManageUsers Route */}
         <Route
-          path="/admin/:type" // Dynamic parameter for type (clients or freelancers)
+          path="/admin/:type" 
           element={
             <AdminLayout>
-              <ManageUsers /> {/* Default to clients */}
+              <ManageUsers /> 
             </AdminLayout>
           }
         />

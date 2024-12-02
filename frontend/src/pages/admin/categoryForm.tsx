@@ -10,7 +10,7 @@ const CategoryForm: React.FC = () => {
 
   const isEditMode = Boolean(id);
 
-  const [loading, setLoading] = useState(isEditMode); // Only set loading for edit mode
+  const [loading, setLoading] = useState(isEditMode); 
 
   const formik = useFormik({
     initialValues: {
@@ -35,7 +35,6 @@ const CategoryForm: React.FC = () => {
     },
   });
 
-  // Fetch existing category data if in edit mode
 useEffect(() => {
   if (isEditMode && id) {
     const fetchCategory = async () => {
@@ -58,7 +57,6 @@ useEffect(() => {
 }, [id]);
  
 
-  // Show a loading indicator while fetching data
   if (loading) {
     return <div>Loading...</div>;
   }

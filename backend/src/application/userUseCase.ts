@@ -42,8 +42,11 @@ export const userUseCase = {
         if(!user.isVerified){
             throw new Error('User not verified yet')
         }
+        if(user.isBlocked) throw new Error ('User is blocked') 
         const token = JwtService.generateToken({id: user.id, email:user.email});
         return {token, user};
         
-    }
+    },
+
+   
 }

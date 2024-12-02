@@ -14,4 +14,5 @@ router.put('/categories/:id',AdminController.updateCategory);
 router.delete('/categories/:id',AdminController.deleteCategory);
 
 
+router.put('/:userId/:isBlocked', AdminController.toggleBlockUser);
 export default router;

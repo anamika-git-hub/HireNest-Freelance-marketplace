@@ -94,7 +94,6 @@ const ManageCategories: React.FC = () => {
               <button
                 className="text-blue-500 hover:underline"
                 onClick={() => {
-                  console.log('iddididi', category.id); // Log category.id to the console
                   navigate(`/admin/categories/edit/${category.id}`);
                 }}
               >

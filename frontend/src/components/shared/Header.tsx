@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../store/userSlice';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null); // Ref for the profile dropdown menu
-  const location = useLocation();
+  const profileMenuRef = useRef<HTMLDivElement>(null); 
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const userRole = localStorage.getItem('role') || 'guest';
 
   const getNavLinks = () => {
@@ -48,7 +51,7 @@ const Header: React.FC = () => {
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
       ) {
-        setIsProfileMenuOpen(false); // Close the dropdown if clicked outside
+        setIsProfileMenuOpen(false); 
       }
     };
 
@@ -60,6 +63,7 @@ const Header: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('role');
+    dispatch(logoutUser())
     navigate('/login');
   };
 

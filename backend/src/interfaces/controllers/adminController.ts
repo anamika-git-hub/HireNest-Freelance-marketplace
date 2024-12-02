@@ -72,5 +72,20 @@ export const AdminController = {
         } catch (error) {
             next(error)
         }
-    }
+    },
+
+    toggleBlockUser: async (req: Req, res: Res, next: Next) => {
+        console.log('heeeeeeeeeeeeeeeee');
+        
+        try {
+            const {userId, isBlocked} = req.params;
+            console.log(`User ID: ${userId}, Is Blocked: ${isBlocked}`);
+            const isBlockedBool = isBlocked === 'true';
+            const updatedUser = await adminUseCase.toggleBlockUser(userId, isBlockedBool);
+            res.status(200).json({message: `User ${isBlocked == 'true' ? "unblocked" : "blocked"} scuccessfully`,user: updatedUser});
+
+        }catch (error){
+            next(error)
+        }
+    },
 };
