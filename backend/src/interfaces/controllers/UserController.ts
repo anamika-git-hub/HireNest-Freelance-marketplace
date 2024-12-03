@@ -10,7 +10,18 @@ export const UserController = {
             next(error)
         }
     },
-
+    googleSignUp: async (req: Req, res: Res, next: Next) => {
+        try {
+            console.log('nnnnnnnnn',req.body)
+            const {email} = req.body
+            console.log('eeeee',typeof(email))
+            const result = await userUseCase.googleSignUp(email);
+            
+            res.status(201).json(result)
+        } catch (error) {
+            next (error)
+        }
+    },
     verifyOtp: async (req: Req, res: Res, next: Next) => {
         try {
             const {email, otp} = req.body;

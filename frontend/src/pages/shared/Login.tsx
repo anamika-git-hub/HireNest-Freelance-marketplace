@@ -6,10 +6,39 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../store/userSlice";
 import { loginValidationSchema } from "../../components/Schemas/signInValidationSchema";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const googleSubmit  = async(googleData:any)=>{
+    const decodeResponse:any= jwtDecode(googleData.credential)
+     const {email} = decodeResponse
+     const user = {email}
+     console.log('nnnnnnnn', user)
+     try {
+      const response = await axiosConfig.post(
+        "/users/google-signup",
+        user
+      );
+  
+      if(response.data.token){
+        const user = response.data.user;
+  
+        localStorage.setItem("accessToken", response.data.token);
+        localStorage.setItem("role", response.data.user.role);
+        localStorage.setItem("email", response.data.user.email);
+  
+        dispatch(loginUser(user));
+        toast.success("User logged in successfully");
+        navigate("/");
+      }
+     } catch (error) {
+      toast.error('There was an error during signUp')
+     }
+   }
 
   const formik = useFormik({
     initialValues: {
@@ -95,15 +124,17 @@ const Login: React.FC = () => {
           >
             Login
           </button>
+        
         </form>
         <div className="text-center my-4 text-white">or</div>
-        <div className="flex justify-between">
-          <button className="w-1/2 bg-blue-50 text-blue-700 border border-blue-500 py-2 rounded-md mr-2">
-            <i className="fab fa-facebook"></i> Log In via Facebook
-          </button>
-          <button className="w-1/2 bg-red-50 text-red-700 border border-red-500 py-2 rounded-md ml-2">
-            <i className="fab fa-google"></i> Log In via Google
-          </button>
+        {/* Google Login Button */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={googleSubmit}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+          />
         </div>
       </div>
     </div>

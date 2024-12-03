@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(checkTokenBlacklist);
 
 router.post ('/signup',UserController.signUp);
+router.post ('/google-signup',UserController.googleSignUp)
 router.post ('/verify-otp',UserController.verifyOtp);
 router.post ('/resend-otp', UserController.resendOtp);
 router.post('/login', UserController.login);

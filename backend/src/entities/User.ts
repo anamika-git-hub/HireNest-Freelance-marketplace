@@ -5,4 +5,5 @@ export interface Iuser {
     role: 'client' | 'freelancer' | 'admin';
     isBlocked?: boolean;
     isVerified?: boolean; 
+    googleSignUp: boolean;
 }

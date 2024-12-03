@@ -15,10 +15,23 @@ export const userUseCase = {
             
             return {message: 'Otp send to email for verification', user: newUser};
         } catch (error:any) {
-            console.log('fjfjfj',error)
             throw error;
         }
       
+    },
+
+    googleSignUp : async (email: string)=>{
+        let user = await UserRepository.findUserByEmail(email);
+        if(!user){
+            user = await UserRepository.createUser({
+                email,
+                googleSignUp: true,
+                role: 'client'
+            });
+        }
+        const token = JwtService.generateToken({id: user.id, email:user.email});
+
+        return {message: 'Signup is successfull',token, user}
     },
 
     verifyOtp: async (email: string, otp:string) => {

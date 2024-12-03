@@ -6,6 +6,9 @@ import axios from "axios";
 import { signupValidationSchema } from "../../components/Schemas/signUpValidationSchema"; 
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import { loginUser } from "../../store/userSlice";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
@@ -17,7 +20,32 @@ const Signup: React.FC = () => {
     confirmPassword: "",
     role: "freelancer", 
   };
+ const googleSubmit  = async(googleData:any)=>{
+  const decodeResponse:any= jwtDecode(googleData.credential)
+   const {email} = decodeResponse
+   const user = {email}
+   console.log('nnnnnnnn', user)
+   try {
+    const response = await axios.post(
+      "http://localhost:5000/api/users/google-signup",
+      user
+    );
 
+    if(response.data.token){
+      const user = response.data.user;
+
+      localStorage.setItem("accessToken", response.data.token);
+      localStorage.setItem("role", response.data.user.role);
+      localStorage.setItem("email", response.data.user.email);
+
+      dispatch(loginUser(user));
+      toast.success("User logged in successfully");
+      navigate("/");
+    }
+   } catch (error) {
+    toast.error('There was an error during signUp')
+   }
+ }
   const handleSubmit = async (values: any) => {
     const { email, password, role } = values;
 
@@ -40,6 +68,8 @@ const Signup: React.FC = () => {
       toast.error("There was an error during signup.");
     }
   };
+
+
 
   return (
     <div
@@ -150,6 +180,12 @@ const Signup: React.FC = () => {
               >
                 Register
               </button>
+              <GoogleLogin
+                  onSuccess={googleSubmit}
+                  onError={() => {
+                    console.log('Login Failed');
+                  }}
+                />;
             </Form>
           )}
         </Formik>
