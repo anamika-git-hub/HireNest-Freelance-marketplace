@@ -42,7 +42,6 @@ const ManageCategories: React.FC = () => {
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  console.log('fffffffffffff',filteredCategories)
 
   return (
     <div className="p-6 bg-gray-100 ">

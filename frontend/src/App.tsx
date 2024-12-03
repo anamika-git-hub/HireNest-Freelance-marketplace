@@ -16,9 +16,12 @@ import ClientProfileSetup from './pages/clients/profileSetup';
 import SettingsPage from './pages/freelancer/Settings';
 import CategoryForm from './pages/admin/categoryForm';
 import PrivateRoute from './context/privateRoute';
+import { Toaster } from 'react-hot-toast';
 
 const App: React.FC = () => {
   return (
+    <>
+    <div><Toaster/></div>
     <Router>
       <Routes>
         <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
@@ -46,6 +49,7 @@ const App: React.FC = () => {
         <Route path="/admin/categories/edit/:id" element={<AdminLayout><CategoryForm/></AdminLayout>} />
       </Routes>
     </Router>
+    </>
   );
 };
 

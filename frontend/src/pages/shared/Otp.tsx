@@ -40,10 +40,13 @@ const OTPVerification: React.FC = () => {
 
   const handleResendOTP = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/users/resend-otp");
+      const response = await axios.post("http://localhost:5000/api/users/resend-otp",{
+        email:localStorage.getItem('email'),
+      });
       if (response.status === 200) {
         setTimer(60); 
         setIsExpired(false);
+        setOtp(Array(6).fill(""));
         alert("OTP has been resent successfully.");
       }
     } catch (error) {

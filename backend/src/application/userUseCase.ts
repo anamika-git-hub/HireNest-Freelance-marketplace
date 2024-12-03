@@ -7,13 +7,19 @@ import { OtpService } from '../infrastructure/services/OtpService';
 
 export const userUseCase = {
     signUp: async (user:Iuser) =>{
-        user.password = await hashPassword(user.password);
+        try {
+            user.password = await hashPassword(user.password);
 
-        const newUser = await UserRepository.createUser(user);
-
-        await OtpService.generateAndSendOtp(user.email);
-        
-        return {message: 'Otp send to email for verification', user: newUser};
+            const newUser = await UserRepository.createUser(user);
+    
+            await OtpService.generateAndSendOtp(user.email);
+            
+            return {message: 'Otp send to email for verification', user: newUser};
+        } catch (error:any) {
+            console.log('fjfjfj',error)
+            throw error;
+        }
+      
     },
 
     verifyOtp: async (email: string, otp:string) => {

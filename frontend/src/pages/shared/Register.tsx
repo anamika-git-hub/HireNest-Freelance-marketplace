@@ -5,6 +5,7 @@ import { registerUser } from "../../store/userSlice";
 import axios from "axios";
 import { signupValidationSchema } from "../../components/Schemas/signUpValidationSchema"; 
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import toast from "react-hot-toast";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ const Signup: React.FC = () => {
 
       if (response.status === 201) {
         dispatch(registerUser(response.data));
-        alert("User registered successfully. Redirecting to OTP page...");
+        toast.success("User registered successfully. Redirecting to OTP page...");
         navigate("/otp", { state: { email } });
         localStorage.setItem("email", email);
       }

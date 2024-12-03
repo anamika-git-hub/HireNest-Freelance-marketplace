@@ -4,11 +4,13 @@ import { generateOtp } from "../../utils/otpGenerater";
 
 export const OtpService = {
     generateAndSendOtp: async (email: string) => {
+        await OtpModel.deleteOne({email});
         const otp = generateOtp();
         const otpRecord = new OtpModel({
             email,
             otp,
             createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         });
         await otpRecord.save();
         sendOtpEmail(email,otp);

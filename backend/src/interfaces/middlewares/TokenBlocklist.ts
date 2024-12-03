@@ -6,9 +6,9 @@ const checkTokenBlacklist = async (req: Req, res: Res, next: Next): Promise<void
     try {
         const token = JwtService.getTokenFromRequest(req);
         
-        if (!token) {
-             res.status(401).json({ message: 'Unauthorized: No token provided' });
-        }
+     //    if (!token) {
+     //         res.status(401).json({ message: 'Unauthorized: No token provided' });
+     //    }
 
         const isBlacklisted = await TokenBlacklist.findOne({ token });
         
