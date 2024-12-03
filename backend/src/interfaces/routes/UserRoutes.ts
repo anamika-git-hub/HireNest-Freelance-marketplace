@@ -1,8 +1,10 @@
 import express from 'express';
 import { UserController } from '../controllers/UserController';
 import { ProfileController } from '../controllers/profileController';
+import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 
 const router = express.Router();
+router.use(checkTokenBlacklist);
 
 router.post ('/signup',UserController.signUp);
 router.post ('/verify-otp',UserController.verifyOtp);

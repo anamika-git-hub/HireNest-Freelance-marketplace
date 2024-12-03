@@ -2,6 +2,7 @@ import { JwtService } from "../infrastructure/services/JwtService";
 import { UserRepository } from "../infrastructure/repositories/UserRepository";
 import { comparePassword } from "../infrastructure/services/HashPassword";
 
+
 export const adminUseCase = {
     login: async (email: string, password: string ) => {
         const admin = await UserRepository.findUserByEmail(email);
@@ -24,6 +25,7 @@ export const adminUseCase = {
     },
     toggleBlockUser: async (userId: string, isBlocked: boolean) => {
         const updatedUser = await UserRepository.toggleBlockUser(userId, isBlocked);
+       
         return updatedUser;
     },
 }

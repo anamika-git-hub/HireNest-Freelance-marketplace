@@ -1,6 +1,8 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { adminUseCase } from '../../application/adminUseCase';
 import { CategoryUseCase } from '../../application/categoryUseCase';
+import { TokenBlacklist } from "../../infrastructure/models/TokenBockList";
+import { JwtService } from '../../infrastructure/services/JwtService';
 
 export const AdminController = {
     login: async (req: Req, res: Res, next: Next) => {
@@ -75,13 +77,15 @@ export const AdminController = {
     },
 
     toggleBlockUser: async (req: Req, res: Res, next: Next) => {
-        console.log('heeeeeeeeeeeeeeeee');
         
         try {
             const {userId, isBlocked} = req.params;
-            console.log(`User ID: ${userId}, Is Blocked: ${isBlocked}`);
             const isBlockedBool = isBlocked === 'true';
             const updatedUser = await adminUseCase.toggleBlockUser(userId, isBlockedBool);
+            if (isBlockedBool) {
+                // Invalidate JWT for the user
+                await TokenBlacklist.create({ token: JwtService.getTokenFromRequest(req) });
+            }
             res.status(200).json({message: `User ${isBlocked == 'true' ? "unblocked" : "blocked"} scuccessfully`,user: updatedUser});
 
         }catch (error){

@@ -1,5 +1,7 @@
 import axios from "axios";
 import dotenv from 'dotenv';
+import store from "../store/store";
+import { logoutUser } from "../store/userSlice";
 console.log('aaaaaaaa', process.env.BASE_URL)
 
 const axiosConfig  = axios.create({
@@ -30,9 +32,10 @@ axiosConfig.interceptors.response.use(
         return response;
     },
     (error) => {
-        if(error.response) {
-            const {data} = error.response;
-
+        if (error.response && error.response.status === 403) {
+            alert('Your account has been blocked by the admin.');
+            store.dispatch(logoutUser());
+            window.location.href = '/login'; // Redirect to login page
         }else {
             console.log(error);
             
