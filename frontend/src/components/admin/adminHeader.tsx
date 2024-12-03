@@ -27,7 +27,7 @@ const AdminHeader: React.FC = () => {
   const handleLogout = () => {
     dispatch(logoutAdmin()); 
     localStorage.removeItem("adminRole"); 
-    navigate("admin/login");
+    navigate("/admin/login");
   };
 
   return (

@@ -28,25 +28,27 @@ const App: React.FC = () => {
         <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
         <Route path="/otp" element={<LayoutWrapper><OTPVerification /></LayoutWrapper>} />
-        <Route path="/freelancer/profile-setup" element={<PrivateRoute><LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper></PrivateRoute>} />
-        <Route path="/freelancer/settings" element={<PrivateRoute><LayoutWrapper><SettingsPage /></LayoutWrapper></PrivateRoute>} />
-        <Route path="/client/profile-setup" element={<PrivateRoute><LayoutWrapper><ClientProfileSetup /></LayoutWrapper></PrivateRoute>} />
+        <Route path="/freelancer/profile-setup" element={<LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper>} />
+        <Route path="/freelancer/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
+        <Route path="/client/profile-setup" element={<LayoutWrapper><ClientProfileSetup /></LayoutWrapper>} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/admin/dashboard" element={<PrivateRoute><AdminLayout><Dashboard /></AdminLayout></PrivateRoute>} />
         
         <Route
           path="/admin/:type" 
           element={
+            <PrivateRoute>
             <AdminLayout>
               <ManageUsers /> 
             </AdminLayout>
+            </PrivateRoute>
           }
         />
        
-        <Route path="/admin/categories" element={<AdminLayout><ManageCategories /></AdminLayout>} />
-        <Route path="/admin/categories/new" element={<AdminLayout><CategoryForm /></AdminLayout>} />
-        <Route path="/admin/categories/edit/:id" element={<AdminLayout><CategoryForm/></AdminLayout>} />
+        <Route path="/admin/categories" element={<PrivateRoute><AdminLayout><ManageCategories /></AdminLayout></PrivateRoute>} />
+        <Route path="/admin/categories/new" element={<PrivateRoute><AdminLayout><CategoryForm /></AdminLayout></PrivateRoute>} />
+        <Route path="/admin/categories/edit/:id" element={<PrivateRoute><AdminLayout><CategoryForm/></AdminLayout></PrivateRoute>} />
       </Routes>
     </Router>
     </>

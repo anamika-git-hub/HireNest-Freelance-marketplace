@@ -17,7 +17,6 @@ const Login: React.FC = () => {
     const decodeResponse:any= jwtDecode(googleData.credential)
      const {email} = decodeResponse
      const user = {email}
-     console.log('nnnnnnnn', user)
      try {
       const response = await axiosConfig.post(
         "/users/google-signup",

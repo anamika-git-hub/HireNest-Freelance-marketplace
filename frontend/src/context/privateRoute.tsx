@@ -11,7 +11,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
 
   if (!currentUser) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;

@@ -41,7 +41,6 @@ const userSlice = createSlice({
         },
         logoutAdmin: (state) => {
             state.currentUser = null;
-            localStorage.removeItem("adminRole");
           },
         setUsersByType: (
             state,
