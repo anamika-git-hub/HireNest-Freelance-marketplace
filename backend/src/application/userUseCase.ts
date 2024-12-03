@@ -1,6 +1,5 @@
 import {Iuser} from '../entities/User';
 import { JwtService } from '../infrastructure/services/JwtService';
-import { TempUserRepository } from '../infrastructure/repositories/tempUserRepository';
 import { UserRepository } from '../infrastructure/repositories/UserRepository';
 import { hashPassword, comparePassword } from '../infrastructure/services/HashPassword';
 import { OtpService } from '../infrastructure/services/OtpService';
@@ -41,14 +40,13 @@ export const userUseCase = {
 
     login: async (email: string, password: string) =>{
         const user = await UserRepository.findUserByEmail(email);
-        if(!user) throw new Error('User not found');
+    
+        if(!user) throw { statusCode:404, message:'User not found'};
 
         const isValidPassword = await comparePassword(password,user.password);
-        if(!isValidPassword) throw new Error ('Invalid credentials');
-        if(!user.isVerified){
-            throw new Error('User not verified yet')
-        }
-        if(user.isBlocked) throw new Error ('User is blocked') 
+        if(!isValidPassword) throw {statusCode: 401,message:'Invalid credentials'};
+        if(!user.isVerified) throw {statusCode: 400, message:'User not verified yet'}
+        if(user.isBlocked) throw {statusCode: 403,message:'User is blocked'}
         const token = JwtService.generateToken({id: user.id, email:user.email});
         return {token, user};
         

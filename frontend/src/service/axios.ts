@@ -2,6 +2,7 @@ import axios from "axios";
 import dotenv from 'dotenv';
 import store from "../store/store";
 import { logoutUser } from "../store/userSlice";
+import toast from "react-hot-toast";
 console.log('aaaaaaaa', process.env.BASE_URL)
 
 const axiosConfig  = axios.create({
@@ -28,14 +29,15 @@ axiosConfig.interceptors.request.use(
 )
 
 axiosConfig.interceptors.response.use(
+    
     response => {
         return response;
     },
     (error) => {
         if (error.response && error.response.status === 403) {
-            alert('Your account has been blocked by the admin.');
+            toast.error('Your account has been blocked by the admin.');
             store.dispatch(logoutUser());
-            window.location.href = '/login'; // Redirect to login page
+            window.location.href = '/login'; 
         }else {
             console.log(error);
             

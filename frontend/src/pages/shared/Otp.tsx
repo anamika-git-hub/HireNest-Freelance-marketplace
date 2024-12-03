@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const OTPVerification: React.FC = () => {
   const [otp, setOtp] = useState(Array(6).fill("")); 
@@ -47,11 +48,11 @@ const OTPVerification: React.FC = () => {
         setTimer(60); 
         setIsExpired(false);
         setOtp(Array(6).fill(""));
-        alert("OTP has been resent successfully.");
+        toast.success("OTP has been resent successfully.");
       }
     } catch (error) {
       console.error("Error during OTP resend:", error);
-      alert("There was an error sending the OTP.");
+      toast.error("There was an error sending the OTP.");
     }
   };
 
@@ -61,7 +62,7 @@ const OTPVerification: React.FC = () => {
     e.preventDefault();
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
-      alert("Please enter all 6 digits of the OTP.");
+      toast.error("Please enter all 6 digits of the OTP.");
       return;
     }
 
@@ -71,13 +72,13 @@ const OTPVerification: React.FC = () => {
         email:localStorage.getItem('email')
       });
       if (response.status === 200) {
-        alert("OTP verified successfully.");
+        toast.success("OTP verified successfully.");
         dispatch({ type: "VERIFY_OTP", payload: response.data });
         navigate("/login"); 
       }
     } catch (error) {
       console.error("Error during OTP verification:", error);
-      alert("Invalid OTP. Please try again.");
+      toast.error("Invalid OTP. Please try again.");
     }
   };
 

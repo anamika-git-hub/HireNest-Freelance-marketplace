@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
+import { useDispatch, UseDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutAdmin } from "../../store/userSlice";
 
 const AdminHeader: React.FC = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null); 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -18,6 +23,12 @@ const AdminHeader: React.FC = () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
+
+  const handleLogout = () => {
+    dispatch(logoutAdmin()); 
+    localStorage.removeItem("adminRole"); 
+    navigate("admin/login");
+  };
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -47,7 +58,9 @@ const AdminHeader: React.FC = () => {
               <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
                 Dashboard
               </button>
-              <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+              <button 
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
                 Logout
               </button>
             </div>

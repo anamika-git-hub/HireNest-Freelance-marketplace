@@ -37,7 +37,7 @@ const Signup: React.FC = () => {
       }
     } catch (error) {
       console.error("Error during signup:", error);
-      alert("There was an error during signup.");
+      toast.error("There was an error during signup.");
     }
   };
 

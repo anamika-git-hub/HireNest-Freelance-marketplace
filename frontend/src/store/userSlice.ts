@@ -39,6 +39,10 @@ const userSlice = createSlice({
             state.currentUser = null;
             localStorage.removeItem("currentUser");
         },
+        logoutAdmin: (state) => {
+            state.currentUser = null;
+            localStorage.removeItem("adminRole");
+          },
         setUsersByType: (
             state,
             action: PayloadAction<{ userType: "client" | "freelancer"; users: User[] }>
@@ -53,5 +57,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { registerUser, loginUser, logoutUser, setUsersByType } = userSlice.actions;
+export const { registerUser, loginUser, logoutUser, setUsersByType, logoutAdmin } = userSlice.actions;
 export default userSlice.reducer;

@@ -49,7 +49,7 @@ const ManageCategories: React.FC = () => {
         <h1 className="text-2xl font-semibold">Category Management</h1>
         <button
           className="bg-gray-800 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
-          onClick={() => navigate("/admin/create-category")}
+          onClick={() => navigate("/admin/categories/new")}
         >
           Create New
         </button>

@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "../../store/userSlice";
 import { useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
+import toast from "react-hot-toast";
 
 
 const AdminLogin: React.FC = () => {
@@ -20,9 +21,9 @@ const AdminLogin: React.FC = () => {
         
         dispatch(loginUser(response.data));
         navigate('/admin/dashboard')
-        alert('Admin logged in successfully');
+        toast.success('Admin logged in successfully');
         localStorage.setItem('accessToken',response.data.token);
-        localStorage.setItem('role',response.data.user.role);
+        localStorage.setItem('adminRole',response.data.user.role);
         localStorage.setItem('email',response.data.user.email);
         
       }

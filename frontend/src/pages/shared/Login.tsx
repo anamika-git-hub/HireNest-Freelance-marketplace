@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../store/userSlice";
 import { loginValidationSchema } from "../../components/Schemas/signInValidationSchema";
+import toast from "react-hot-toast";
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
@@ -27,11 +28,16 @@ const Login: React.FC = () => {
           localStorage.setItem("email", response.data.user.email);
 
           dispatch(loginUser(user));
-          alert("User logged in successfully");
+          toast.success("User logged in successfully");
           navigate("/");
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log("Login failed:", error);
+        if(error.response) {
+          const errorMessage = error.response.data.error || 'An error occurred';
+          toast.error(errorMessage);
+        }
+        
       }
     },
   });
