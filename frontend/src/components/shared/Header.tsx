@@ -16,18 +16,18 @@ const Header: React.FC = () => {
     if (userRole === "freelancer") {
       return (
         <>
-          <a href="#home" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="#about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="#contact" className="text-gray-700 hover:text-blue-600">Contact</a>
+          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
+          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
           <a href="#findjob" className="text-gray-700 hover:text-blue-600">Find Work</a>
         </>
       );
     } else if (userRole === "client") {
       return (
         <>
-          <a href="#home" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="#about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="#contact" className="text-gray-700 hover:text-blue-600">Contact</a>
+          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
+          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
           <a href="#posttask" className="text-gray-700 hover:text-blue-600">Post Task</a>
           <a href="#findtalent" className="text-gray-700 hover:text-blue-600">Find Talent</a>
         </>
@@ -35,9 +35,9 @@ const Header: React.FC = () => {
     } else {
       return (
         <>
-          <a href="#home" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="#about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="#contact" className="text-gray-700 hover:text-blue-600">Contact</a>
+          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
+          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
           <a href="#findtalent" className="text-gray-700 hover:text-blue-600">Find Talent</a>
           <a href="#findjob" className="text-gray-700 hover:text-blue-600">Find Work</a>
         </>

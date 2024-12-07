@@ -19,7 +19,6 @@ const FreelancerProfileSetup = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-8 px-4">
       <div className="max-w-6xl w-full bg-white shadow-lg rounded-xl p-8 relative">
-       
 
         {/* Header */}
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-8">
@@ -57,17 +56,6 @@ const FreelancerProfileSetup = () => {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
             </div>
-            <div className="sm:col-span-1">
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                Full Name
-                </label>
-                <input
-                type="text"
-                value={formData.name}
-                placeholder="Your Name"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-            </div>
             {/* Job Title */}
             <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -81,18 +69,7 @@ const FreelancerProfileSetup = () => {
                 />
             </div>
 
-            {/* Phone Number */}
-            <div className="sm:col-span-1">
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                Phone Number
-                </label>
-                <input
-                type="text"
-                value={formData.phone}
-                placeholder="Your Phone Number"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-            </div>
+        
 
             {/* Experience */}
             <div className="sm:col-span-1">

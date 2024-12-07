@@ -1,37 +1,43 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormik } from "formik";
+import axiosConfig from "../../service/axios";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../store/userSlice";
 import { useNavigate } from "react-router-dom";
-import axiosConfig from "../../service/axios";
 import toast from "react-hot-toast";
-
+import { loginValidationSchema } from "../../components/Schemas/signInValidationSchema";
 
 const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const payload = {email, password}
-    try {
-      const response = await axiosConfig.post("admin/login",payload);
-      if(response.status === 200){
-        
-        dispatch(loginUser(response.data));
-        navigate('/admin/dashboard')
-        toast.success('Admin logged in successfully');
-        localStorage.setItem('accessToken',response.data.token);
-        localStorage.setItem('adminRole',response.data.user.role);
-        localStorage.setItem('email',response.data.user.email);
-        
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginValidationSchema, 
+    onSubmit: async (values) => {
+      try {
+        const response = await axiosConfig.post("admin/login", values);
+        if (response.status === 200) {
+          dispatch(loginUser(response.data));
+          navigate('/admin/dashboard');
+          toast.success('Admin logged in successfully');
+          localStorage.setItem('accessToken', response.data.token);
+          localStorage.setItem('adminRole', response.data.user.role);
+          localStorage.setItem('email', response.data.user.email);
+        }
+      } catch (error: any) {
+        console.log(error);
+        if (error.response) {
+          const errorMessage = error.response.data.error || 'An error occurred during login';
+          toast.error(errorMessage);
+        }
       }
-    } catch (error) {
-      console.log(error);
-      
-    }
-  }
+    },
+  });
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-md rounded-lg flex flex-col md:flex-row w-full max-w-4xl">
@@ -47,20 +53,25 @@ const AdminLogin: React.FC = () => {
             Welcome
           </h2>
           <p className="text-center text-sm text-gray-600 mb-6">
-            Please login to admin dashboard.
+            Please login to the admin dashboard.
           </p>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={formik.handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-800 mb-2">
                 Email Address
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 placeholder="Enter your email"
                 className="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-800"
               />
+              {formik.errors.email && formik.touched.email && (
+                <div className="text-red-500 text-sm mt-2">{formik.errors.email}</div>
+              )}
             </div>
 
             <div className="mb-6">
@@ -69,11 +80,16 @@ const AdminLogin: React.FC = () => {
               </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 placeholder="Enter your password"
                 className="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-800"
               />
+              {formik.errors.password && formik.touched.password && (
+                <div className="text-red-500 text-sm mt-2">{formik.errors.password}</div>
+              )}
             </div>
 
             <button

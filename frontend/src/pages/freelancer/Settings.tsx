@@ -4,11 +4,11 @@ import MyProfile from "./MyProfile";
 
 const SettingsPage: React.FC = () => {
   return (
-    <div className="p-10 max-w-5xl mx-auto bg-white rounded-lg shadow space-y-12">
+    <div className="p-10 max-w-5xl mx-auto bg-gray-50 rounded-lg shadow space-y-12">
       <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
 
       {/* My Account Section */}
-      <div>
+      <div className="space-y-6">
         <MyAccount />
       </div>
 

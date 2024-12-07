@@ -2,7 +2,7 @@ import React from "react";
 
 const MyAccount: React.FC = () => {
   return (
-    <section className="p-6 bg-white rounded-lg shadow-md">
+    <section className="p-6 bg-white rounded-lg shadow-lg">
   <h3 className="text-lg font-semibold text-gray-800 mb-6">My Account</h3>
 
   <div className="flex items-start space-x-6">
@@ -59,8 +59,6 @@ const MyAccount: React.FC = () => {
       </div>
 
       </div>
-
-      {/* Email */}
      
     </div>
   </div>

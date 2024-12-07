@@ -7,11 +7,11 @@ export const adminUseCase = {
     login: async (email: string, password: string ) => {
         const admin = await UserRepository.findUserByEmail(email);
         if(!admin || admin.role !== 'admin'){
-            throw new Error('Unauthorized: Admin not found or access denied');
+            throw {message:'Admin not found or access denied'};
         }
         const isValidPassword = await comparePassword(password, admin.password);
         if(!isValidPassword){
-            throw new Error ('Invalid credentials');
+            throw {message:'Invalid credentials'};
         }
 
         const token = JwtService.generateToken({id: admin.id, email: admin.email, role: admin.role});

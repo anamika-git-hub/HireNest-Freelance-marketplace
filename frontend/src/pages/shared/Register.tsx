@@ -142,7 +142,7 @@ const Signup: React.FC = () => {
                 <ErrorMessage
                   name="email"
                   component="div"
-                  className="text-red-500 text-xs mt-1"
+                  className="text-red-900 text-xs mt-1"
                 />
               </div>
 
@@ -156,7 +156,7 @@ const Signup: React.FC = () => {
                 <ErrorMessage
                   name="password"
                   component="div"
-                  className="text-red-500 text-xs mt-1"
+                  className="text-red-900 text-xs mt-1"
                 />
               </div>
 
@@ -170,7 +170,7 @@ const Signup: React.FC = () => {
                 <ErrorMessage
                   name="confirmPassword"
                   component="div"
-                  className="text-red-500 text-xs mt-1"
+                  className="text-red-800 text-xs mt-1"
                 />
               </div>
 

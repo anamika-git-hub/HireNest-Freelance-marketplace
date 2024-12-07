@@ -12,7 +12,6 @@ export const UserController = {
     },
     googleSignUp: async (req: Req, res: Res, next: Next) => {
         try {
-            console.log('nnnnnnnnn',req.body)
             const {email} = req.body
             console.log('eeeee',typeof(email))
             const result = await userUseCase.googleSignUp(email);
