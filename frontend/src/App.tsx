@@ -20,6 +20,7 @@ import CategoryForm from './pages/admin/categoryForm';
 import FreelancerProfileSetup from './pages/freelancer/profileSetup';
 import SettingsPage from './pages/freelancer/Settings';
 import TaskList from './pages/freelancer/taskList';
+import FreelancerProfile from './pages/freelancer/freelancerProfile';
 
 //--------------Clients----------------//
 import ClientProfileSetup from './pages/clients/profileSetup';
@@ -46,6 +47,7 @@ const App: React.FC = () => {
         <Route path="/freelancer/profile-setup" element={<LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper>} />
         <Route path="/freelancer/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
         <Route path="/freelancer/task-list" element={<LayoutWrapper><TaskList /></LayoutWrapper>} />
+        <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
 
          {/* ----------client-------------------*/}
         <Route path="/client/profile-setup" element={<LayoutWrapper><ClientProfileSetup /></LayoutWrapper>} />

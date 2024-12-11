@@ -6,7 +6,6 @@ import { OtpService } from '../infrastructure/services/OtpService';
 
 export const userUseCase = {
     signUp: async (user:Iuser) =>{
-        try {
             user.password = await hashPassword(user.password);
 
             const newUser = await UserRepository.createUser(user);
@@ -14,9 +13,6 @@ export const userUseCase = {
             await OtpService.generateAndSendOtp(user.email);
             
             return {message: 'Otp send to email for verification', user: newUser};
-        } catch (error:any) {
-            throw error;
-        }
       
     },
 

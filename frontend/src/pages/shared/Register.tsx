@@ -22,9 +22,9 @@ const Signup: React.FC = () => {
   };
  const googleSubmit  = async(googleData:any)=>{
   const decodeResponse:any= jwtDecode(googleData.credential)
+  console.log('google',decodeResponse)
    const {email} = decodeResponse
    const user = {email}
-   console.log('nnnnnnnn', user)
    try {
     const response = await axios.post(
       "http://localhost:5000/api/users/google-signup",

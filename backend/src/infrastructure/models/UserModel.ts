@@ -28,7 +28,7 @@ const UserSchema = new Schema<Iuser>({
     },
     googleSignUp: {
         type: Boolean,
-        default: false, // Tracks if the user signed up via Google
+        default: false, 
     },
 }, { timestamps: true });
 

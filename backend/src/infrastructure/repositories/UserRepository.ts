@@ -1,4 +1,5 @@
 import { UserModel } from "../models/UserModel";
+import { UserDetailModel } from "../models/UserDetailModel";
 
 export const UserRepository = {
 
@@ -21,4 +22,6 @@ export const UserRepository = {
         );
         return updatedUser;
     },
+    createUserDetail: async (userDetails: any) => new UserDetailModel(userDetails).save(),
+    
 };

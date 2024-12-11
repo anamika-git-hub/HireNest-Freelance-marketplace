@@ -6,7 +6,7 @@ export const UserController = {
         try {
             const result = await userUseCase.signUp(req.body);
             res.status(201).json(result);
-        } catch (error:any) {
+        } catch (error) {
             next(error)
         }
     },
