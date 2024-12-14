@@ -71,68 +71,74 @@ const Login: React.FC = () => {
   });
 
   return (
-    <div
-      className="bg-cover bg-center h-screen flex items-center justify-center"
-      style={{
-        backgroundImage:
-          "url('https://img.freepik.com/free-photo/team-coworkers-comparing-source-codes-running-laptop-screen-computer-monitor-it-development-office-software-developers-collaborating-data-coding-group-project-while-sitting-desk_482257-41846.jpg?t=st=1732350387~exp=1732353987~hmac=010e9fb6cd61dded2e322b967e756c848e0e6655f446d7b02c6be14fa9f36790&w=1060')",
-      }}
-    >
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center mb-6 text-white">Login</h2>
-        <p className="text-sm text-white text-center mt-4">
-          Don't have an account?{" "}
-          <a href="/register" className="text-blue-500 hover:underline">
-            Register
-          </a>
-        </p>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-white text-sm font-semibold mb-2">Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              name="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-            {formik.errors.email && formik.touched.email && (
-              <div className="text-red-500 text-sm mt-2">{formik.errors.email}</div>
-            )}
-          </div>
-          <div className="mb-4">
-            <label className="block text-white text-sm font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-            {formik.errors.password && formik.touched.password && (
-              <div className="text-red-500 text-sm mt-2">{formik.errors.password}</div>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Login
-          </button>
+    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center h-screen flex items-center justify-center">
+      <div className="flex items-stretch max-w-4xl w-full bg-white  rounded-lg shadow-lg mt-16">
         
-        </form>
-        <div className="text-center my-4 text-white">or</div>
-        {/* Google Login Button */}
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={googleSubmit}
-            onError={() => {
-              console.log("Login Failed");
-            }}
+        {/* Form Div */}
+        <div className=" w-1/2 p-8 flex flex-col" style={{flexGrow: 1}}>
+          <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">Login</h2>
+          <p className="text-sm text-blue-600 text-center mt-4">
+            Don't have an account?{" "}
+            <a href="/register" className="text-blue-500 hover:underline">
+              Register
+            </a>
+          </p>
+          <form onSubmit={formik.handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-blue-600 text-sm font-semibold mb-2">Email</label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              />
+              {formik.errors.email && formik.touched.email && (
+                <div className="text-red-500 text-sm mt-2">{formik.errors.email}</div>
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-blue-600 text-sm font-semibold mb-2">Password</label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              />
+              {formik.errors.password && formik.touched.password && (
+                <div className="text-red-500 text-sm mt-2">{formik.errors.password}</div>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Login
+            </button>
+          </form>
+          <div className="text-center my-4 text-white">or</div>
+          {/* Google Login Button */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={googleSubmit}
+              onError={() => {
+                console.log("Login Failed");
+              }}
+            />
+          </div>
+        </div>
+  
+        {/* Image Div */}
+        <div className="mx- w-1/2 flex items-center justify-center" style={{flexGrow: 1}}>
+          <img
+            src="/assets/login.png"
+            alt="Your Image"
+            className="object-cover w-full h-full rounded-lg"
           />
         </div>
       </div>

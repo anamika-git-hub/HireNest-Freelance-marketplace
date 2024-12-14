@@ -1,51 +1,10 @@
 import React from 'react';
+import HeroSection from '../../components/shared/hero';
 
 const Home: React.FC = () => {
     return (
         <>
-        
-            <div className="bg-cover bg-center h-screen flex flex-col justify-center text-center px-6"
-                style={{
-                    backgroundImage: "url('https://img.freepik.com/free-photo/team-coworkers-comparing-source-codes-running-laptop-screen-computer-monitor-it-development-office-software-developers-collaborating-data-coding-group-project-while-sitting-desk_482257-41846.jpg?t=st=1732350387~exp=1732353987~hmac=010e9fb6cd61dded2e322b967e756c848e0e6655f446d7b02c6be14fa9f36790&w=1060')",
-                }}
-                >
-                {/* Headline Section */}
-                <div className="text-white mb-8">
-                    <h1 className="text-5xl font-bold">
-                        Hire experts freelancers for any job, any time.
-                    </h1>
-                    <p className="text-lg mt-4">
-                        Huge community of designers, developers, and creatives ready for your project.
-                    </p>
-                </div>
-
-                {/* <div className="bg-transparent shadow-md rounded-lg overflow-hidden max-w-4xl mx-auto flex items-center justify-center space-x-4 py-4">
-        
-                    <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-                        Post Task
-                    </button>
-
-                    <button className="border-2 border-blue-600  text-white px-6 py-3 rounded-lg hover:bg-blue-100">
-                        Find Talent
-                    </button>
-                </div> */}
-
-                {/* Stats Section */}
-                <div className="flex justify-center mt-8 text-white space-x-12">
-                    <div>
-                        <h2 className="text-3xl font-bold">1,586</h2>
-                        <p>Tasks Done</p>
-                    </div>
-                    <div>
-                        <h2 className="text-3xl font-bold">3,543</h2>
-                        <p>Tasks Posted</p>
-                    </div>
-                    <div>
-                        <h2 className="text-3xl font-bold">1,232</h2>
-                        <p>Freelancers</p>
-                    </div>
-                </div>
-            </div>
+           <HeroSection/>
             <div className="py-16 bg-gray-100">
                 <h2 className="text-3xl font-bold text-center mb-12">Popular Categories</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-4">

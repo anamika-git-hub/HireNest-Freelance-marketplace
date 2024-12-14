@@ -2,13 +2,6 @@
 // import ClientProfileModel from "../models/ClientProfileModel";
 
 // export const ProfileRepository = {
-//     createFreelancerProfile: async (data: any) => new FreelancerProfileModel(data).save(),
-//     updateFreelancerProfile: async (id: string, updates: any)=>
-//         FreelancerProfileModel.findByIdAndUpdate(id,updates,{new:true}),
-
-//     createClientProfile: async (data: any) => new ClientProfileModel(data).save(),
-//     updateClientProfile: async (id: string, updates: any) =>
-//         ClientProfileModel.findByIdAndUpdate(id,updates , {new: true}),
 
 //     findProfileByUserId: async (userId: string, role: 'freelancer' | 'client') => {
 //         if(role === 'freelancer') {
@@ -24,4 +17,10 @@ import { IUserDetail } from "../../entities/UserDetail";
 
 export const ProfileRepository = {
     createProfile: async (data:IUserDetail) => new UserDetailModel(data).save(),
+
+    updateProfile: async (id: string, updates: IUserDetail) => UserDetailModel.findByIdAndUpdate(id,updates,{new:true}),
+
+    
+
+    
 }

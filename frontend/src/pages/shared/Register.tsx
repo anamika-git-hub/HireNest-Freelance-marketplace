@@ -72,126 +72,138 @@ const Signup: React.FC = () => {
 
 
   return (
-    <div
-      className="bg-cover bg-center h-screen flex items-center justify-center"
-      style={{
-        backgroundImage:
-          "url('https://img.freepik.com/free-photo/team-coworkers-comparing-source-codes-running-laptop-screen-computer-monitor-it-development-office-software-developers-collaborating-data-coding-group-project-while-sitting-desk_482257-41846.jpg?t=st=1732350387~exp=1732353987~hmac=010e9fb6cd61dded2e322b967e756c848e0e6655f446d7b02c6be14fa9f36790&w=1060')",
-      }}
-    >
-      <div className="bg-white/10 backdrop-blur-md p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center mb-6 text-white">
-          Signup
-        </h2>
-        <p className="text-sm text-white text-center mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Login
-          </a>
-        </p>
-
-        <Formik
-          initialValues={initialValues}
-          validationSchema={signupValidationSchema} 
-          onSubmit={handleSubmit}
-        >
-          {({ setFieldValue, values }) => (
-            <Form className="space-y-5">
-              <div className="mt-6">
-                <div className="flex gap-x-4">
-                  <label
-                    className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
-                      values.role === "freelancer"
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    <Field
-                      type="radio"
-                      name="role"
-                      value="freelancer"
-                      className="hidden"
-                    />
-                    Freelancer
-                  </label>
-                  <label
-                    className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
-                      values.role === "client"
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    <Field
-                      type="radio"
-                      name="role"
-                      value="client"
-                      className="hidden"
-                    />
-                    Client
-                  </label>
+    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center min-h-screen flex items-center justify-center">
+      
+      <div className="flex items-stretch max-w-4xl w-full bg-white rounded-lg shadow-lg mt-28 mb-4">
+        
+        {/* Form Div */}
+        <div className="w-1/2 p-8 flex flex-col" style={{ flexGrow: 1 }}>
+          <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">Signup</h2>
+          <p className="text-sm text-blue-600 text-center mt-4">
+            Already have an account?{" "}
+            <a href="/login" className="text-blue-500 hover:underline">
+              Login
+            </a>
+          </p>
+  
+          <Formik
+            initialValues={initialValues}
+            validationSchema={signupValidationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ setFieldValue, values }) => (
+              <Form className="space-y-5">
+                <div className="mt-6">
+                  <div className="flex gap-x-4">
+                    <label
+                      className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
+                        values.role === "freelancer"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <Field
+                        type="radio"
+                        name="role"
+                        value="freelancer"
+                        className="hidden"
+                      />
+                      Freelancer
+                    </label>
+                    <label
+                      className={`flex-1 py-2 text-center rounded-lg font-semibold cursor-pointer ${
+                        values.role === "client"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      <Field
+                        type="radio"
+                        name="role"
+                        value="client"
+                        className="hidden"
+                      />
+                      Client
+                    </label>
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <Field
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <ErrorMessage
-                  name="email"
-                  component="div"
-                  className="text-red-900 text-xs mt-1"
-                />
-              </div>
-
-              <div>
-                <Field
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="text-red-900 text-xs mt-1"
-                />
-              </div>
-
-              <div>
-                <Field
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Repeat Password"
-                  className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <ErrorMessage
-                  name="confirmPassword"
-                  component="div"
-                  className="text-red-800 text-xs mt-1"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-              >
-                Register
-              </button>
-              <GoogleLogin
-                  onSuccess={googleSubmit}
-                  onError={() => {
-                    console.log('Login Failed');
-                  }}
-                />;
-            </Form>
-          )}
-        </Formik>
+  
+                <div>
+                  <Field
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-red-900 text-xs mt-1"
+                  />
+                </div>
+  
+                <div>
+                  <Field
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-900 text-xs mt-1"
+                  />
+                </div>
+  
+                <div>
+                  <Field
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Repeat Password"
+                    className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <ErrorMessage
+                    name="confirmPassword"
+                    component="div"
+                    className="text-red-800 text-xs mt-1"
+                  />
+                </div>
+  
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                >
+                  Register
+                </button>
+                <div className="text-center my-4 text-blue-600">or</div>
+  
+                {/* Google Login Button */}
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={googleSubmit}
+                    onError={() => {
+                      console.log('Login Failed');
+                    }}
+                  />
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+  
+        {/* Image Div */}
+        <div className="w-1/2 flex items-center justify-center" style={{ flexGrow: 1 }}>
+          <img
+            src="/assets/login.png" 
+            alt="Your Image"
+            className="object-cover w-full h-full rounded-lg"
+          />
+        </div>
       </div>
     </div>
   );
+  
 };
 
 export default Signup;

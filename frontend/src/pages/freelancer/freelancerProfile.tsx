@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { FaEdit } from "react-icons/fa";
+import axiosConfig from "../../service/axios";
 
 const FreelancerProfile: React.FC = () => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [attachments, setAttachments] = useState(
@@ -10,6 +13,26 @@ const FreelancerProfile: React.FC = () => {
   const [modalFile, setModalFile] = useState<File | null>(null);
   const [modalTitle, setModalTitle] = useState("");
   const [modalDescription, setModalDescription] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [location, setLocation] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [experience, setExperience] = useState("");
+  const [hourlyRate, setHourlyRate] = useState(35); // Default value
+  const [introduction, setIntroduction] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        setImagePreview(fileURL);
+      }
+    };
+    const handleEditClick = () => {
+      fileInputRef.current?.click(); 
+    };
 
   const handleAddSkill = () => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
@@ -42,76 +65,138 @@ const FreelancerProfile: React.FC = () => {
     setAttachments(attachments.filter((attachment) => attachment.id !== id));
   };
 
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Prepare the data
+    const formData = new FormData();
+
+    // Add basic info
+    formData.append("firstName", firstName);
+    formData.append("location", location);
+    formData.append("tagline", tagline);
+    formData.append("experience", experience);
+    formData.append("hourlyRate", hourlyRate.toString());
+    formData.append("introduction", introduction);
+
+    // Add skills
+    skills.forEach((skill) => formData.append("skills[]", skill));
+
+    // Add attachments
+    attachments.forEach((attachment) => {
+      formData.append("attachments", attachment.file);
+      formData.append(`attachmentDetails[${attachment.id}][title]`, attachment.title);
+      formData.append(`attachmentDetails[${attachment.id}][description]`, attachment.description);
+    });
+
+    try {
+      // Send the data to the backend
+      const response = await axiosConfig.post("/freelancers", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      console.log("Form submitted successfully:", response.data);
+      alert("Profile submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Failed to submit the profile. Please try again.");
+    }
+  };
+
   return (
-    <section className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg space-y-8">
-      <h3 className="text-lg font-semibold text-gray-800 mb-6">Freelancer Profile</h3>
+    <section id="hero" className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
+    <div className="container mx-20 px-6">
+    <h1 className="text-3xl md:text-4xl font-bold leading-tight text-center mx-auto mb-4 mt-6 w-full">
+      Complete Freelancer Profile <br />
+    </h1>
+    <p className="text-gray-600 mb-6 text-center">
+      Fill in your  details and upload required documents to set up your profile.
+    </p>
+      <div className="flex flex-col lg:flex-row items-center">
+        {/* Left Content */}
+        <div className="lg:w-1/2">
+          <div className="hero-content text-left">
+          <form className="w-full max-w-3xl space-y-8 mt-8" onSubmit={handleSubmit}>
+      
+      <div className="flex gap-8 items-start mb-6">
+        {/* Profile Photo */}
+                    <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Profile Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-300">Upload Photo</span>
+                      )}
+        
+                      {/* Edit Icon */}
+                      <div
+                        className="absolute bottom-0 right-0 bg-blue-700 hover:bg-blue-600 p-2 rounded-full cursor-pointer"
+                        onClick={handleEditClick}
+                      >
+                        <FaEdit className="text-white text-sm" />
+                      </div>
+                    </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+          {/* Profile Details */}
+        <div className="col-span-2 space-y-3">
+           {/* Name Fields */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Name</label>
+              <input
+                type="text"
+                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                placeholder="Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Location</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+             />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-3 gap-4 items-start">
-  {/* Profile Photo */}
-  <div className="relative col-span-1 flex items-start justify-start">
-    <div className="w-45 h-40 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100 relative">
-      <img
-        src="https://via.placeholder.com/150"
-        alt="Profile"
-        className="object-cover w-full h-full"
-        onError={(e) =>
-          (e.currentTarget.src = "https://via.placeholder.com/150?text=Photo")
-        }
-      />
-      {/* Edit Icon */}
-      <button
-        className="absolute bottom-4 right-5 transform translate-x-1 translate-y-1 p-2 bg-blue-600 text-white rounded-full text-xs z-10"
-        aria-label="Edit Profile Picture"
-      >
-        ✎
-      </button>
-    </div>
-   
-  </div>
-
-  {/* Profile Details */}
-  <div className="col-span-2 space-y-3">
-    {/* Name Fields */}
-    <div className="grid grid-cols-2 gap-3">
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">First Name</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="First Name"
-        />
+            {/* Tagline and Experience */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Tagline</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., Web Developer"
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Experience</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., 3 years"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Location</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="Location"
-        />
-      </div>
-    </div>
-
-    {/* Tagline and Experience */}
-    <div className="grid grid-cols-2 gap-3">
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Tagline</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g., Web Developer"
-        />
-      </div>
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Experience</label>
-        <input
-          type="text"
-          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g., 3 years"
-        />
-      </div>
-    </div>
-  </div>
-</div>
 
 
       {/* Hourly Rate and Skills */}
@@ -211,58 +296,97 @@ const FreelancerProfile: React.FC = () => {
                 <p className="text-gray-600 text-sm">{attachment.description}</p>
               </div>
               <button
-                className="px-4 py-2 text-red-500 hover:text-red-700"
+                type="button"
+                className="text-red-500 hover:text-red-700"
                 onClick={() => handleRemoveAttachment(attachment.id)}
               >
-                ✕
+                Remove
               </button>
             </div>
-          ))}
+            ))}
         </div>
+</div>
+
+{/* Modal for Adding Attachments */}
+{modalVisible && (
+<div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+  <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h3 className="text-lg font-semibold text-gray-800 mb-4">Upload Attachment</h3>
+    <div className="space-y-4">
+      <div>
+        <label className="block text-gray-700 text-sm font-medium mb-1">File</label>
+        <input
+          type="file"
+          className="w-full"
+          onChange={(e) => setModalFile(e.target.files ? e.target.files[0] : null)}
+        />
+      </div>
+      <div>
+        <label className="block text-gray-700 text-sm font-medium mb-1">Title</label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          value={modalTitle}
+          onChange={(e) => setModalTitle(e.target.value)}
+        />
+      </div>
+      <div>
+        <label className="block text-gray-700 text-sm font-medium mb-1">Description</label>
+        <textarea
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          value={modalDescription}
+          onChange={(e) => setModalDescription(e.target.value)}
+          rows={3}
+        ></textarea>
+      </div>
+    </div>
+    <div className="mt-6 flex justify-end space-x-2">
+      <button
+        className="px-4 py-2 bg-gray-300 text-gray-800 rounded"
+        onClick={() => setModalVisible(false)}
+      >
+        Cancel
+      </button>
+      <button
+        className="px-4 py-2 bg-blue-600 text-white rounded"
+        onClick={handleFileUpload}
+      >
+        Add
+      </button>
+    </div>
+  </div>
+</div>
+)}
+{/* Submit Button */}
+<div className="mt-6 flex justify-center">
+        <button
+          type="submit"
+          className="px-6 py-2 bg-blue-600 text-white rounded"
+        >
+          Submit Profile
+        </button>
       </div>
 
-      {/* Modal for Uploading Attachments */}
-      {modalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg space-y-4 w-96">
-            <h3 className="text-lg font-medium text-gray-800">Upload Attachment</h3>
-            <input
-              type="file"
-              onChange={(e) => setModalFile(e.target.files?.[0] || null)}
-              className="block w-full px-4 py-2 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Title"
-              value={modalTitle}
-              onChange={(e) => setModalTitle(e.target.value)}
-              className="block w-full px-4 py-2 border border-gray-300 rounded"
-            />
-            <textarea
-              placeholder="Description"
-              value={modalDescription}
-              onChange={(e) => setModalDescription(e.target.value)}
-              className="block w-full px-4 py-2 border border-gray-300 rounded"
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded"
-                onClick={() => setModalVisible(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-                onClick={handleFileUpload}
-              >
-                Upload
-              </button>
+ </form>
+
+ </div>
+          </div>
+
+          {/* Right Image */}
+          <div className="lg:w-1/2 mt-10 lg:mt-0 mb-40">
+            <div className="text-center">
+              <img
+                src="/assets/freelancer-profile.png"
+                alt="Hero Illustration"
+                className="w-full max-w-md mx-auto lg:max-w-lg"
+              />
             </div>
           </div>
         </div>
-      )}
+      </div>
     </section>
-  );
+);
 };
 
 export default FreelancerProfile;
+

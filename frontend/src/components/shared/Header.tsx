@@ -6,7 +6,7 @@ import { logoutUser } from '../../store/userSlice';
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null); 
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -68,35 +68,37 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-6 flex justify-between items-center h-16">
-        <div className="text-2xl font-bold text-blue-600 flex items-center">
+    <header className="bg-white text-white w-10/12 shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-full px-6">
+      <div className="flex justify-between items-center h-16">
+        <div className="text-2xl font-bold flex items-center text-blue-600">
           <span className="mr-2">🔷</span> HireNest
         </div>
 
-        <nav className="hidden md:flex space-x-6 items-center">
+        {/* Desktop Nav Links */}
+        <nav className="hidden lg:flex space-x-6 items-center">
           {getNavLinks()}
         </nav>
 
+        {/* Auth Buttons for Guest */}
         {userRole === "guest" ? (
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             <button
               onClick={() => navigate("/login")}
-              className="text-gray-700 hover:text-blue-600"
+              className="hover:text-blue-200 px-4 py-2 bg-blue-600 rounded-full"
             >
               Sign In
             </button>
             <button
               onClick={() => navigate("/register")}
-              className="text-blue-600 border border-blue-600 px-4 py-2 rounded"
+              className="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full hover:bg-gray-100"
             >
               Sign Up
             </button>
           </div>
         ) : (
-          <div className="hidden md:flex items-center space-x-4">
-            <button className="relative text-gray-700 hover:text-blue-600">🔔</button>
-            <button className="relative text-gray-700 hover:text-blue-600">✉️</button>
+          <div className="hidden lg:flex items-center space-x-4">
+            <button className="relative hover:text-blue-200">🔔</button>
+            <button className="relative hover:text-blue-200">✉️</button>
             <div className="relative" ref={profileMenuRef}>
               <img
                 src="https://i.pinimg.com/474x/43/6c/ac/436cac73f5fff533999f31147c3538b7.jpg"
@@ -106,26 +108,25 @@ const Header: React.FC = () => {
               />
               <span className="absolute bottom-0 right-0 bg-green-500 rounded-full w-3 h-3"></span>
               {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-lg">
+                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-700 shadow-md rounded-lg">
                   <div className="px-4 py-2 border-b">
-                    {/* <p className="text-gray-800 font-semibold">{localStorage.getItem('email') || 'user@example.com'}</p> */}
-                    <p className="text-gray-500 text-sm">{localStorage.getItem('role')}</p>
+                    <p className="text-sm">{localStorage.getItem('role')}</p>
                   </div>
                   <button
                     onClick={() => navigate('/dashboard')}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     Dashboard
                   </button>
                   <button
                     onClick={() => navigate('/settings')}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     Settings
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     Logout
                   </button>
@@ -135,23 +136,27 @@ const Header: React.FC = () => {
           </div>
         )}
 
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden text-gray-700 focus:outline-none"
+          className="lg:hidden focus:outline-none text-blue-600"
         >
           {isMenuOpen ? "✖" : "☰"}
         </button>
       </div>
 
+      {/* Mobile Dropdown Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-md p-4">
-          {getNavLinks()}
-          {userRole === "guest" && (
-            <>
-              <a href="/login" className="block py-2 text-blue-600">Sign In</a>
-              <a href="/register" className="block py-2 text-blue-600">Sign Up</a>
-            </>
-          )}
+        <div className="lg:hidden bg-white text-gray-700 shadow-md p-4 absolute rounded-lg mt-2 top-full left-1/2 transform -translate-x-1/2 w-full">
+          <div className="flex flex-col space-y-2">
+            {getNavLinks()}
+            {userRole === "guest" && (
+              <>
+                <a href="/login" className="block py-2 text-blue-600">Sign In</a>
+                <a href="/register" className="block py-2 text-blue-600">Sign Up</a>
+              </>
+            )}
+          </div>
         </div>
       )}
     </header>

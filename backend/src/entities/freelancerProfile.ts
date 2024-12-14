@@ -1,13 +1,19 @@
+import mongoose from "mongoose";
+
 export interface IFreelancerProfile {
-    freelancerId?: string; 
-    fullName: string;
-    phone: string;
+    id: mongoose.Types.ObjectId;
+    name: string; 
     location: string;
-    rolePosition: string; 
-    categoryId: string; 
-    hourlyRate: number; 
-    experienceYears: number; 
+    tagline: string;
+    experience: string;
+    hourlyRate: number;
+    skills: string[];
     description: string; 
-    skills: string[]; 
-    portfolioId: string; 
+    profileImage: string | null;
+    attachments: {
+        id: string; 
+        file: String; 
+        title: string;
+        description: string;
+    }[]; 
 }

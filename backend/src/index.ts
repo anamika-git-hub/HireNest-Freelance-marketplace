@@ -5,6 +5,7 @@ import { Config } from './config/config';
 import { catchError } from './interfaces/middlewares/catchError';
 import userRouter from './interfaces/routes/UserRoutes';
 import adminRouter from './interfaces/routes/adminRoutes';
+import freelancerRouter from './interfaces/routes/freelancerRouter';
 
 
 const port = Config.PORT ;
@@ -22,6 +23,8 @@ app.use(express.urlencoded({extended: true}))
 
 app.use('/api/users',userRouter);
 app.use('/api/admin',adminRouter);
+app.use('/api/freelancers',freelancerRouter);
+
 app.use(catchError);
 
 mongoose 

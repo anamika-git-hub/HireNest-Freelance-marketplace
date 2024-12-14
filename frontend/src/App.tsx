@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 //---------Shared----------------//
 import Home from './pages/shared/Home';
@@ -7,6 +7,7 @@ import Login from './pages/shared/Login';
 import Register from './pages/shared/Register';
 import OTPVerification from './pages/shared/Otp';
 import LayoutWrapper from './components/shared/LayoutWrapper';
+import AccountSetup from './pages/shared/accountSetup';
 
 //------------Admin------------------//
 import AdminLogin from './pages/admin/Login';
@@ -17,13 +18,11 @@ import ManageCategories from './pages/admin/CategoryList';
 import CategoryForm from './pages/admin/categoryForm';
 
 //--------------Freelancer--------------//
-import FreelancerProfileSetup from './pages/freelancer/profileSetup';
 import SettingsPage from './pages/freelancer/Settings';
 import TaskList from './pages/freelancer/taskList';
 import FreelancerProfile from './pages/freelancer/freelancerProfile';
 
 //--------------Clients----------------//
-import ClientProfileSetup from './pages/clients/profileSetup';
 import TaskSubmissionForm from './pages/clients/postTask';
 import FreelancerList from './pages/clients/freelancerList';
 
@@ -42,15 +41,14 @@ const App: React.FC = () => {
         <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
         <Route path="/otp" element={<LayoutWrapper><OTPVerification /></LayoutWrapper>} />
+        <Route path="/account-setup" element={<LayoutWrapper><AccountSetup /></LayoutWrapper>} />
 
          {/* ---------freelancer--------------- */}
-        <Route path="/freelancer/profile-setup" element={<LayoutWrapper><FreelancerProfileSetup /></LayoutWrapper>} />
         <Route path="/freelancer/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
         <Route path="/freelancer/task-list" element={<LayoutWrapper><TaskList /></LayoutWrapper>} />
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
 
          {/* ----------client-------------------*/}
-        <Route path="/client/profile-setup" element={<LayoutWrapper><ClientProfileSetup /></LayoutWrapper>} />
         <Route path="/client/task-form" element={<LayoutWrapper><TaskSubmissionForm/></LayoutWrapper>} />
         <Route path="/client/freelancer-list" element={<LayoutWrapper><FreelancerList/></LayoutWrapper>} />
 
