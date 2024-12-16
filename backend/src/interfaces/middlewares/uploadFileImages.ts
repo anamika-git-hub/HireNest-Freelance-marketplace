@@ -34,4 +34,8 @@ export const uploadProfileImages = upload.fields([
 export const uploadFreelancerImages = upload.fields([
     {name: 'profileImage', maxCount:1},
     {name: 'attachments', maxCount:10},
+]);
+
+export const uploadTaskFiles = upload.fields([
+    {name:'attachments', maxCount:10}
 ])

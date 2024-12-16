@@ -15,6 +15,6 @@ const UserDetailSchema = new Schema<IUserDetail> ({
   profileImage: { type: String, required: true },
   idFrontImage: { type: String, required: true },
   idBackImage: { type: String, required: true },
-});
+}, { timestamps: true });
 
 export const UserDetailModel = mongoose.model<IUserDetail>('userDetail',UserDetailSchema);

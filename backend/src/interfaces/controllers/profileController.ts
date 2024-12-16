@@ -2,17 +2,15 @@ import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { ProfileUseCase } from '../../application/profileUseCase';
 
 export const ProfileController = {
-    
     setupProfile: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body;
-            console.log('data:', data)
             const files = req.files as { [key: string]: Express.Multer.File[] };
+            console.log( 'files', files)
 
             const result = await ProfileUseCase.setUpProfile(data, files);
             res.status(201).json({ message: "Profile setup successful", profile: result });
         } catch (error) {
-            console.log('lkfjslkfjslkdfjdslk',error)
             next (error);
         }
     },

@@ -4,6 +4,8 @@ import axiosConfig from "../../service/axios";
 
 const FreelancerProfile: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [attachments, setAttachments] = useState(
@@ -18,7 +20,7 @@ const FreelancerProfile: React.FC = () => {
   const [location, setLocation] = useState("");
   const [tagline, setTagline] = useState("");
   const [experience, setExperience] = useState("");
-  const [hourlyRate, setHourlyRate] = useState(35); // Default value
+  const [hourlyRate, setHourlyRate] = useState<number>(35);// Default value
   const [introduction, setIntroduction] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,10 +30,16 @@ const FreelancerProfile: React.FC = () => {
       if (file) {
         const fileURL = URL.createObjectURL(file);
         setImagePreview(fileURL);
+        setImageFile(file)
       }
     };
     const handleEditClick = () => {
       fileInputRef.current?.click(); 
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setHourlyRate(Number(value)); // Convert the string to a number
     };
 
   const handleAddSkill = () => {
@@ -72,26 +80,34 @@ const FreelancerProfile: React.FC = () => {
     const formData = new FormData();
 
     // Add basic info
-    formData.append("firstName", firstName);
-    formData.append("location", location);
-    formData.append("tagline", tagline);
-    formData.append("experience", experience);
-    formData.append("hourlyRate", hourlyRate.toString());
-    formData.append("introduction", introduction);
+   // Assuming skills is an array of strings and attachments is an array of objects with file properties
+formData.append("name", firstName);
+formData.append("location", location);
+formData.append("tagline", tagline);
+formData.append("experience", experience);
+formData.append("hourlyRate", hourlyRate.toString());
+formData.append("description", introduction);
 
-    // Add skills
-    skills.forEach((skill) => formData.append("skills[]", skill));
+// Append profile image
+if (imageFile) {
+  formData.append("profileImage", imageFile); // Ensure this is a File object, not a URL
+}
 
-    // Add attachments
-    attachments.forEach((attachment) => {
-      formData.append("attachments", attachment.file);
-      formData.append(`attachmentDetails[${attachment.id}][title]`, attachment.title);
-      formData.append(`attachmentDetails[${attachment.id}][description]`, attachment.description);
-    });
+// Add skills
+skills.forEach((skill) => formData.append("skills[]", skill)); // Ensure the server expects 'skills[]'
+
+// Add attachments
+attachments.forEach((attachment, index) => {
+  // You need to append each property of the attachment separately
+  formData.append(`attachments[${index}].file`, attachment.file); // Append the file
+  formData.append(`attachments[${index}].title`, attachment.title); // Append the title
+  formData.append(`attachments[${index}].description`, attachment.description); // Append the description
+});
+
 
     try {
       // Send the data to the backend
-      const response = await axiosConfig.post("/freelancers", formData, {
+      const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -211,6 +227,8 @@ const FreelancerProfile: React.FC = () => {
               type="number"
               className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               placeholder="35"
+              value={hourlyRate}
+              onChange={handleChange} // Use the handleChange function
             />
              <input
               type="range"
@@ -219,6 +237,7 @@ const FreelancerProfile: React.FC = () => {
               max="100"
               step="1"
               defaultValue={35}
+              
             />
           </div>
         </div>
@@ -267,6 +286,8 @@ const FreelancerProfile: React.FC = () => {
           className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           placeholder="Write about yourself..."
           rows={4}
+          value={introduction}
+              onChange={(e)=>setIntroduction(e.target.value)}
           
         ></textarea>
       </div>

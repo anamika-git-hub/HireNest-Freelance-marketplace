@@ -6,6 +6,7 @@ import { catchError } from './interfaces/middlewares/catchError';
 import userRouter from './interfaces/routes/UserRoutes';
 import adminRouter from './interfaces/routes/adminRoutes';
 import freelancerRouter from './interfaces/routes/freelancerRouter';
+import clientRouter from './interfaces/routes/clientRouter';
 
 
 const port = Config.PORT ;
@@ -17,13 +18,14 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
   }));
 
-app.use(express.json());
-app.use(express.urlencoded({extended: true}))
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({extended: true, limit: '10mb'}))
 
 
 app.use('/api/users',userRouter);
 app.use('/api/admin',adminRouter);
 app.use('/api/freelancers',freelancerRouter);
+app.use('/api/client/',clientRouter);
 
 app.use(catchError);
 

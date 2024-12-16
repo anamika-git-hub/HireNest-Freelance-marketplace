@@ -1,19 +1,23 @@
 import React, { useState, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
-import accountSetup from "../../../../public/assets/account-setup.png"
 
 const AccountSetup: React.FC = () => {
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFront, setFrontPreview] = useState<string | null>(null);
-  const [imageBack, setBackPreview] = useState<string | null>(null);
+  const [imageFrontFile, setImageFrontFile] = useState<File | null>(null);
+  const [imageFrontPreview, setImageFrontPreview] = useState<string | null>(
+    null
+  );
+  const [imageBackFile, setImageBackFile] = useState<File | null>(null);
+  const [imageBackPreview, setImageBackPreview] = useState<string | null>(null);
   const [selectedID, setSelectedID] = useState<string>("debit_card");
   const [IDNumber, setIDNumber] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [dob, setDob] = useState<string>("");
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,11 +25,12 @@ const AccountSetup: React.FC = () => {
     if (file) {
       const fileURL = URL.createObjectURL(file);
       setImagePreview(fileURL);
+      setImageFile(file);
     }
   };
 
   const handleEditClick = () => {
-    fileInputRef.current?.click(); 
+    fileInputRef.current?.click();
   };
 
   const handleIdImageUpload = (
@@ -38,45 +43,45 @@ const AccountSetup: React.FC = () => {
       reader.onload = () => {
         if (reader.result && typeof reader.result === "string") {
           if (side === "front") {
-            setFrontPreview(reader.result);
+            setImageFrontPreview(reader.result);
+            setImageFrontFile(file);
           } else if (side === "back") {
-            setBackPreview(reader.result);
+            setImageBackPreview(reader.result);
+            setImageBackFile(file);
           }
         }
       };
       reader.readAsDataURL(file);
     }
   };
-  
+
   const handleIDChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedID(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     const formData = new FormData();
+    formData.append("firstname", firstName);
+    formData.append("lastname", lastName);
+    formData.append("phone", phone);
+    formData.append("dateOfBirth", dob);
+    formData.append("idType", selectedID);
+    formData.append("idNumber", IDNumber);
 
-    formData.append("firstName",firstName);
-    formData.append("lastName",lastName);
-    formData.append("phone",phone);
-    formData.append("dateOfBirth",dob);
-    formData.append("selectedID",selectedID);
-    formData.append("IDNumber",IDNumber);
-    if (imagePreview) {
-      formData.append("profileImage", imagePreview);
-    }
-    // if(imageFront)formData.append("imageFront",imageFront);
-    // if(imageBack)formData.append("imageBack",imageBack); 
+    console.log('imageFile', imageFile)
+
+    if (imageFile) formData.append("profileImage", imageFile);
+    if (imageFrontFile) formData.append("idFrontImage", imageFrontFile);
+    if (imageBackFile) formData.append("idBackImage", imageBackFile);
 
     try {
-      const response = await axiosConfig.post(
-        "/users/setup-account",
-        formData
-      );
+      const response = await axiosConfig.post("/users/setup-account", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      if (response.status === 200) {
-        console.log("Form submitted successfully:", response.data);
+      if (response.status === 201) {
         alert("Profile setup completed successfully!");
       }
     } catch (error) {
@@ -86,200 +91,203 @@ const AccountSetup: React.FC = () => {
   };
 
   return (
-    <section id="hero" className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
+    <section
+      id="hero"
+      className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden"
+    >
       <div className="container mx-20 px-6">
-      <h1 className="text-3xl md:text-4xl font-bold leading-tight text-center mx-auto mb-4 mt-6 w-full">
-        Set Up your Account <br />
-      </h1>
-      <p className="text-gray-600 mb-6 text-center">
-        Fill in your personal details and upload required documents to get started.
-      </p>
+        <h1 className="text-3xl md:text-4xl font-bold leading-tight text-center mx-auto mb-4 mt-6 w-full">
+          Set Up your Account <br />
+        </h1>
+        <p className="text-gray-600 mb-6 text-center">
+          Fill in your personal details and upload required documents to get
+          started.
+        </p>
         <div className="flex flex-col lg:flex-row items-center">
-          {/* Left Content */}
           <div className="lg:w-1/2">
-            <div className="hero-content text-left">
             <form className="w-full max-w-3xl space-y-8" onSubmit={handleSubmit}>
-          {/* Profile Photo and Personal Information */}
-          <div className="flex gap-8 items-start mb-6">
-            {/* Profile Photo */}
-            <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile Preview"
-                  className="w-full h-full object-cover"
+              <div className="flex gap-8 items-start mb-6">
+                <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Profile Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm text-gray-300">Upload Photo</span>
+                  )}
+                  <div
+                    className="absolute bottom-0 right-0 bg-blue-700 hover:bg-blue-600 p-2 rounded-full cursor-pointer"
+                    onClick={handleEditClick}
+                  >
+                    <FaEdit className="text-white text-sm" />
+                  </div>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
                 />
-              ) : (
-                <span className="text-sm text-gray-300">Upload Photo</span>
-              )}
-
-              {/* Edit Icon */}
-              <div
-                className="absolute bottom-0 right-0 bg-blue-700 hover:bg-blue-600 p-2 rounded-full cursor-pointer"
-                onClick={handleEditClick}
-              >
-                <FaEdit className="text-white text-sm" />
+                <div className="col-span-2 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-2">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Tom"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-2">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Smith"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-2">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="(123) 456-7890"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-2">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageUpload}
-            />
-             {/* Profile Details */}
-        <div className="col-span-2 space-y-3">
-           {/* Name Fields */}
-          <div className="grid grid-cols-2 gap-3">
+              <h2 className="text-xl font-semibold mt-6 text-gray-700">
+                ID Verification
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-blue-600 mb-2">First Name</label>
-                  <input
-                    type="text"
+                  <label className="block text-sm text-gray-700 mb-2">
+                    Select ID Type
+                  </label>
+                  <select
                     className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Tom"
-                  />
+                    onChange={handleIDChange}
+                    value={selectedID}
+                  >
+                    <option value="debit_card">💳 Debit/Credit Card</option>
+                    <option value="passport">🌍 Passport</option>
+                    <option value="driver_license">🚗 Driver's License</option>
+                    <option value="national_id">🆔 National ID</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-blue-600 mb-2">Last Name</label>
+                  <label className="block text-sm text-gray-700 mb-2">
+                    ID Number
+                  </label>
                   <input
                     type="text"
                     className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Smith"
+                    placeholder="Enter your ID number"
+                    value={IDNumber}
+                    onChange={(e) => setIDNumber(e.target.value)}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-blue-600 mb-2">Phone</label>
+                  <label
+                    htmlFor="id-front-upload"
+                    className="block text-sm text-gray-700 mb-2"
+                  >
+                    Upload ID Front
+                  </label>
+                  <label
+                    htmlFor="id-front-upload"
+                    className="cursor-pointer px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-semibold"
+                  >
+                    Upload Front
+                  </label>
                   <input
-                    type="tel"
-                    className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(123) 456-7890"
+                    type="file"
+                    id="id-front-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleIdImageUpload(e, "front")}
                   />
+                  {imageFrontPreview && (
+                    <img
+                      src={imageFrontPreview}
+                      alt="ID Front Preview"
+                      className="mt-2 rounded-md border w-32 h-20 object-cover"
+                    />
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm text-blue-600 mb-2">Date of Birth</label>
+                  <label
+                    htmlFor="id-back-upload"
+                    className="block text-sm text-gray-700 mb-2"
+                  >
+                    Upload ID Back
+                  </label>
+                  <label
+                    htmlFor="id-back-upload"
+                    className="cursor-pointer px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-semibold"
+                  >
+                    Upload Back
+                  </label>
                   <input
-                    type="date"
-                    className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
+                    type="file"
+                    id="id-back-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleIdImageUpload(e, "back")}
                   />
+                  {imageBackPreview && (
+                    <img
+                      src={imageBackPreview}
+                      alt="ID Back Preview"
+                      className="mt-2 rounded-md border w-32 h-20 object-cover"
+                    />
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* ID Verification Section */}
-          <h2 className="text-xl font-semibold mt-6 text-blue-600">ID Verification</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-blue-600 mb-2">Select ID Type</label>
-              <select
-                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                onChange={handleIDChange}
-                value={selectedID}
+              <button
+                type="submit"
+                className="w-full mt-6 p-3 rounded-lg text-white bg-blue-700 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 font-semibold"
               >
-                <option value="debit_card">💳 Debit/Credit Card</option>
-                <option value="passport">🌍 Passport</option>
-                <option value="driver_license">🚗 Driver's License</option>
-                <option value="national_id">🆔 National ID</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm text-blue-600 mb-2">ID Number</label>
-              <input
-                type="text"
-                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                placeholder="Enter your ID number"
-                value={IDNumber}
-                onChange={(e) => setIDNumber(e.target.value)}
-              />
-            </div>
+                Submit
+              </button>
+            </form>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-  <div>
-    <label htmlFor="id-front-upload" className="block text-sm text-blue-600 mb-2">
-      Upload ID Front
-    </label>
-    <label
-      htmlFor="id-front-upload"
-      className="cursor-pointer px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-semibold"
-    >
-      Upload Front
-    </label>
-    <input
-      id="id-front-upload"
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={(e) => handleIdImageUpload(e, "front")}
-    />
-    {imageFront && (
-      <div className="mt-4">
-        <img
-          src={imageFront}
-          alt="ID Front Preview"
-          className="w-full h-48 object-cover rounded-lg border border-gray-300"
-        />
-      </div>
-    )}
-  </div>
-  <div>
-    <label htmlFor="id-back-upload" className="block text-sm text-blue-600 mb-2">
-      Upload ID Back
-    </label>
-    <label
-      htmlFor="id-back-upload"
-      className="cursor-pointer px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-white font-semibold"
-    >
-      Upload Back
-    </label>
-    <input
-      id="id-back-upload"
-      type="file"
-      accept="image/*"
-      className="hidden"
-      onChange={(e) => handleIdImageUpload(e, "back")}
-    />
-    {imageBack && (
-      <div className="mt-4">
-        <img
-          src={imageBack}
-          alt="ID Back Preview"
-          className="w-full h-48 object-cover rounded-lg border border-gray-300"
-        />
-      </div>
-    )}
-  </div>
-</div>
-
-
-          {/* Submit Button */}
-          <div className="flex justify-center mt-6">
-            <button
-              type="submit"
-              className="w-full bg-blue-800 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-            </div>
-          </div>
-
           {/* Right Image */}
-          <div className="lg:w-1/2 mt-10 lg:mt-0">
+          <div className="lg:w-1/2 mt-10 lg:mt-0 mb-40">
             <div className="text-center">
               <img
-                src="/assets/account-setup.png"
+                src="/assets/account-setupImage.png"
                 alt="Hero Illustration"
                 className="w-full max-w-md mx-auto lg:max-w-lg"
               />

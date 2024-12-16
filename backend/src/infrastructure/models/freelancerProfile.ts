@@ -56,6 +56,6 @@ const FreelancerProfileSchema = new Schema<IFreelancerProfile>({
             required: true
         }
     }]
-})
+}, { timestamps: true })
 
 export const FreelancerProfileModel = mongoose.model<IFreelancerProfile>('freelancerProfile',FreelancerProfileSchema)
