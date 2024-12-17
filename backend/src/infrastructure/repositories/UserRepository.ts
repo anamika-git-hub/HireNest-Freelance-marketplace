@@ -4,7 +4,8 @@ import { UserDetailModel } from "../models/UserDetailModel";
 export const UserRepository = {
 
     findUserByEmail: async (email: string) => UserModel.findOne({ email }),
-    findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}),
+    findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}).populate('userId'),
+    
     createUser: async (userData: any) => new UserModel(userData).save(),
     updateUser: async (id: string, updates: any) => UserModel.findByIdAndUpdate(id, updates, {new: true}),
     updateUserVerification: async (email: string, isVerified: boolean) => {
@@ -23,5 +24,6 @@ export const UserRepository = {
         return updatedUser;
     },
     createUserDetail: async (userDetails: any) => new UserDetailModel(userDetails).save(),
+    
     
 };

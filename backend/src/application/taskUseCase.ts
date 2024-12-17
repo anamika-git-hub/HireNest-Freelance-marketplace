@@ -1,8 +1,8 @@
-import { ClientRepository } from "../infrastructure/repositories/ClientRepository";
+import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { ITaskSubmissionForm } from "../entities/Tasks";
 import cloudinaryV2 from "../utils/cloudinary";
 
-export const ClientUseCase = {
+export const TaskUseCase = {
     // Create a new task submission
     createTask: async (data: ITaskSubmissionForm, files: { [key: string]: Express.Multer.File[] }) => {
         try {
@@ -26,7 +26,7 @@ export const ClientUseCase = {
                 attachments, // Attach the array of file URLs (strings) to the task data
             };
 
-            return await ClientRepository.createTask(taskData);
+            return await TaskRepository.createTask(taskData);
         } catch (error: any) {
             throw new Error(`Failed to create task: ${error.message}`);
         }
@@ -64,7 +64,7 @@ export const ClientUseCase = {
                 attachments: updatedAttachments,
             };
 
-            return await ClientRepository.updateTask(id, updatedTaskData);
+            return await TaskRepository.updateTask(id, updatedTaskData);
         } catch (error: any) {
             throw new Error(`Failed to update task: ${error.message}`);
         }
@@ -73,9 +73,18 @@ export const ClientUseCase = {
     // Delete a task submission
     deleteTask: async (id: string) => {
         try {
-            return await ClientRepository.deleteTask(id);
+            return await TaskRepository.deleteTask(id);
         } catch (error: any) {
             throw new Error(`Failed to delete task: ${error.message}`);
         }
+    },
+
+    getTasks: async () => {
+        try {
+            return await TaskRepository.getTasks();
+        } catch (error) {
+            throw new Error ('Failed to get tasks')
+        }
     }
+    
 };

@@ -98,11 +98,11 @@ skills.forEach((skill) => formData.append("skills[]", skill)); // Ensure the ser
 
 // Add attachments
 attachments.forEach((attachment, index) => {
-  // You need to append each property of the attachment separately
-  formData.append(`attachments[${index}].file`, attachment.file); // Append the file
-  formData.append(`attachments[${index}].title`, attachment.title); // Append the title
-  formData.append(`attachments[${index}].description`, attachment.description); // Append the description
+  formData.append(`attachments[${index}].file`, attachment.file);
+  formData.append(`attachments[${index}].title`, attachment.title);
+  formData.append(`attachments[${index}].description`, attachment.description);
 });
+
 
 
     try {
@@ -296,6 +296,7 @@ attachments.forEach((attachment, index) => {
       <div>
         <label className="block text-gray-700 text-sm font-medium mb-1">Attachments</label>
         <button
+        type="button"
           className="px-4 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-sm font-medium"
           onClick={() => setModalVisible(true)}
         >

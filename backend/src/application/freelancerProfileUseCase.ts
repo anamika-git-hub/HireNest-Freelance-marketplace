@@ -1,8 +1,8 @@
-import { FreelancerRepository } from "../infrastructure/repositories/FreelancerRepository";
+import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { IFreelancerProfile } from "../entities/freelancerProfile";
 import cloudinaryV2 from "../utils/cloudinary";
 
-export const FreelancerUseCase = {
+export const FreelancerProfileUseCase = {
     createProfile: async (data:IFreelancerProfile, files:{[key: string]: Express.Multer.File[]}) => {
         try {
             const uploadToCloudinary = async (filePath: string) => {
@@ -29,7 +29,7 @@ export const FreelancerUseCase = {
                 profileImage: profileImageUrl,
                 attachments,
             };
-            return await FreelancerRepository.createProfile(profileData)
+            return await FreelancerProfileRepository.createProfile(profileData)
         } catch (error: any) {
             throw new Error (`Failed to set up profile: ${error.message}`)
         }
@@ -73,9 +73,17 @@ export const FreelancerUseCase = {
                 profileImage: profileImageUrl,
                 attachments,
             };
-            return await FreelancerRepository.updateProfile(id, updatedProfileData);
+            return await FreelancerProfileRepository.updateProfile(id, updatedProfileData);
         } catch (error: any) {
             throw new Error (`Failed to update freelancer profile: ${error.message}`);
+        }
+    },
+
+    getFreelancers: async()=>{
+        try {
+            return await FreelancerProfileRepository.getFreelancers();
+        } catch (error:any) {
+            throw new Error(`Failed to get freelancers: ${error.message}`);
         }
     }
 }

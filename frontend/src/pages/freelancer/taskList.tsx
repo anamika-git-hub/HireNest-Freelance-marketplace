@@ -1,49 +1,33 @@
-import React from "react";
+import React ,{useState,useEffect}from "react";
+import axiosConfig from "../../service/axios";
 
-const TaskList = () => {
-  const jobs = [
-    {
-      title: "Food Delivery Web App",
-      time: "2 minutes ago",
-      price: "$1,000 - $2,500",
-      type: "Fixed Price",
-    },
-    {
-      title: "2000 Words English to German",
-      time: "5 minutes ago",
-      price: "$75",
-      type: "Fixed Price",
-    },
-    {
-      title: "WordPress Theme Installation",
-      time: "30 minutes ago",
-      price: "$100",
-      type: "Fixed Price",
-    },
-    {
-      title: "PHP Core Website Fixes",
-      time: "1 hour ago",
-      price: "$50 - $80",
-      type: "Hourly Rate",
-    },
-    {
-      title: "Design a Landing Page",
-      time: "2 hours ago",
-      price: "$500",
-      type: "Fixed Price",
-    },
-    {
-      title: "Website and Logo Redesign",
-      time: "3 hours ago",
-      price: "$850 - $1,000",
-      type: "Fixed Price",
-    },
-  ];
+const TaskList: React.FC = () => {
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
+  useEffect(() => {
+    // Fetch tasks from the backend
+    axiosConfig
+      .get("/freelancers/tasks-list") // Replace with the correct endpoint
+      .then((response) => {
+        // Accessing tasks data from the backend response
+        setTasks(response.data.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to load tasks.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  
   return (
-    <div className="flex">
+    <div className="flex pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       {/* Sidebar */}
-      <div className="w-1/4 bg-gray-100 p-5">
+      <div className="w-1/4 bg-gray-100 p-5 mt-14">
         <h2 className="text-xl font-semibold mb-5">Filters</h2>
         <div className="mb-5">
           <label className="block mb-2 font-medium">Location</label>
@@ -114,28 +98,31 @@ const TaskList = () => {
       <div className="w-3/4 p-5">
         {/* Search Alerts */}
         <div className="flex items-center justify-between mb-5">
-          <div>
-            <label className="flex items-center space-x-2">
-              <input type="checkbox" />
-              <span>Turn on email alerts for this search</span>
-            </label>
-          </div>
-          <select className="p-2 border border-gray-300 rounded">
+         
+          <select className=" border border-gray-300 rounded">
             <option>Relevance</option>
           </select>
         </div>
 
         {/* Job Listings */}
-        <div className="grid grid-cols-2 gap-5">
-          {jobs.map((job, index) => (
+        <div className="grid grid-cols-2 gap-5 ">
+          {tasks.map((task, index) => (
             <div
               key={index}
-              className="border border-gray-300 p-5 rounded shadow-sm"
+              className="border border-gray-300 p-5 rounded shadow-sm bg-gray-100"
             >
-              <h3 className="text-lg font-semibold">{job.title}</h3>
-              <p className="text-gray-600 text-sm">{job.time}</p>
-              <p className="font-semibold mt-3">{job.price}</p>
-              <p className="text-gray-600">{job.type}</p>
+              <h3 className="text-lg font-semibold">{task.projectName}</h3>
+              <p className="text-gray-600 text-sm">{task.category}</p>
+              <p className="font-semibold mt-3">{task.minRate}$ - {task.maxRate}$</p>
+              <span
+                  className={`px-3 py-1 rounded-full text-sm mt-2 ${
+                    task.type === "Fixed Price"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-blue-100 text-blue-600"
+                  }`}
+                >
+                  {task.rateType}
+                </span>
               <button className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">
                 Bid Now
               </button>
@@ -143,24 +130,21 @@ const TaskList = () => {
           ))}
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-center space-x-2 mt-5">
-          <button className="px-4 py-2 border border-gray-300 rounded">
-            &lt;
-          </button>
-          <button className="px-4 py-2 bg-blue-500 text-white rounded">
-            1
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded">
-            2
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded">
-            3
-          </button>
-          <button className="px-4 py-2 border border-gray-300 rounded">
-            &gt;
-          </button>
-        </div>
+    {/* Pagination  */}
+    <div className="flex justify-center items-center mt-6 space-x-2">
+            {[1, 2, 3, 4].map((page) => (
+              <button
+                key={page}
+                className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                  page === 2
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
       </div>
     </div>
   );

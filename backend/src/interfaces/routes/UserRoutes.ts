@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { UserController } from '../controllers/UserController';
-import { ProfileController } from '../controllers/profileController';
+import { AccountDetailController } from '../controllers/accountDetailController';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { uploadProfileImages } from '../middlewares/uploadFileImages';
 
@@ -14,8 +14,8 @@ router.post ('/verify-otp',UserController.verifyOtp);
 router.post ('/resend-otp', UserController.resendOtp);
 router.post('/login', UserController.login);
 
-router.post('/setup-account', uploadProfileImages, ProfileController.setupProfile);
-router.put ('/update-account/:id',uploadProfileImages, ProfileController.updateProfile);
+router.post('/setup-account', uploadProfileImages, AccountDetailController.setupProfile);
+router.put ('/update-account/:id',uploadProfileImages, AccountDetailController.updateProfile);
 // router.get('/:userId/:role', ProfileController.getProfile);
 
 

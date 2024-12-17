@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { AccountSetupValidationSchema } from "../../components/Schemas/accountSetupValidation";
 
 const AccountSetup: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -11,14 +13,16 @@ const AccountSetup: React.FC = () => {
   );
   const [imageBackFile, setImageBackFile] = useState<File | null>(null);
   const [imageBackPreview, setImageBackPreview] = useState<string | null>(null);
-  const [selectedID, setSelectedID] = useState<string>("debit_card");
-  const [IDNumber, setIDNumber] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [dob, setDob] = useState<string>("");
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const initialValues = {
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dob: "",
+    selectedID: "debit_card",
+    IDNumber: "",
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,22 +59,14 @@ const AccountSetup: React.FC = () => {
     }
   };
 
-  const handleIDChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedID(e.target.value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
-    formData.append("firstname", firstName);
-    formData.append("lastname", lastName);
-    formData.append("phone", phone);
-    formData.append("dateOfBirth", dob);
-    formData.append("idType", selectedID);
-    formData.append("idNumber", IDNumber);
-
-    console.log('imageFile', imageFile)
+    formData.append("firstname", values.firstName);
+    formData.append("lastname", values.lastName);
+    formData.append("phone", values.phone);
+    formData.append("dateOfBirth", values.dob);
+    formData.append("idType", values.selectedID);
+    formData.append("idNumber", values.IDNumber);
 
     if (imageFile) formData.append("profileImage", imageFile);
     if (imageFrontFile) formData.append("idFrontImage", imageFrontFile);
@@ -105,119 +101,154 @@ const AccountSetup: React.FC = () => {
         </p>
         <div className="flex flex-col lg:flex-row items-center">
           <div className="lg:w-1/2">
-            <form className="w-full max-w-3xl space-y-8" onSubmit={handleSubmit}>
-              <div className="flex gap-8 items-start mb-6">
-                <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
-                  {imagePreview ? (
-                    <img
-                      src={imagePreview}
-                      alt="Profile Preview"
-                      className="w-full h-full object-cover"
+          <Formik
+              initialValues={initialValues}
+              validationSchema={AccountSetupValidationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ setFieldValue, values }) => (
+                <Form className="w-full max-w-3xl space-y-8">
+                  <div className="flex gap-8 items-start mb-6">
+                    <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Profile Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-300">
+                          Upload Photo
+                        </span>
+                      )}
+                      <div
+                        className="absolute bottom-0 right-0 bg-blue-700 hover:bg-blue-600 p-2 rounded-full cursor-pointer"
+                        onClick={handleEditClick}
+                      >
+                        <FaEdit className="text-white text-sm" />
+                      </div>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
                     />
-                  ) : (
-                    <span className="text-sm text-gray-300">Upload Photo</span>
-                  )}
-                  <div
-                    className="absolute bottom-0 right-0 bg-blue-700 hover:bg-blue-600 p-2 rounded-full cursor-pointer"
-                    onClick={handleEditClick}
-                  >
-                    <FaEdit className="text-white text-sm" />
+                    <div className="col-span-2 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">
+                            First Name
+                          </label>
+                          <Field
+                            type="text"
+                            name="firstName"
+                            className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            placeholder="Tom"
+                          />
+                          <ErrorMessage
+                            name="firstName"
+                            component="div"
+                            className="text-red-500 text-sm mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">
+                            Last Name
+                          </label>
+                          <Field
+                            type="text"
+                            name="lastName"
+                            className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            placeholder="Smith"
+                          />
+                          <ErrorMessage
+                            name="lastName"
+                            component="div"
+                            className="text-red-500 text-sm mt-1"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">
+                            Phone
+                          </label>
+                          <Field
+                            type="tel"
+                            name="phone"
+                            className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            placeholder="(123) 456-7890"
+                          />
+                          <ErrorMessage
+                            name="phone"
+                            component="div"
+                            className="text-red-500 text-sm mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-700 mb-2">
+                            Date of Birth
+                          </label>
+                          <Field
+                            type="date"
+                            name="dob"
+                            className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          />
+                          <ErrorMessage
+                            name="dob"
+                            component="div"
+                            className="text-red-500 text-sm mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-                <div className="col-span-2 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <h2 className="text-xl font-semibold mt-6 text-gray-700">
+                    ID Verification
+                  </h2>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm text-gray-700 mb-2">
-                        First Name
+                        Select ID Type
                       </label>
-                      <input
-                        type="text"
+                      <Field
+                        as="select"
+                        name="selectedID"
                         className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Tom"
+                      >
+                        <option value="debit_card">💳 Debit/Credit Card</option>
+                        <option value="passport">🌍 Passport</option>
+                        <option value="driver_license">
+                          🚗 Driver's License
+                        </option>
+                        <option value="national_id">🆔 National ID</option>
+                      </Field>
+                      <ErrorMessage
+                        name="selectedID"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
                       />
                     </div>
                     <div>
                       <label className="block text-sm text-gray-700 mb-2">
-                        Last Name
+                        ID Number
                       </label>
-                      <input
+                      <Field
                         type="text"
+                        name="IDNumber"
                         className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Smith"
+                        placeholder="XXXX XXXX XXXX XXXX"
+                      />
+                      <ErrorMessage
+                        name="IDNumber"
+                        component="div"
+                        className="text-red-500 text-sm mt-1"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-2">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="(123) 456-7890"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-700 mb-2">
-                        Date of Birth
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                        value={dob}
-                        onChange={(e) => setDob(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold mt-6 text-gray-700">
-                ID Verification
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-700 mb-2">
-                    Select ID Type
-                  </label>
-                  <select
-                    className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    onChange={handleIDChange}
-                    value={selectedID}
-                  >
-                    <option value="debit_card">💳 Debit/Credit Card</option>
-                    <option value="passport">🌍 Passport</option>
-                    <option value="driver_license">🚗 Driver's License</option>
-                    <option value="national_id">🆔 National ID</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-700 mb-2">
-                    ID Number
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    placeholder="Enter your ID number"
-                    value={IDNumber}
-                    onChange={(e) => setIDNumber(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="id-front-upload"
@@ -281,10 +312,14 @@ const AccountSetup: React.FC = () => {
               >
                 Submit
               </button>
-            </form>
-          </div>
-          {/* Right Image */}
-          <div className="lg:w-1/2 mt-10 lg:mt-0 mb-40">
+                </Form>
+              )}
+            </Formik>
+            
+          
+        </div>
+        {/* Right Image */}
+      <div className="lg:w-1/2 mt-10 lg:mt-0 mb-40">
             <div className="text-center">
               <img
                 src="/assets/account-setupImage.png"
@@ -293,7 +328,8 @@ const AccountSetup: React.FC = () => {
               />
             </div>
           </div>
-        </div>
+      </div>
+      
       </div>
     </section>
   );

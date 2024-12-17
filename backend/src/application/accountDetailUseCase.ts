@@ -1,33 +1,9 @@
-// import { ProfileRepository } from "../infrastructure/repositories/ProfileRepository";
 
-// export const ProfileUseCase = {
-//     setupFreelancerProfile: async (data: any) => {
-//         return await ProfileRepository.createFreelancerProfile(data);
-//     },
-
-//     setupClientProfile: async (data: any) => {
-//         return await ProfileRepository.createClientProfile(data);
-
-//     },
-
-//     updateFreelancerProfile: async (id: string, updates: any) => {
-//         return await ProfileRepository.updateFreelancerProfile(id, updates);
-//     },
-
-//     updateClientProfile: async (id: string, updates: any) => {
-//         return await ProfileRepository.updateClientProfile (id, updates);
-//     },
-
-//     getProfile: async (userId: string, role: 'freelancer' | 'client') => {
-//         return await ProfileRepository.findProfileByUserId(userId, role);
-//     }
-// };
-
-import { ProfileRepository } from "../infrastructure/repositories/ProfileRepository";
+import { AccountDetailRepository } from "../infrastructure/repositories/accountDetail";
 import { IUserDetail } from "../entities/UserDetail";
 import cloudinaryV2 from "../utils/cloudinary";
 
-export const ProfileUseCase = {
+export const AccountDetailUseCase = {
     setUpProfile: async (data:IUserDetail, files:{[key: string]: Express.Multer.File[]}) => {
         try {
             const uploadToCloudinary = async (filePath:string) => {
@@ -47,7 +23,7 @@ export const ProfileUseCase = {
                 idFrontImage: idFrontImageUrl,
                 idBackImage: idBackImageUrl,
             };
-            return await ProfileRepository.createProfile(profileData)
+            return await AccountDetailRepository.createProfile(profileData)
         } catch (error: any) {
             throw new Error (`Failed to set up profile: ${error.message}`);
         }
@@ -83,7 +59,7 @@ export const ProfileUseCase = {
                 idBackImage: idBackImageUrl,
 
             }
-            return await ProfileRepository.updateProfile(id, updatedProfileData);
+            return await AccountDetailRepository.updateProfile(id, updatedProfileData);
         } catch (error: any) {
             throw new Error(`Failed to update profile: ${error.message}`)
         }

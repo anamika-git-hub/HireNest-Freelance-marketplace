@@ -41,7 +41,6 @@ const FreelancerProfileSchema = new Schema<IFreelancerProfile>({
     attachments:[{
         id: {
             type: String,
-            required: true
         },
         file:{
             type: String,

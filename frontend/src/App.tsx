@@ -42,9 +42,10 @@ const App: React.FC = () => {
         <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
         <Route path="/otp" element={<LayoutWrapper><OTPVerification /></LayoutWrapper>} />
         <Route path="/account-setup" element={<LayoutWrapper><AccountSetup /></LayoutWrapper>} />
+        <Route path="/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
 
          {/* ---------freelancer--------------- */}
-        <Route path="/freelancer/settings" element={<LayoutWrapper><SettingsPage /></LayoutWrapper>} />
+       
         <Route path="/freelancer/task-list" element={<LayoutWrapper><TaskList /></LayoutWrapper>} />
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
 

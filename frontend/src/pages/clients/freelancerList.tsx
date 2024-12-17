@@ -1,20 +1,34 @@
-import React from "react";
-
-const freelancers = [
-  { name: "Andy Smith", skill: "Marketing", rate: "$120/hr", rating: 4.5 },
-  { name: "Lily Woods", skill: "Design", rate: "$160/hr", rating: 5 },
-  { name: "Kathie Corl", skill: "Development", rate: "$240/hr", rating: 4.5 },
-  { name: "Matt Cannon", skill: "Development", rate: "$280/hr", rating: 4 },
-  { name: "Patrick Meyer", skill: "Marketing", rate: "$140/hr", rating: 4 },
-  { name: "Sandy Hung", skill: "Design", rate: "$210/hr", rating: 5 },
-];
+import React, { useState, useEffect } from "react";
+import axiosConfig from "../../service/axios"; // Assuming axiosConfig is set up
 
 const FreelancerList: React.FC = () => {
+  const [freelancers, setFreelancers] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    // Fetch freelancers from the backend
+    axiosConfig
+      .get("/client/freelancer-list")
+      .then((response) => {
+        // Accessing freelancers data from the backend response
+        setFreelancers(response.data.data); // Now it's response.data.data instead of just response.data
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to load freelancers.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
-    <div className="container mx-auto p-6">
+    <div className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Search Filter Section */}
-        <aside className="bg-white p-6 rounded-lg shadow-md w-full md:w-1/4">
+        <aside className="bg-blue-50 p-6 mt-14 rounded-lg shadow-md w-full md:w-1/4">
           <h2 className="text-lg font-semibold mb-4">Search Filters</h2>
           <div className="space-y-4">
             <input
@@ -72,7 +86,7 @@ const FreelancerList: React.FC = () => {
             {freelancers.map((freelancer, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center"
+                className="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
               >
                 <img
                   src="https://via.placeholder.com/80"
@@ -114,7 +128,7 @@ const FreelancerList: React.FC = () => {
               </div>
             ))}
           </div>
-          {/* Pagination */}
+          {/* Pagination  */}
           <div className="flex justify-center items-center mt-6 space-x-2">
             {[1, 2, 3, 4].map((page) => (
               <button

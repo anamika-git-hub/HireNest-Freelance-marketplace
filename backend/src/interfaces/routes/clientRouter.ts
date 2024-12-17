@@ -1,6 +1,7 @@
 import express from 'express';
 
-import { ClientController } from '../controllers/clientController';
+import { TaskController } from '../controllers/taskController';
+import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { uploadTaskFiles } from '../middlewares/uploadFileImages';  
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 
@@ -8,10 +9,12 @@ const router = express.Router();
 
 router.use(checkTokenBlacklist);
 
-router.post("/create-task", uploadTaskFiles, ClientController.createTask);
+router.post("/create-task", uploadTaskFiles, TaskController.createTask);
 
-router.put("/update-task/:id", uploadTaskFiles, ClientController.updateTask);
+router.put("/update-task/:id", uploadTaskFiles, TaskController.updateTask);
 
-router.delete("/delete-task/:id", ClientController.deleteTask);
+router.delete("/delete-task/:id", TaskController.deleteTask);
+
+router.get('/freelancer-list',FreelancerProfileController.getFreelancers);
 
 export default router;

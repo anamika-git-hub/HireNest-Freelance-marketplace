@@ -1,14 +1,14 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
-import { ProfileUseCase } from '../../application/profileUseCase';
+import { AccountDetailUseCase } from '../../application/accountDetailUseCase';
 
-export const ProfileController = {
+export const AccountDetailController = {
     setupProfile: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body;
             const files = req.files as { [key: string]: Express.Multer.File[] };
             console.log( 'files', files)
 
-            const result = await ProfileUseCase.setUpProfile(data, files);
+            const result = await AccountDetailUseCase.setUpProfile(data, files);
             res.status(201).json({ message: "Profile setup successful", profile: result });
         } catch (error) {
             next (error);
@@ -19,7 +19,7 @@ export const ProfileController = {
             const {id} = req.params;
             const updates = req.body;
             const files = req.files as {[key:string]: Express.Multer.File[]};
-            const result = await ProfileUseCase.updateProfile(id, updates,files);
+            const result = await AccountDetailUseCase.updateProfile(id, updates,files);
             res.status(200).json({message: 'Profile updated Successfully', profile: result})
         } catch (error) {
             next (error)

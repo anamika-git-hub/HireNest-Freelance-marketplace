@@ -1,7 +1,7 @@
 import { TaskSubmissionModel } from "../models/TaskSubmissionModel";
 import { ITaskSubmissionForm } from "../../entities/Tasks";
 
-export const ClientRepository = {
+export const TaskRepository = {
     // Create a new task submission
     createTask: async (data: ITaskSubmissionForm) => {
         try {
@@ -36,5 +36,8 @@ export const ClientRepository = {
         } catch (error: any) {
             throw new Error("Error deleting task: " + error.message);
         }
-    }
+    },
+
+    getTasks: async () => {return await TaskSubmissionModel.find() },
+
 };
