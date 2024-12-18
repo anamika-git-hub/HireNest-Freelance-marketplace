@@ -24,6 +24,7 @@ export const AccountDetailUseCase = {
                 idBackImage: idBackImageUrl,
             };
             return await AccountDetailRepository.createProfile(profileData)
+            
         } catch (error: any) {
             throw new Error (`Failed to set up profile: ${error.message}`);
         }

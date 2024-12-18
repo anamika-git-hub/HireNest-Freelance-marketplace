@@ -74,7 +74,7 @@ const OTPVerification: React.FC = () => {
       if (response.status === 200) {
         toast.success("OTP verified successfully.");
         dispatch({ type: "VERIFY_OTP", payload: response.data });
-        navigate("/login"); 
+        navigate("/account-setup"); 
       }
     } catch (error) {
       console.error("Error during OTP verification:", error);

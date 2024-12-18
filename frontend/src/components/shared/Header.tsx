@@ -119,10 +119,10 @@ const Header: React.FC = () => {
                     Dashboard
                   </button>
                   <button
-                    onClick={() => navigate('/settings')}
+                    onClick={() => navigate('/my-account')}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
-                    Settings
+                    My Account
                   </button>
                   <button
                     onClick={handleLogout}

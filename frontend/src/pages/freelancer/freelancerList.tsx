@@ -7,12 +7,11 @@ const FreelancerList: React.FC = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    // Fetch freelancers from the backend
     axiosConfig
       .get("/client/freelancer-list")
       .then((response) => {
-        // Accessing freelancers data from the backend response
-        setFreelancers(response.data.data); // Now it's response.data.data instead of just response.data
+        setFreelancers(response.data.data); 
+        console.log(response.data.data)
         setLoading(false);
       })
       .catch((err) => {
@@ -89,21 +88,15 @@ const FreelancerList: React.FC = () => {
                 className="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
               >
                 <img
-                  src="https://via.placeholder.com/80"
+                  src={freelancer.profileImage}
                   alt="Avatar"
                   className="w-20 h-20 rounded-full mb-4"
                 />
                 <h3 className="text-lg font-semibold">{freelancer.name}</h3>
                 <p
-                  className={`px-3 py-1 rounded-full text-sm mt-2 ${
-                    freelancer.skill === "Marketing"
-                      ? "bg-purple-100 text-purple-600"
-                      : freelancer.skill === "Design"
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-green-100 text-green-600"
-                  }`}
+                  className='px-3 py-1 rounded-full text-sm mt-2'
                 >
-                  {freelancer.skill}
+                  {freelancer.tagline}
                 </p>
                 <p className="text-blue-500 font-bold mt-2">{freelancer.rate}</p>
                 <div className="flex items-center mt-2">
@@ -125,6 +118,7 @@ const FreelancerList: React.FC = () => {
                     </svg>
                   ))}
                 </div>
+                
               </div>
             ))}
           </div>

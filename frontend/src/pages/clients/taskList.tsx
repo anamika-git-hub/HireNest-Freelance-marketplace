@@ -1,5 +1,6 @@
 import React ,{useState,useEffect}from "react";
 import axiosConfig from "../../service/axios";
+import { Link } from "react-router-dom";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -7,12 +8,11 @@ const TaskList: React.FC = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    // Fetch tasks from the backend
     axiosConfig
-      .get("/freelancers/tasks-list") // Replace with the correct endpoint
+      .get("/freelancers/tasks-list") 
       .then((response) => {
-        // Accessing tasks data from the backend response
         setTasks(response.data.data);
+        console.log(response.data.data)
         setLoading(false);
       })
       .catch((err) => {
@@ -123,9 +123,11 @@ const TaskList: React.FC = () => {
                 >
                   {task.rateType}
                 </span>
+                <Link to={`/freelancer/task-detail/${task._id}`}>
               <button className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">
                 Bid Now
               </button>
+              </Link>
             </div>
           ))}
         </div>

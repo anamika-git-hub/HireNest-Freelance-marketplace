@@ -15,6 +15,7 @@ const Login: React.FC = () => {
 
   const googleSubmit  = async(googleData:any)=>{
     const decodeResponse:any= jwtDecode(googleData.credential)
+    console.log(decodeResponse)
      const {email} = decodeResponse
      const user = {email}
      try {
@@ -25,6 +26,7 @@ const Login: React.FC = () => {
   
       if(response.data.token){
         const user = response.data.user;
+        console.log(response.data)
   
         localStorage.setItem("accessToken", response.data.token);
         localStorage.setItem("role", response.data.user.role);

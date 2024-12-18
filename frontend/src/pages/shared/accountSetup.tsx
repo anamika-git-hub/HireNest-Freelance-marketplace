@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { AccountSetupValidationSchema } from "../../components/Schemas/accountSetupValidation";
@@ -14,6 +15,7 @@ const AccountSetup: React.FC = () => {
   const [imageBackFile, setImageBackFile] = useState<File | null>(null);
   const [imageBackPreview, setImageBackPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const initialValues = {
     firstName: "",
@@ -59,6 +61,7 @@ const AccountSetup: React.FC = () => {
     }
   };
 
+
   const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
     formData.append("firstname", values.firstName);
@@ -79,6 +82,8 @@ const AccountSetup: React.FC = () => {
 
       if (response.status === 201) {
         alert("Profile setup completed successfully!");
+        navigate("/login"); 
+
       }
     } catch (error) {
       console.error("Failed to submit form data:", error);

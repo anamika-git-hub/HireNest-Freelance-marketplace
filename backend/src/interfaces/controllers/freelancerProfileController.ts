@@ -40,5 +40,15 @@ export const FreelancerProfileController = {
         } catch (error) {
             next(error);
         }
-    }
+    },
+
+     getFreelancerById: async (req: Req, res: Res, next: Next) => {
+            try {
+                const { id } = req.params; // Task ID
+                const freelancer = await FreelancerProfileUseCase.getFreelancerById(id);
+                res.status(200).json({ freelancer, message: 'Task fetched successfully' });
+            } catch (error) {
+                next(error); 
+            }
+        }
 }

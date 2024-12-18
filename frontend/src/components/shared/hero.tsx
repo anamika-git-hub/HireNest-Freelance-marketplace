@@ -57,8 +57,8 @@ const HeroSection = () => {
               <i className="bi bi-trophy text-blue-600 text-2xl"></i>
             </div>
             <div>
-              <h4 className="text-lg font-semibold">3x Won Awards</h4>
-              <p className="text-gray-500 text-sm">Vestibulum ante ipsum</p>
+              <h4 className="text-lg font-semibold">2,303</h4>
+              <p className="text-gray-500 text-sm">Clients</p>
             </div>
           </div>
 
@@ -68,8 +68,8 @@ const HeroSection = () => {
               <i className="bi bi-briefcase text-blue-600 text-2xl"></i>
             </div>
             <div>
-              <h4 className="text-lg font-semibold">6.5k Faucibus</h4>
-              <p className="text-gray-500 text-sm">Nullam quis ante</p>
+              <h4 className="text-lg font-semibold">2,393</h4>
+              <p className="text-gray-500 text-sm">Tasks posted</p>
             </div>
           </div>
 
@@ -79,8 +79,8 @@ const HeroSection = () => {
               <i className="bi bi-graph-up text-blue-600 text-2xl"></i>
             </div>
             <div>
-              <h4 className="text-lg font-semibold">80k Mauris</h4>
-              <p className="text-gray-500 text-sm">Etiam sit amet orci</p>
+              <h4 className="text-lg font-semibold">2,321</h4>
+              <p className="text-gray-500 text-sm">Freelancers</p>
             </div>
           </div>
 
@@ -90,8 +90,8 @@ const HeroSection = () => {
               <i className="bi bi-award text-blue-600 text-2xl"></i>
             </div>
             <div>
-              <h4 className="text-lg font-semibold">6x Phasellus</h4>
-              <p className="text-gray-500 text-sm">Vestibulum ante ipsum</p>
+              <h4 className="text-lg font-semibold">2,004</h4>
+              <p className="text-gray-500 text-sm">Tasks completed</p>
             </div>
           </div>
         </div>

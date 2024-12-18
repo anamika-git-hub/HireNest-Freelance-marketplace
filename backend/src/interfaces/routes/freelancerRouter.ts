@@ -12,4 +12,5 @@ router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfi
 router.put("/update-freelancer-profile/:id", uploadFreelancerImages, FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",TaskController.getTasks);
+router.get('/tasks/:id', TaskController.getTaskById);
 export default router;

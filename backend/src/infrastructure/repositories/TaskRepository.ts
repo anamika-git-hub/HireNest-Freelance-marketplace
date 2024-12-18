@@ -40,4 +40,16 @@ export const TaskRepository = {
 
     getTasks: async () => {return await TaskSubmissionModel.find() },
 
+    getTaskById: async (id: string) => {
+        try {
+            const task = await TaskSubmissionModel.findById(id);
+            if (!task) {
+                throw new Error("Task not found");
+            }
+            return task;
+        } catch (error: any) {
+            throw new Error("Error fetching task: " + error.message);
+        }
+    }
+
 };

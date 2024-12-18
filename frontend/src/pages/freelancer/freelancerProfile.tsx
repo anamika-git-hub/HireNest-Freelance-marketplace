@@ -39,7 +39,7 @@ const FreelancerProfile: React.FC = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      setHourlyRate(Number(value)); // Convert the string to a number
+      setHourlyRate(Number(value)); 
     };
 
   const handleAddSkill = () => {
@@ -76,11 +76,8 @@ const FreelancerProfile: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Prepare the data
     const formData = new FormData();
 
-    // Add basic info
-   // Assuming skills is an array of strings and attachments is an array of objects with file properties
 formData.append("name", firstName);
 formData.append("location", location);
 formData.append("tagline", tagline);
@@ -88,15 +85,12 @@ formData.append("experience", experience);
 formData.append("hourlyRate", hourlyRate.toString());
 formData.append("description", introduction);
 
-// Append profile image
 if (imageFile) {
-  formData.append("profileImage", imageFile); // Ensure this is a File object, not a URL
+  formData.append("profileImage", imageFile);
 }
 
-// Add skills
-skills.forEach((skill) => formData.append("skills[]", skill)); // Ensure the server expects 'skills[]'
+skills.forEach((skill) => formData.append("skills[]", skill));
 
-// Add attachments
 attachments.forEach((attachment, index) => {
   formData.append(`attachments[${index}].file`, attachment.file);
   formData.append(`attachments[${index}].title`, attachment.title);
@@ -106,7 +100,6 @@ attachments.forEach((attachment, index) => {
 
 
     try {
-      // Send the data to the backend
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
