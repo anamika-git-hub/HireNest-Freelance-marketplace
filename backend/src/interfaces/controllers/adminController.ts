@@ -83,7 +83,6 @@ export const AdminController = {
             const isBlockedBool = isBlocked === 'true';
             const updatedUser = await adminUseCase.toggleBlockUser(userId, isBlockedBool);
             if (isBlockedBool) {
-                // Invalidate JWT for the user
                 await TokenBlacklist.create({ token: JwtService.getTokenFromRequest(req) });
             }
             res.status(200).json({message: `User ${isBlocked == 'true' ? "unblocked" : "blocked"} scuccessfully`,user: updatedUser});

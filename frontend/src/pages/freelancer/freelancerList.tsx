@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axiosConfig from "../../service/axios"; // Assuming axiosConfig is set up
+import axiosConfig from "../../service/axios";
+import FilterSidebar from "../../components/shared/FilterSideBar";
+import { Link } from "react-router-dom";
 
 const FreelancerList: React.FC = () => {
   const [freelancers, setFreelancers] = useState<any[]>([]);
@@ -22,56 +24,13 @@ const FreelancerList: React.FC = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
+  const categories = ["All Categories", "Web Development", "Graphic Design"];
 
   return (
     <div className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Search Filter Section */}
-        <aside className="bg-blue-50 p-6 mt-14 rounded-lg shadow-md w-full md:w-1/4">
-          <h2 className="text-lg font-semibold mb-4">Search Filters</h2>
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Location"
-              className="w-full p-2 border rounded-md"
-            />
-            <select className="w-full p-2 border rounded-md">
-              <option>All Categories</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Keywords"
-              className="w-full p-2 border rounded-md"
-            />
-            <div>
-              <label className="block mb-2 font-medium text-sm">Hourly Rate</label>
-              <input type="range" className="w-full" />
-              <div className="flex justify-between text-sm mt-1">
-                <span>$10</span>
-                <span>$250</span>
-              </div>
-            </div>
-            <div>
-              <label className="block mb-2 font-medium text-sm">Skills</label>
-              <div className="flex flex-wrap gap-2">
-                {["front-end dev", "angular", "react", "vue js", "web apps"].map(
-                  (skill, idx) => (
-                    <span
-                      key={idx}
-                      className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-sm"
-                    >
-                      {skill}
-                    </span>
-                  )
-                )}
-              </div>
-              <button className="text-blue-500 mt-2 text-sm">+ Add more skills</button>
-            </div>
-            <button className="bg-blue-500 text-white w-full p-2 rounded-md">
-              Search
-            </button>
-          </div>
-        </aside>
+        <FilterSidebar/>
 
         {/* Freelancer List Section */}
         <div className="flex-grow">
@@ -83,15 +42,19 @@ const FreelancerList: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {freelancers.map((freelancer, index) => (
+              <Link to={`/client/freelancer-detail/${freelancer._id}`}>
               <div
                 key={index}
                 className="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
               >
+                
                 <img
                   src={freelancer.profileImage}
                   alt="Avatar"
                   className="w-20 h-20 rounded-full mb-4"
+
                 />
+                
                 <h3 className="text-lg font-semibold">{freelancer.name}</h3>
                 <p
                   className='px-3 py-1 rounded-full text-sm mt-2'
@@ -120,6 +83,7 @@ const FreelancerList: React.FC = () => {
                 </div>
                 
               </div>
+              </Link>
             ))}
           </div>
           {/* Pagination  */}

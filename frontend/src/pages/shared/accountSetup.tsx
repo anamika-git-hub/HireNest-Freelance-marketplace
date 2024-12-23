@@ -1,6 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useDebugValue } from "react";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setAccountData } from "../../store/accountSlice";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { AccountSetupValidationSchema } from "../../components/Schemas/accountSetupValidation";
@@ -16,6 +18,7 @@ const AccountSetup: React.FC = () => {
   const [imageBackPreview, setImageBackPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const initialValues = {
     firstName: "",
@@ -25,6 +28,8 @@ const AccountSetup: React.FC = () => {
     selectedID: "debit_card",
     IDNumber: "",
   };
+  
+  const userId = localStorage.getItem('userId')
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,13 +80,30 @@ const AccountSetup: React.FC = () => {
     if (imageFrontFile) formData.append("idFrontImage", imageFrontFile);
     if (imageBackFile) formData.append("idBackImage", imageBackFile);
 
+    
+
     try {
-      const response = await axiosConfig.post("/users/setup-account", formData, {
+      const response = await axiosConfig.post("/users/setup-account",formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.status === 201) {
         alert("Profile setup completed successfully!");
+        const formDataToStore = {
+
+          firstName: values.firstName,
+          lastName: values.lastName,
+          phone: values.phone,
+          dob: values.dob,
+          selectedID: values.selectedID,
+          IDNumber: values.IDNumber,
+          profileImage: imagePreview,
+          idFrontImage: imageFrontPreview,
+          idBackImage: imageBackPreview,
+        };
+    
+        // Dispatch the action to store data in Redux
+        dispatch(setAccountData(formDataToStore));
         navigate("/login"); 
 
       }

@@ -1,6 +1,7 @@
 import React ,{useState,useEffect}from "react";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
+import FilterSidebar from "../../components/shared/FilterSideBar";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -23,114 +24,73 @@ const TaskList: React.FC = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
+  const categories = ["All Categories", "Web Development", "Graphic Design"];
   
   return (
     <div className="flex pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       {/* Sidebar */}
-      <div className="w-1/4 bg-gray-100 p-5 mt-14">
-        <h2 className="text-xl font-semibold mb-5">Filters</h2>
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Location</label>
-          <input
-            type="text"
-            placeholder="Location"
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Category</label>
-          <select className="w-full p-2 border border-gray-300 rounded">
-            <option>All Categories</option>
-          </select>
-        </div>
-
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Keywords</label>
-          <div className="flex">
-            <input
-              type="text"
-              placeholder="e.g. task title"
-              className="w-full p-2 border border-gray-300 rounded-l"
-            />
-            <button className="bg-blue-500 text-white px-4 rounded-r">+</button>
-          </div>
-        </div>
-
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Fixed Price</label>
-          <input type="range" className="w-full" />
-          <p className="text-gray-600">$50 - $2,500</p>
-        </div>
-
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Hourly Rate</label>
-          <input type="range" className="w-full" />
-          <p className="text-gray-600">$10 - $150</p>
-        </div>
-
-        <div className="mb-5">
-          <label className="block mb-2 font-medium">Skills</label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded">
-              Front-end Dev
-            </span>
-            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded">
-              React
-            </span>
-            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded">
-              Design
-            </span>
-          </div>
-          <input
-            type="text"
-            placeholder="Add more skills"
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <button className="w-full bg-blue-500 text-white py-2 rounded">
-          Search
-        </button>
-      </div>
+      <FilterSidebar/>
 
       {/* Main Content */}
-      <div className="w-3/4 p-5">
+      <div className="w-3/4 p-5 pt-16">
         {/* Search Alerts */}
-        <div className="flex items-center justify-between mb-5">
-         
-          <select className=" border border-gray-300 rounded">
-            <option>Relevance</option>
-          </select>
+        <div className="flex items-center justify-between mb-5 ">
+          {/* Search bar on the left */}
+          <input
+            type="text"
+            placeholder="Search"
+            className="p-2 border border-gray-300 bg-gray-100 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Sort By text and select dropdown on the right */}
+          <div className="flex items-center">
+            <span className="mr-2 text-gray-600">Sort By:</span>
+            <select className="p-2  rounded">
+              <option>Relevance</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest</option>
+            </select>
+          </div>
         </div>
 
+
         {/* Job Listings */}
-        <div className="grid grid-cols-2 gap-5 ">
-          {tasks.map((task, index) => (
-            <div
-              key={index}
-              className="border border-gray-300 p-5 rounded shadow-sm bg-gray-100"
-            >
-              <h3 className="text-lg font-semibold">{task.projectName}</h3>
-              <p className="text-gray-600 text-sm">{task.category}</p>
-              <p className="font-semibold mt-3">{task.minRate}$ - {task.maxRate}$</p>
-              <span
-                  className={`px-3 py-1 rounded-full text-sm mt-2 ${
-                    task.type === "Fixed Price"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-blue-100 text-blue-600"
-                  }`}
-                >
-                  {task.rateType}
-                </span>
-                <Link to={`/freelancer/task-detail/${task._id}`}>
-              <button className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">
-                Bid Now
-              </button>
-              </Link>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 gap-5">
+  {tasks.map((task, index) => (
+    <div
+      key={index}
+      className="border border-gray-300 p-5 rounded-lg shadow-md bg-white"
+    >
+      {/* Top Section: Project Name */}
+      <h3 className="text-lg font-semibold mb-2">{task.projectName}</h3>
+
+      {/* Location and Time */}
+      <div className="flex items-center text-sm text-gray-500 mb-4">
+        <span className="flex items-center mr-4">
+         
+          {task.category}
+        </span>
+      </div>
+
+      {/* Pricing and Type */}
+      <div className="flex w-full items-center justify-between  border-t pt-3">
+        <div>
+          <p className="font-semibold text-gray-800">
+            ${task.minRate} - ${task.maxRate}
+          </p>
+          <p className="text-sm text-gray-500">{task.rateType}</p>
         </div>
+        <Link to={`/freelancer/task-detail/${task._id}`}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+            Bid Now
+          </button>
+        </Link>
+      </div>
+    </div>
+  ))}
+</div>
+
 
     {/* Pagination  */}
     <div className="flex justify-center items-center mt-6 space-x-2">

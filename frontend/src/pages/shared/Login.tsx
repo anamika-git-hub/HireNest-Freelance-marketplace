@@ -26,7 +26,7 @@ const Login: React.FC = () => {
   
       if(response.data.token){
         const user = response.data.user;
-        console.log(response.data)
+        console.log('rrrrrrrrrrr',response.data)
   
         localStorage.setItem("accessToken", response.data.token);
         localStorage.setItem("role", response.data.user.role);

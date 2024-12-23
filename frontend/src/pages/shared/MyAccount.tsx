@@ -1,7 +1,13 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const MyAccount: React.FC = () => {
-  const [accountType, setAccountType] = useState<string>("Freelancer");
+  const accountData = useSelector((state:RootState) => state.account);
+
+  const email = localStorage.getItem('email')
+  const role = localStorage.getItem('role')
+  console.log('accountData:',accountData)
   
   return (
     <section className="p-10 pt-20 bg-white rounded-lg shadow-lg">
@@ -68,16 +74,16 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
                   <div className="mt-2 flex items-center gap-4">
                     <button
-                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${accountType === "Freelancer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                      onClick={() => setAccountType("Freelancer")}
+                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${role === "freelancer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                      
                     >
                       Freelancer
                     </button>
                     <button
-                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${accountType === "Employer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                      onClick={() => setAccountType("Employer")}
+                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${role === "client" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
+                      
                     >
-                      Employer
+                      Client
                     </button>
                   </div>
                 </div>
@@ -86,7 +92,7 @@ const MyAccount: React.FC = () => {
                   <input
                     type="email"
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="tom@example.com"
+                    value={email || ""}
                     disabled
                   />
                 </div>

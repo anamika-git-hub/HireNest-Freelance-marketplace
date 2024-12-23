@@ -8,7 +8,7 @@ export const userUseCase = {
     signUp: async (user:Iuser) =>{
             user.password = await hashPassword(user.password);
 
-            const newUser = await UserRepository.createUser(user);
+            const newUser = (await UserRepository.createUser(user));
     
             await OtpService.generateAndSendOtp(user.email);
             

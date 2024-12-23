@@ -4,6 +4,7 @@ import { AccountDetailUseCase } from '../../application/accountDetailUseCase';
 export const AccountDetailController = {
     setupProfile: async (req: Req, res: Res, next: Next) => {
         try {
+            console.log('req', req.body)
             const data = req.body;
             const files = req.files as { [key: string]: Express.Multer.File[] };
             console.log( 'files', files)

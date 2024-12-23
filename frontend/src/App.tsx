@@ -50,7 +50,7 @@ const App: React.FC = () => {
          {/* ---------freelancer--------------- */}
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
         <Route path="/client/freelancer-list" element={<LayoutWrapper><FreelancerList/></LayoutWrapper>} />
-        <Route path="/client/freelancer-detail" element={<LayoutWrapper><FreelancerDetail/></LayoutWrapper>} />
+        <Route path="/client/freelancer-detail/:id" element={<LayoutWrapper><FreelancerDetail/></LayoutWrapper>} />
         
 
          {/* ----------client-------------------*/}

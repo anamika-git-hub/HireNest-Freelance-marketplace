@@ -9,8 +9,8 @@ export const JwtService = {
     getTokenFromRequest: (req: any): string | null => {
         const authorizationHeader = req.headers.authorization;
         if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-            return authorizationHeader.split(' ')[1]; // Extract the token part
+            return authorizationHeader.split(' ')[1]; 
         }
-        return null; // No valid token found
+        return null; 
     }
 };

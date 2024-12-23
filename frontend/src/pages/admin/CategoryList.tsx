@@ -12,12 +12,14 @@ const ManageCategories: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const categories = useSelector((state: RootState) => state.category.categories);
+  console.log('mangage',categories)
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axiosConfig.get("/admin/categories");
+        console.log('rrrr',response.data.name)
         dispatch(getCategories(response.data));
       } catch (error) {
         console.error("Error fetching categories:", error);

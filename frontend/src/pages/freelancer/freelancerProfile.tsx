@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 
+
 const FreelancerProfile: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -106,6 +107,7 @@ attachments.forEach((attachment, index) => {
 
       console.log("Form submitted successfully:", response.data);
       alert("Profile submitted successfully!");
+      
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the profile. Please try again.");
