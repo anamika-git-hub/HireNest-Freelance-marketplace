@@ -6,6 +6,8 @@ import { setAccountData } from "../../store/accountSlice";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { AccountSetupValidationSchema } from "../../components/Schemas/accountSetupValidation";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const AccountSetup: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -20,6 +22,9 @@ const AccountSetup: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const currentUserId = useSelector((state: RootState) => state.user.userId);
+  
+
   const initialValues = {
     firstName: "",
     lastName: "",
@@ -28,8 +33,8 @@ const AccountSetup: React.FC = () => {
     selectedID: "debit_card",
     IDNumber: "",
   };
-  
-  const userId = localStorage.getItem('userId')
+
+
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,6 +80,7 @@ const AccountSetup: React.FC = () => {
     formData.append("dateOfBirth", values.dob);
     formData.append("idType", values.selectedID);
     formData.append("idNumber", values.IDNumber);
+    formData.append('userId',currentUserId || '')
 
     if (imageFile) formData.append("profileImage", imageFile);
     if (imageFrontFile) formData.append("idFrontImage", imageFrontFile);
@@ -101,8 +107,6 @@ const AccountSetup: React.FC = () => {
           idFrontImage: imageFrontPreview,
           idBackImage: imageBackPreview,
         };
-    
-        // Dispatch the action to store data in Redux
         dispatch(setAccountData(formDataToStore));
         navigate("/login"); 
 

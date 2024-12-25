@@ -14,8 +14,9 @@ router.post ('/verify-otp',UserController.verifyOtp);
 router.post ('/resend-otp', UserController.resendOtp);
 router.post('/login', UserController.login);
 
-router.post('/setup-account', uploadProfileImages, AccountDetailController.setupProfile);
-router.put ('/update-account/:id',uploadProfileImages, AccountDetailController.updateProfile);
+router.post('/setup-account', uploadProfileImages, AccountDetailController.setUpAccount);
+router.put ('/update-account/:id',uploadProfileImages, AccountDetailController.updateAccount);
+router.get('/account-detail/:id',AccountDetailController.getAccountDetail);
 // router.get('/:userId/:role', ProfileController.getProfile);
 
 

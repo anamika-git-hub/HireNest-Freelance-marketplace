@@ -1,25 +1,151 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
+import React, { useState, useEffect, useRef } from "react";
+import axiosConfig from "../../service/axios";
+import { FaEdit } from "react-icons/fa";
+
+interface UserDetail {
+  profileImage: string;
+  firstname: string;
+  lastname: string;
+  phone: string;
+  dateOfBirth: Date;
+}
 
 const MyAccount: React.FC = () => {
-  const accountData = useSelector((state:RootState) => state.account);
-
-  const email = localStorage.getItem('email')
-  const role = localStorage.getItem('role')
-  console.log('accountData:',accountData)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dob: "",
+    profileImage: "",
+  });
   
+  const email = localStorage.getItem('email');
+  const role = localStorage.getItem('role');
+
+  const handleEditClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  
+
+  // Fetch user details on component mount
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userId = localStorage.getItem("userId"); 
+        if (userId) {
+          const response = await axiosConfig.get(`/users/account-detail/${userId}`);
+          setUserDetail(response.data.userDetails);
+
+          console.log('User details response:', response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
+
+  // Update formData when userDetail changes
+  useEffect(() => {
+    if (userDetail) {
+      setFormData({
+        firstName: userDetail.firstname || "",
+        lastName: userDetail.lastname || "",
+        phone: userDetail.phone || "",
+        dob: userDetail.dateOfBirth ? userDetail.dateOfBirth.toString().split("T")[0] : "", // Formatting date as YYYY-MM-DD
+        profileImage: userDetail.profileImage || "",
+      });
+    }
+  }, [userDetail]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: URL.createObjectURL(file), // Set the preview image
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    // Prepare the form data for submission
+    const updatedData = new FormData();
+    updatedData.append("firstName", formData.firstName);
+    updatedData.append("lastName", formData.lastName);
+    updatedData.append("phone", formData.phone);
+    updatedData.append("dob", formData.dob);
+    
+    // Append the profile image (if exists)
+    if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
+      updatedData.append("profileImage", fileInputRef.current.files[0]);
+    }
+  
+    try {
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        // Make API call to update user details
+        const response = await axiosConfig.put(`/users/update-account/${userId}`, updatedData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log("User details updated:", response.data);
+        // You can show a success message or redirect after success
+      }
+    } catch (error) {
+      console.error("Error updating user details:", error);
+    }
+  };
+  
+
   return (
-    <section className="p-10 pt-20 bg-white rounded-lg shadow-lg">
+    <form onSubmit={handleSubmit} className="p-10 pt-20 bg-white rounded-lg shadow-lg">
       <div className="space-y-6">
-        {/* My Account Section */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-6">My Account</h3>
-          <div className="flex items-start  space-x-6 ">
+          <div className="flex items-start space-x-6">
             {/* Profile Picture */}
-            <div className="w-32 h-32 mt-16 bg-gray-200 rounded-md flex justify-center items-center text-gray-500">
-              <span>Photo</span>
+            <div className="w-32 h-32 mt-16 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
+              {formData.profileImage ? (
+                <img
+                  src={formData.profileImage}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-md"
+                />
+              ) : (
+                <span>Photo</span>
+              )}
+              <div
+                className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full"
+                onClick={handleEditClick}
+              >
+                <FaEdit className="fas fa-edit" />
+              </div>
             </div>
+
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*"
+            />
 
             {/* Form Section */}
             <div className="flex-1">
@@ -30,8 +156,10 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">First Name</label>
                   <input
                     type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Tom"
                   />
                 </div>
 
@@ -40,8 +168,10 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Last Name</label>
                   <input
                     type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Smith"
                   />
                 </div>
               </div>
@@ -53,8 +183,10 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Phone</label>
                   <input
                     type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="123-456-7890"
                   />
                 </div>
 
@@ -63,6 +195,9 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
                   <input
                     type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleChange}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -74,14 +209,34 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
                   <div className="mt-2 flex items-center gap-4">
                     <button
-                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${role === "freelancer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                      
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          role: "freelancer",
+                        }))
+                      }
+                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
+                        role === "freelancer"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
                     >
                       Freelancer
                     </button>
                     <button
-                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${role === "client" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"}`}
-                      
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          role: "client",
+                        }))
+                      }
+                      className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
+                        role === "client"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
                     >
                       Client
                     </button>
@@ -91,9 +246,10 @@ const MyAccount: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <input
                     type="email"
-                    className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    name="email"
                     value={email || ""}
                     disabled
+                    className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -111,7 +267,7 @@ const MyAccount: React.FC = () => {
               <input
                 type="password"
                 className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
+                placeholder="Enter current Password"
               />
             </div>
 
@@ -121,17 +277,19 @@ const MyAccount: React.FC = () => {
               <input
                 type="password"
                 className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
+                placeholder="Enter new Password"
               />
             </div>
 
             {/* Repeat New Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">Repeat New Password</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Repeat New Password
+              </label>
               <input
                 type="password"
                 className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="••••••••"
+                placeholder="Confirm the password"
               />
             </div>
           </div>
@@ -139,12 +297,15 @@ const MyAccount: React.FC = () => {
 
         {/* Save Changes Button */}
         <div className="flex justify-end mt-6">
-          <button className="px-6 py-3 bg-blue-500 text-white rounded-lg focus:outline-none">
+          <button
+            type="submit"
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg focus:outline-none"
+          >
             Save Changes
           </button>
         </div>
       </div>
-    </section>
+    </form>
   );
 };
 

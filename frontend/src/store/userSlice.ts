@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
-    id?: string;
+    id?: string | null;
     email: string;
     password?: string;
     role: "client" | "freelancer" | "admin";
@@ -9,9 +9,23 @@ interface User {
     isVerified?: boolean;
 }
 
+interface UserDetail {
+    firstname: string;
+    lastname: string;
+    phone: string;
+    dateOfBirth: string;
+    idType: string;
+    idNumber: string;
+    profileImage: string;
+    idFrontImage: string;
+    idBackImage: string;
+}
+
 interface UserState {
     users: User[];
     currentUser?: User | null;
+    currentUserDetail?: UserDetail | null;
+    userId:string | null;
     clients: User[];
     freelancers: User[];
 }
@@ -19,6 +33,8 @@ interface UserState {
 const initialState: UserState = {
     users: [],
     currentUser: null,
+    currentUserDetail: null,
+    userId: null,
     clients: [],
     freelancers: [],
 };
@@ -27,13 +43,15 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        registerUser: (state, action: PayloadAction<User>) => {
-            state.users.push(action.payload);
-        },
-        loginUser: (state, action: PayloadAction<User>) => {
-            state.currentUser = action.payload;
+        registerUser: (state, action: PayloadAction<{ user: User; id: string }>) => {
+            state.users.push({ ...action.payload.user, id: action.payload.id });
+            state.userId = action.payload.id;
+        },        
+        loginUser: (state, action: PayloadAction<{ user: User; userDetail: UserDetail }>
+        ) => {
+            state.currentUser = action.payload.user;
+            state.currentUserDetail = action.payload.userDetail;
             localStorage.setItem("currentUser", JSON.stringify(action.payload));
-            
         },
         logoutUser: (state) => {
             state.currentUser = null;

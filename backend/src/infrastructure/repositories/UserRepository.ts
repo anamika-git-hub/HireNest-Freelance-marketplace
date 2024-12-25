@@ -23,7 +23,5 @@ export const UserRepository = {
         );
         return updatedUser;
     },
-    createUserDetail: async (userDetails: any) => new UserDetailModel(userDetails).save(),
-    
-    
+
 };

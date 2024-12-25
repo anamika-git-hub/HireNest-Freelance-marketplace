@@ -1,110 +1,156 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { FaEdit } from "react-icons/fa";
 
 const MyProfile: React.FC = () => {
+  const currentUserDetail = useSelector(
+    (state: RootState) => state.user.currentUserDetail
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const email = localStorage.getItem('email');
+  const role = localStorage.getItem('role');
+
+  const handleEditClick = () => {
+    fileInputRef.current?.click(); // Triggers the file input
+  };
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dob: "",
+    profileImage: "",
+  });
+
+  useEffect(() => {
+    if (currentUserDetail) {
+      setFormData({
+        firstName: currentUserDetail.firstname || "",
+        lastName: currentUserDetail.lastname || "",
+        phone: currentUserDetail.phone || "",
+        dob: currentUserDetail.dateOfBirth || "",
+        profileImage: currentUserDetail.profileImage || "", 
+      });
+    }
+  }, [currentUserDetail]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      // Update profile image and handle file upload logic
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: URL.createObjectURL(file), // Set the preview image
+      }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Form Submitted:", formData);
+  };
+
   return (
-    <section className="space-y-8 p-6 bg-white shadow-lg rounded-lg  ">
-       <h3 className="text-lg font-semibold text-gray-800 mb-6">My Profile</h3>
-      {/* Minimal Hourly Rate */}
-      <div className="flex space-x-40 ">
-        <div className="w-auto">
-          <label className="block text-gray-700 text-sm font-medium mb-1">
-            Set your minimal hourly rate
-          </label>
-          <div className="flex items-center space-y-6 space-x-4">
-            <span className="text-gray-500 text-lg font-medium">$</span>
-            <input
-              type="number"
-              className="w-20 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-              placeholder="35"
-              defaultValue={35}
+    <div className="flex justify-center py-10">
+      <div className="bg-white shadow-lg rounded-lg w-full max-w-4xl px-8 py-6">
+        <h2 className="text-2xl font-semibold text-gray-700 text-center">Freelancer Profile</h2>
+        
+        {/* Profile Image Section */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+            <img
+              src={'default-image.jpg'} 
+              alt="Profile"
+              className="w-full h-full object-cover"
             />
           </div>
-          <input
-              type="range"
-              className="flex-grow w-72"
-              min="10"
-              max="100"
-              step="1"
-              defaultValue={35}
+          <button className="ml-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Edit</button>
+        </div>
+        
+        <form>
+          {/* Name */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600" htmlFor="name">Full Name</label>
+            <input 
+              type="text" 
+              id="name" 
+              className="mt-2 block w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your full name"
             />
-        </div>
-
-        {/* Skills Section */}
-        <div >
-          <label className="block text-gray-700 text-sm font-medium mb-1">Skills</label>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {["Vue JS", "iOS", "Android", "Angular", "Laravel"].map((skill) => (
-              <span
-                key={skill}
-                className="inline-flex items-center px-3 py-1 rounded bg-blue-100 text-blue-600 text-sm font-medium"
-              >
-                {skill}
-                <button
-                  type="button"
-                  className="ml-2 text-gray-500 hover:text-gray-700"
-                  aria-label={`Remove ${skill}`}
-                >
-                  ✕
-                </button>
-              </span>
-            ))}
           </div>
-          <input
-            type="text"
-            className="mt-4 w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g., Angular, Laravel"
-          />
-        </div>
-       
+          
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600" htmlFor="email">Email</label>
+            <input 
+              type="email" 
+              id="email" 
+              className="mt-2 block w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your email"
+            />
+          </div>
+          
+          {/* Bio */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600" htmlFor="bio">Bio</label>
+            <textarea 
+              id="bio" 
+              className="mt-2 block w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Tell us about yourself"
+            ></textarea>
+          </div>
+          
+          {/* Skills */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600" htmlFor="skills">Skills</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <input 
+                type="text" 
+                className="w-1/3 px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                placeholder="Add skill"
+              />
+              <button type="button" className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Add Skill
+              </button>
+            </div>
+          </div>
+          
+          {/* Attachments */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-600" htmlFor="attachments">Attachments</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input 
+                type="file" 
+                className="w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button type="button" className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Upload Attachment
+              </button>
+            </div>
+          </div>
+          
+          {/* Submit Button */}
+          <div className="text-center mt-6">
+            <button 
+              type="submit" 
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Save Profile
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Attachments */}
-      <div className="border-t-2 border-grey-300 space-y-6 pt-4">
-        <label className="block text-gray-700 text-sm space-x-3 font-medium mb-1">Attachments</label>
-        <div className="flex items-center space-x-4">
-          <div className="text-gray-700">Cover Letter</div>
-          <button className="px-4 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-sm font-medium">
-            Upload Files
-          </button>
-        </div>
-      </div>
-
-      {/* Tagline */}
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Tagline</label>
-        <input
-          type="text"
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="iOS Expert + Node Dev"
-          defaultValue="iOS Expert + Node Dev"
-        />
-      </div>
-
-      {/* Nationality */}
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Nationality</label>
-        <select
-          className="mt-2 w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          defaultValue="United States"
-        >
-          <option>United States</option>
-          <option>Canada</option>
-          <option>India</option>
-          <option>Germany</option>
-        </select>
-      </div>
-
-      {/* Introduction */}
-      <div>
-        <label className="block text-gray-700 text-sm font-medium mb-1">Introduce Yourself</label>
-        <textarea
-          className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-          placeholder="Write about yourself..."
-          rows={4}
-          defaultValue="Leverage agile frameworks to provide a robust synopsis for high-level overviews. Iterative approaches to corporate strategy foster collaborative thinking to further the overall value proposition. Organically grow the holistic world view of disruptive innovation via workplace diversity and empowerment."
-        ></textarea>
-      </div>
-    </section>
+    </div>
   );
 };
 

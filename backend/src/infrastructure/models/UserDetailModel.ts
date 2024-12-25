@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { IUserDetail } from "../../entities/UserDetail";
 
 const UserDetailSchema = new Schema<IUserDetail> ({
-  id: {type:mongoose.Schema.Types.ObjectId,
+  userId: {type:mongoose.Schema.Types.ObjectId,
        ref:"User",
        default: null
   },

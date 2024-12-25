@@ -2,15 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logoutUser } from '../../store/userSlice';
+import axiosConfig from '../../service/axios';
+import {
+  FaSignOutAlt,
+  FaCog,
+} from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
+interface UserDetail {
+  profileImage: string;
+  firstname: string;
+  lastname: string;
+}
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const [userDetail,setUserDetail] = useState<UserDetail | null>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userRole = localStorage.getItem('role') || 'guest';
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userId = localStorage.getItem("userId"); 
+        console.log('userId', userId)
+        if (userId) {
+          const response = await axiosConfig.get(`/users/account-detail/${userId}`);
+          setUserDetail(response.data.userDetails);
+
+          console.log('resspond', response.data)
+          
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   const getNavLinks = () => {
     if (userRole === "freelancer") {
@@ -100,39 +132,59 @@ const Header: React.FC = () => {
             <button className="relative hover:text-blue-200">🔔</button>
             <button className="relative hover:text-blue-200">✉️</button>
             <div className="relative" ref={profileMenuRef}>
-              <img
-                src="https://i.pinimg.com/474x/43/6c/ac/436cac73f5fff533999f31147c3538b7.jpg"
-                alt="User Avatar"
-                className="w-10 h-10 rounded-full border-2 border-green-500 cursor-pointer"
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              />
-              <span className="absolute bottom-0 right-0 bg-green-500 rounded-full w-3 h-3"></span>
-              {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-700 shadow-md rounded-lg">
-                  <div className="px-4 py-2 border-b">
-                    <p className="text-sm">{localStorage.getItem('role')}</p>
-                  </div>
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    Dashboard
-                  </button>
-                  <button
-                    onClick={() => navigate('/my-account')}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    My Account
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+  <img
+    src={
+      userDetail?.profileImage ||
+      "https://i.pinimg.com/474x/43/6c/ac/436cac73f5fff533999f31147c3538b7.jpg"
+    }
+    alt="User Avatar"
+    className="w-10 h-10 rounded-full border-2 border-green-500 cursor-pointer"
+    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+  />
+  <span className="absolute bottom-0 right-0 bg-green-500 rounded-full w-3 h-3"></span>
+  {isProfileMenuOpen && (
+    <div className="absolute right-0 mt-2 w-56 bg-white text-gray-700 shadow-md rounded-lg">
+      {/* User Info Section */}
+      <div className="flex items-center px-4 py-3 border-b">
+        <img
+          src={
+            userDetail?.profileImage ||
+            "https://i.pinimg.com/474x/43/6c/ac/436cac73f5fff533999f31147c3538b7.jpg"
+          }
+          alt="User Avatar"
+          className="w-10 h-10 rounded-full"
+        />
+        <div className="ml-3">
+          <p className="font-semibold text-sm">
+            {`${userDetail?.firstname || "User"} ${
+              userDetail?.lastname || ""
+            }`}
+          </p>
+          <p className="text-xs text-gray-500">{localStorage.getItem("role")}</p>
+        </div>
+      </div>
+      {/* Menu Items */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100"
+      >
+        <MdDashboard className="mr-3 text-gray-600" /> Dashboard
+      </button>
+      <button
+        onClick={() => navigate("/settings")}
+        className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100"
+      >
+        <FaCog className="mr-3 text-gray-600" /> Settings
+      </button>
+      <button
+        onClick={handleLogout}
+        className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+      >
+        <FaSignOutAlt className="mr-3" /> Logout
+      </button>
+    </div>
+  )}
+</div>
           </div>
         )}
 

@@ -26,8 +26,6 @@ const Login: React.FC = () => {
   
       if(response.data.token){
         const user = response.data.user;
-        console.log('rrrrrrrrrrr',response.data)
-  
         localStorage.setItem("accessToken", response.data.token);
         localStorage.setItem("role", response.data.user.role);
         localStorage.setItem("email", response.data.user.email);
@@ -52,12 +50,16 @@ const Login: React.FC = () => {
         const response = await axiosConfig.post("users/login", values);
         if (response.status === 200) {
           const user = response.data.user;
+          const userDetail = response.data.userDetails
+          console.log('user',userDetail)
 
           localStorage.setItem("accessToken", response.data.token);
           localStorage.setItem("role", response.data.user.role);
           localStorage.setItem("email", response.data.user.email);
+          localStorage.setItem('userId',response.data.user._id);
 
-          dispatch(loginUser(user));
+          dispatch(loginUser({user,userDetail}));
+
           toast.success("User logged in successfully");
           navigate("/");
         }

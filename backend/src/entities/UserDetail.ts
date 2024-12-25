@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IUserDetail {
-    id: mongoose.Types.ObjectId;
+    userId: mongoose.Types.ObjectId;
     firstname: string;
     lastname: string;
     phone: string;

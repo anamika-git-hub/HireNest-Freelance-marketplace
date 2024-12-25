@@ -2,7 +2,11 @@ import { UserDetailModel } from "../models/UserDetailModel";
 import { IUserDetail } from "../../entities/UserDetail";
 
 export const AccountDetailRepository = {
-    createProfile: async (data:IUserDetail) => new UserDetailModel(data).save(),
+    createProfile: async (data: IUserDetail) => new UserDetailModel(data).save(),
 
-    updateProfile: async (id: string, updates: IUserDetail) => UserDetailModel.findByIdAndUpdate(id,updates,{new:true}),
+    updateProfile: async (userId: string, updates: IUserDetail) => 
+        UserDetailModel.findOneAndUpdate({ userId }, updates, { new: true }),  
+
+    
+    findUserDetailsById: async( userId:string) => UserDetailModel.findOne({userId})
 }

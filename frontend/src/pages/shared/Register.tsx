@@ -59,7 +59,8 @@ const Signup: React.FC = () => {
       );
 
       if (response.status === 201) {
-        dispatch(registerUser(response.data));
+        console.log('rrrrrrrrrrrrrrrrr',response.data)
+        dispatch(registerUser({...response.data.user, id: response.data.user._id}));
         toast.success("User registered successfully. Redirecting to OTP page...");
         navigate("/otp", { state: { email } });
         localStorage.setItem("email", email);
@@ -69,9 +70,6 @@ const Signup: React.FC = () => {
       toast.error("There was an error during signup.");
     }
   };
-
-
-
   return (
     <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center min-h-screen flex items-center justify-center">
       
