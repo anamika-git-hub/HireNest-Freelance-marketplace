@@ -13,9 +13,9 @@ const port = Config.PORT ;
 const app = express();
 
 app.use(cors({
-    origin: '*', 
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization','refreshToken'],
   }));
 
 app.use(express.json({limit: '10mb'}));

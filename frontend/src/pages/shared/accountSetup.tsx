@@ -92,7 +92,8 @@ const AccountSetup: React.FC = () => {
       const response = await axiosConfig.post("/users/setup-account",formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
+      const role = localStorage.getItem('role')
+      console.log(role)
       if (response.status === 201) {
         alert("Profile setup completed successfully!");
         const formDataToStore = {
@@ -108,6 +109,7 @@ const AccountSetup: React.FC = () => {
           idBackImage: imageBackPreview,
         };
         dispatch(setAccountData(formDataToStore));
+        
         navigate("/freelancer/freelancer-profile"); 
 
       }

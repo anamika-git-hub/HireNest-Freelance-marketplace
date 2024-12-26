@@ -42,9 +42,6 @@ const MyProfile: React.FC = () => {
   const [modalTitle, setModalTitle] = useState("");
   const [modalDescription, setModalDescription] = useState("");
 
-  const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
-
   const handleEditClick = () => {
     fileInputRef.current?.click();
   };
@@ -136,6 +133,7 @@ const MyProfile: React.FC = () => {
     e.preventDefault();
 
     const updatedData = new FormData();
+    console.log('formd',formData)
     updatedData.append("name", formData.name);
     updatedData.append("location", formData.location);
     updatedData.append("tagline", formData.tagline);
@@ -152,7 +150,7 @@ const MyProfile: React.FC = () => {
     try {
       const userId = localStorage.getItem("userId");
       if (userId) {
-        const response = await axiosConfig.put(`/freelancers/update-profile/${userId}`, updatedData, {
+        const response = await axiosConfig.put(`/freelancers/update-freelancer-profile/${userId}`, updatedData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -271,12 +269,13 @@ const MyProfile: React.FC = () => {
               min="10"
               max="100"
               step="1"
-              defaultValue={35}
+              value={formData.hourlyRate}
+              onChange={handleChange}
               
             />
-</div>
+              </div>
                 </div>
-
+              {/* Skills */}
                 <div>
                 <label className="block text-gray-700 text-sm font-medium mb-1">Skills</label>
                 <div className="flex space-x-2">
@@ -314,9 +313,6 @@ const MyProfile: React.FC = () => {
                 </ul>
               </div>
               </div>
-
-              {/* Skills */}
-             
 
               {/* Description */}
               <div>
@@ -408,7 +404,7 @@ const MyProfile: React.FC = () => {
           type="submit"
           className="w-full mt-8 px-4 py-2 bg-blue-600 text-white rounded-lg"
         >
-          Save Profile
+          Save Changes
         </button>
       </div>
     </form>

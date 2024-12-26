@@ -51,9 +51,10 @@ const Login: React.FC = () => {
         if (response.status === 200) {
           const user = response.data.user;
           const userDetail = response.data.userDetails
-          console.log('user',userDetail)
+          console.log('refreshtoken',response.data.refreshToken)
 
           localStorage.setItem("accessToken", response.data.token);
+          localStorage.setItem("refreshToken",response.data.refreshToken);
           localStorage.setItem("role", response.data.user.role);
           localStorage.setItem("email", response.data.user.email);
           localStorage.setItem('userId',response.data.user._id);

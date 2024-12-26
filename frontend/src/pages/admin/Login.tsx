@@ -21,12 +21,14 @@ const AdminLogin: React.FC = () => {
       try {
         const response = await axiosConfig.post("admin/login", values);
         if (response.status === 200) {
-          dispatch(loginUser(response.data));
+          console.log(response)
+          // const  userData = {user:response.data.admin}
+          dispatch(loginUser(response.data.admin));
           navigate('/admin/dashboard');
           toast.success('Admin logged in successfully');
           localStorage.setItem('accessToken', response.data.token);
-          localStorage.setItem('adminRole', response.data.user.role);
-          localStorage.setItem('email', response.data.user.email);
+          localStorage.setItem('adminRole', response.data.admin.role);
+          localStorage.setItem('email', response.data.admin.email);
         }
       } catch (error: any) {
         console.log(error);

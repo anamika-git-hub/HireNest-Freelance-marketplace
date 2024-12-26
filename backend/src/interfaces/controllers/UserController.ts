@@ -50,6 +50,14 @@ export const UserController = {
             next(error);
         }
     },
-
+    updateRole: async (req:Req, res: Res, next:Next) => {
+        try {
+            const {role,userId} = req.body;
+            const result = await userUseCase.updateRole(role,userId);
+            res.status(200).json(result)
+        } catch (error) {
+          next(error)   
+        }
+    }
    
 }

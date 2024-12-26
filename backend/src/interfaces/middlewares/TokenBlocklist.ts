@@ -1,19 +1,16 @@
 import { TokenBlacklist } from '../../infrastructure/models/TokenBockList';
 import { Req, Res, Next } from '../../infrastructure/types/serverPackageTypes';
 import { JwtService } from '../../infrastructure/services/JwtService';
-
-const checkTokenBlacklist = async (req: Req, res: Res, next: Next): Promise<void> => {
+interface CustomRequest extends Req{
+    user?:{userId:string};
+}
+const checkTokenBlacklist = async (req: CustomRequest, res: Res, next: Next): Promise<any> => {
     try {
-        const token = JwtService.getTokenFromRequest(req);
-        
-     //    if (!token) {
-     //         res.status(401).json({ message: 'Unauthorized: No token provided' });
-     //    }
-
-        const isBlacklisted = await TokenBlacklist.findOne({ token });
+        const id = req.user?.userId
+        const isBlacklisted = await TokenBlacklist.findOne({ _id:id,isBlocked:true});
         
         if (isBlacklisted) {
-             res.status(403).json({ message: 'User is blocked. Please contact admin.' });
+           return  res.status(403).json({ message: 'User is blocked. Please contact admin.' });
         }
 
         next(); // Token is valid and not blacklisted, proceed to next middleware or route

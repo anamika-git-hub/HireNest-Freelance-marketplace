@@ -25,8 +25,10 @@ export const FreelancerProfileController = {
             const {id} = req.params;
             const updates = req.body;
             const files = req.files as { [ key: string]: Express.Multer.File[]};
+            
 
             const result = await FreelancerProfileUseCase.updateProfile(id,updates, files);
+            console.log('rrr',result)
             res.status(200).json({message: 'Freelancer profile updated successfully', profile: result})
         } catch (error) {
             next (error);

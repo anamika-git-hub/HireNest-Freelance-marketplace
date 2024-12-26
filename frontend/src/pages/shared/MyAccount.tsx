@@ -20,7 +20,7 @@ const MyAccount: React.FC = () => {
     dob: "",
     profileImage: "",
   });
-  
+  const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'client');
   const email = localStorage.getItem('email');
   const role = localStorage.getItem('role');
 
@@ -79,6 +79,35 @@ const MyAccount: React.FC = () => {
       }));
     }
   };
+
+  // useEffect(() => {
+  //   const storedRole = localStorage.getItem('role');
+  //   if (storedRole) {
+  //     setUserRole(storedRole);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   localStorage.setItem('role', userRole);
+  // }, [role]);
+
+// Function to update account type in the backend
+const updateAccountType = async (newRole: string) => {
+  const userId = localStorage.getItem('userId')
+  try {
+    const response = await axiosConfig.post('/users/update-role', { role: newRole,userId:userId });
+    if (response.status === 200) {
+      localStorage.setItem('role', newRole);
+      setUserRole(newRole)
+      console.log('Account type updated successfully');
+    } else {
+      console.error('Failed to update account type');
+    }
+  } catch (error) {
+    console.error('Error updating account type:', error);
+  }
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,32 +239,36 @@ const MyAccount: React.FC = () => {
                   <div className="mt-2 flex items-center gap-4">
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={async () => {
+                        const newRole = "freelancer";
+                        setUserRole(newRole);
                         setFormData((prev) => ({
                           ...prev,
-                          role: "freelancer",
-                        }))
-                      }
+                          role: newRole,
+                        }));
+                        // Send a request to the backend to update the user's role
+                        await updateAccountType(newRole);
+                      }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "freelancer"
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-200 text-gray-700"
+                        role === "freelancer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"
                       }`}
                     >
                       Freelancer
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
+                      onClick={async () => {
+                        const newRole = "client";
+                        setUserRole(newRole);
                         setFormData((prev) => ({
                           ...prev,
-                          role: "client",
-                        }))
-                      }
+                          role: newRole,
+                        }));
+                        // Send a request to the backend to update the user's role
+                        await updateAccountType(newRole);
+                      }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "client"
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-200 text-gray-700"
+                        role === "client" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"
                       }`}
                     >
                       Client

@@ -15,9 +15,13 @@ const axiosConfig  = axios.create({
 axiosConfig.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem('accessToken');
-        const role = localStorage.getItem('role');
+        const refreshToken = localStorage.getItem('refreshToken');
+
         if(accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+        if(refreshToken){
+            config.headers['refreshToken'] = `Bearer ${refreshToken}`;
         }
         
 

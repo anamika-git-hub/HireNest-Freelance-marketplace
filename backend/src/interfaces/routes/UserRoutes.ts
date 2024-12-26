@@ -4,6 +4,7 @@ import { UserController } from '../controllers/UserController';
 import { AccountDetailController } from '../controllers/accountDetailController';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { uploadProfileImages } from '../middlewares/uploadFileImages';
+import { isUser } from '../middlewares/auth';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -17,7 +18,7 @@ router.post('/login', UserController.login);
 router.post('/setup-account', uploadProfileImages, AccountDetailController.setUpAccount);
 router.put ('/update-account/:id',uploadProfileImages, AccountDetailController.updateAccount);
 router.get('/account-detail/:id',AccountDetailController.getAccountDetail);
-// router.get('/:userId/:role', ProfileController.getProfile);
+router.post('/update-role',UserController.updateRole);
 
 
 export default router;

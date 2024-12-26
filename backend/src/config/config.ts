@@ -5,5 +5,6 @@ dotenv.config();
 export const Config = {
     PORT: process.env.PORT ,
     DB_URI: process.env.DB_URI ,
-    JWT_SECRET: process.env.JWT_SECRET 
+    JWT_SECRET: process.env.JWT_SECRET ,
+    REFRESH_SECRET: process.env.REFRESH_SECRET
 }

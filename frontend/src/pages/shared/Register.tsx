@@ -35,6 +35,7 @@ const Signup: React.FC = () => {
       const user = response.data.user;
 
       localStorage.setItem("accessToken", response.data.token);
+      localStorage.setItem("refreshToken",response.data.refreshToken);
       localStorage.setItem("userId",response.data.user._id)
       localStorage.setItem("role", response.data.user.role);
       localStorage.setItem("email", response.data.user.email);

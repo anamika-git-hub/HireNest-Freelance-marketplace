@@ -23,5 +23,13 @@ export const UserRepository = {
         );
         return updatedUser;
     },
+    updateRole: async (role: string, userId:string) => {
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            { role },
+            { new: true } // Return the updated user
+          );
+          return updatedUser
+    }
 
 };

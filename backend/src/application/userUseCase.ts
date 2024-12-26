@@ -28,8 +28,9 @@ export const userUseCase = {
             });
         }
         const token = JwtService.generateToken({id: user.id, email:user.email});
+        const refreshToken = JwtService.generateRefreshToken({id:user.id,email:user.email})
 
-        return {message: 'Signup is successfull',token, user}
+        return {message: 'Signup is successfull',token,refreshToken, user}
     },
 
     verifyOtp: async (email: string, otp:string) => {
@@ -50,8 +51,9 @@ export const userUseCase = {
     },
 
     login: async (email: string, password: string) =>{
+        
         const user = await UserRepository.findUserByEmail(email);
-    
+        console.log('uuuuuuuuuuuuuuuuu',user)
         if(!user) throw { statusCode:404, message:'User not found'};
 
         const isValidPassword = await comparePassword(password,user.password);
@@ -62,9 +64,19 @@ export const userUseCase = {
 
     if (!userDetails) throw { statusCode: 404, message: 'User account details not found' };
         const token = JwtService.generateToken({id: user.id, email:user.email});
-        return {token, user , userDetails};
+        const refreshToken = JwtService.generateRefreshToken({id:user.id,email:user.email})
+        return {token,refreshToken, user , userDetails};
         
     },
+
+    updateRole: async (role:string, userId: string) => {
+        const updatedUser = await UserRepository.updateRole(role,userId);
+        
+          if (!updatedUser) {
+            throw {statusCode:404, message:'User not found'};
+          }
+          return {updatedUser}
+    }
 
    
 }
