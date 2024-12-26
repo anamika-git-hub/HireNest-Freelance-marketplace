@@ -1,4 +1,7 @@
+import mongoose from "mongoose";
+
 export interface ITaskSubmissionForm {
+    clientId: mongoose.Types.ObjectId;
     projectName: string;
     category: string;
     timeline: string;

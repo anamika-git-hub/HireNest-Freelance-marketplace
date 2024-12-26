@@ -17,7 +17,20 @@ export const FreelancerProfileRepository = {
             throw new Error ('Error get freelancers:' + error.message)
         }
     },
-     getFreelancerById: async (id: string) => {
+     getFreelancerByUserId: async (id: string) => {
+            try {
+                const freelancer = await FreelancerProfileModel.findOne({userId:id});
+                console.log('frees',freelancer)
+                if (!freelancer) {
+                    throw new Error("freelancer not found");
+                }
+                return freelancer;
+            } catch (error: any) {
+                throw new Error("Error fetching freelancer: " + error.message);
+            }
+        },
+
+        getFreelancerById: async (id: string) => {
             try {
                 const freelancer = await FreelancerProfileModel.findById(id);
                 if (!freelancer) {

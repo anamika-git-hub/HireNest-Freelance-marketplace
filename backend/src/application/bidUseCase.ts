@@ -1,5 +1,5 @@
 import { BidRepository } from "../infrastructure/repositories/BidRepository";
-import { IBidSubmissionForm } from "../entities/bids";
+import { IBidSubmissionForm } from "../entities/Bids";
 
 export const BidUseCase = {
     createBid: async (data: IBidSubmissionForm) => {

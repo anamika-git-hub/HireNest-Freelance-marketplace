@@ -8,7 +8,7 @@ interface TaskDetails {
   timeline: string;
   skills: string[];
   rateType: string;
-  minRate: number | string;
+  minRate: number ;
   maxRate: number | string;
   description: string;
   attachments: string[];
@@ -26,8 +26,8 @@ const TaskDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [formData, setFormData] = useState<BidFormData>({
-    rate: 100,
-    deliveryTime: 3,
+    rate:0,
+    deliveryTime: 0,
     timeUnit: "Days",
   });
 
@@ -57,6 +57,13 @@ const TaskDetail: React.FC = () => {
       const deadline = new Date(taskDetails.timeline);
       const now = new Date();
       const timeDiff = deadline.getTime() - now.getTime();
+      const defaultDeliveryTime = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); 
+
+      setFormData({
+        rate: taskDetails.minRate,
+        deliveryTime: defaultDeliveryTime > 0 ? defaultDeliveryTime : 1, 
+        timeUnit: "Days",
+      });
 
       if (timeDiff <= 0) {
         setTimeLeft("Task deadline reached");
@@ -82,7 +89,7 @@ const TaskDetail: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "rate" || name === "deliveryTime" ? +value : value,
+      [name]: value,
     }));
   };
 
@@ -186,7 +193,7 @@ const TaskDetail: React.FC = () => {
                     name="rate"
                     placeholder="$100"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={formData.rate}
+                    value= {formData.rate}
                     onChange={handleChange}
                     required
                   />

@@ -2,7 +2,7 @@ import mongoose , {Schema} from "mongoose";
 import { IFreelancerProfile } from "../../entities/freelancerProfile";
 
 const FreelancerProfileSchema = new Schema<IFreelancerProfile>({
-    id: {type: mongoose.Schema.Types.ObjectId,
+    userId: {type: mongoose.Schema.Types.ObjectId,
         ref:"User",
         default: null
     },

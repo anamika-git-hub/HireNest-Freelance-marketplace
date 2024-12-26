@@ -93,6 +93,9 @@ export const TaskUseCase = {
         } catch (error: any) {
             throw new Error(`Failed to get task by ID: ${error.message}`);
         }
+    },
+    getTasksByUserId: async (id:string) => {
+        return await TaskRepository.getTaskByUserId(id)
     }
     
 };

@@ -57,6 +57,16 @@ export const TaskController = {
         } catch (error) {
             next(error); 
         }
+    },
+
+    getTasksByUserId: async(req: Req, res: Res, next: Next) => {
+        try {
+            const {id} = req.params;
+            const task = await TaskUseCase.getTasksByUserId(id);
+            res.status(200).json(task);
+        } catch (error) {
+            next(error)
+        }
     }
 
 };

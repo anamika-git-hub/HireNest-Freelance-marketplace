@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IBidSubmissionForm } from "../../entities/bids";
+import { IBidSubmissionForm } from "../../entities/Bids";
 
 const BidSubmissionSchema = new Schema<IBidSubmissionForm>(
     {

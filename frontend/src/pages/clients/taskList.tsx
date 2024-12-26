@@ -98,7 +98,7 @@ const TaskList: React.FC = () => {
               <button
                 key={page}
                 className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                  page === 2
+                  page === 1
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100 text-gray-700"
                 }`}

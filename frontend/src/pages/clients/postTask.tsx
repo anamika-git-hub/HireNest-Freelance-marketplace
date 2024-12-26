@@ -12,6 +12,9 @@ const TaskSubmissionForm: React.FC = () => {
   const [minRate, setMinRate] = useState<string>(""); 
   const [maxRate, setMaxRate] = useState<string>("");
 
+  const clientId = localStorage.getItem("userId")
+ 
+
   const initialValues = {
     projectName: "",
     category: "",
@@ -53,6 +56,7 @@ const TaskSubmissionForm: React.FC = () => {
   const handleSubmit = async (values: typeof initialValues) => {
     setLoading(true);
     const formData = new FormData();
+    formData.append("clientId", clientId || "")
     formData.append("projectName", values.projectName);
     formData.append("category", values.category);
     formData.append("timeline", values.timeline);

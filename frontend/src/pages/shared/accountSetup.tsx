@@ -108,7 +108,7 @@ const AccountSetup: React.FC = () => {
           idBackImage: imageBackPreview,
         };
         dispatch(setAccountData(formDataToStore));
-        navigate("/login"); 
+        navigate("/freelancer/freelancer-profile"); 
 
       }
     } catch (error) {

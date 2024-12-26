@@ -2,6 +2,11 @@ import mongoose, { Schema } from "mongoose";
 import { ITaskSubmissionForm } from "../../entities/Tasks";
 
 const TaskSubmissionSchema = new Schema<ITaskSubmissionForm>({
+    clientId: {
+        type: Schema.Types.ObjectId,
+        ref:'User',
+        required: true,
+    },
     projectName: {
         type: String,
         required: true

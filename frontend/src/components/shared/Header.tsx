@@ -28,12 +28,9 @@ const Header: React.FC = () => {
     const fetchUserDetails = async () => {
       try {
         const userId = localStorage.getItem("userId"); 
-        console.log('userId', userId)
         if (userId) {
           const response = await axiosConfig.get(`/users/account-detail/${userId}`);
           setUserDetail(response.data.userDetails);
-
-          console.log('resspond', response.data)
           
         }
       } catch (error) {

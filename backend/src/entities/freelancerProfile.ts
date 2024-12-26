@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IFreelancerProfile {
-    id: mongoose.Types.ObjectId;
+    userId: mongoose.Types.ObjectId;
     name: string; 
     location: string;
     tagline: string;

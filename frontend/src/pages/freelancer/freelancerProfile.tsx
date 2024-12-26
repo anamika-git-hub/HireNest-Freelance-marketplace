@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
-
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const FreelancerProfile: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -21,8 +23,12 @@ const FreelancerProfile: React.FC = () => {
   const [location, setLocation] = useState("");
   const [tagline, setTagline] = useState("");
   const [experience, setExperience] = useState("");
-  const [hourlyRate, setHourlyRate] = useState<number>(35);// Default value
+  const [hourlyRate, setHourlyRate] = useState<number>(35);
   const [introduction, setIntroduction] = useState("");
+
+  const navigate = useNavigate()
+
+   const currentUserId = useSelector((state: RootState) => state.user.userId);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,6 +85,7 @@ const FreelancerProfile: React.FC = () => {
 
     const formData = new FormData();
 
+formData.append("userId",currentUserId || "");    
 formData.append("name", firstName);
 formData.append("location", location);
 formData.append("tagline", tagline);
@@ -98,7 +105,7 @@ attachments.forEach((attachment, index) => {
   formData.append(`attachments[${index}].description`, attachment.description);
 });
 
-
+ 
 
     try {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
@@ -107,6 +114,7 @@ attachments.forEach((attachment, index) => {
 
       console.log("Form submitted successfully:", response.data);
       alert("Profile submitted successfully!");
+      navigate('/login')
       
     } catch (error) {
       console.error("Error submitting form:", error);

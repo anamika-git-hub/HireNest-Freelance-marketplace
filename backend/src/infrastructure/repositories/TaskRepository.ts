@@ -50,6 +50,16 @@ export const TaskRepository = {
         } catch (error: any) {
             throw new Error("Error fetching task: " + error.message);
         }
+    },
+
+    getTaskByUserId: async (id:string) => {
+        try {
+            const task = await TaskSubmissionModel.find({clientId:id});
+            if(!task) throw new Error("Task not found");
+            return task;
+        } catch (error: any) {
+            throw new Error("Error fetching task:" + error.message)
+        }
     }
 
 };
