@@ -24,7 +24,6 @@ const TaskList: React.FC = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
-  const categories = ["All Categories", "Web Development", "Graphic Design"];
   
   return (
     <div className="flex pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">

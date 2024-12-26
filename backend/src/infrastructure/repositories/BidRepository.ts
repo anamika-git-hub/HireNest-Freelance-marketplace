@@ -33,7 +33,8 @@ export const BidRepository = {
 
     getBidsByTask: async (taskId: string) => {
         try {
-            return await BidSubmissionModel.find({ taskId }).populate("bidderId");
+            const bids =  await BidSubmissionModel.find({ taskId })
+            return bids
         } catch (error: any) {
             throw new Error("Error fetching bids: " + error.message);
         }

@@ -5,7 +5,6 @@ export const BidController = {
     createBid: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body;
-
             const result = await BidUseCase.createBid(data);
             res.status(201).json({ message: "Bid created successfully", bid: result });
         } catch (error) {

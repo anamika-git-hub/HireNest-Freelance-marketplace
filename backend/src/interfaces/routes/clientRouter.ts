@@ -17,4 +17,5 @@ router.get('/my-tasks',TaskController.getTasksByUserId);
 
 router.get('/freelancer-list',FreelancerProfileController.getFreelancers);
 router.get('/freelancer/:id',FreelancerProfileController.getFreelancerById);
+
 export default router;

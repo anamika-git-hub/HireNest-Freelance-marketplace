@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+
 //---------Shared----------------//
 import Home from './pages/shared/Home';
 import Login from './pages/shared/Login';
@@ -32,6 +33,7 @@ import TaskList from './pages/clients/taskList';
 import TaskSubmissionForm from './pages/clients/postTask';
 import TaskDetail from './pages/clients/taskDetail';
 import MyTaskList from './pages/clients/myTask';
+import BiddersList from './pages/clients/bidList';
 
 
 //--------------Others------------------//
@@ -67,6 +69,7 @@ const App: React.FC = () => {
         <Route path="/freelancer/task-list" element={<LayoutWrapper><TaskList /></LayoutWrapper>} />
         <Route path="/freelancer/task-detail/:id" element={<LayoutWrapper><TaskDetail /></LayoutWrapper>} />
         <Route path="/client/tasks" element={<UserSidebar><MyTaskList /></UserSidebar>} />
+        <Route path="/client/bidders-list/:id" element={<UserSidebar><BiddersList /></UserSidebar>} />
 
         {/* -----------admin-------------------*/}
         <Route path="/admin/login" element={<AdminLogin />} />

@@ -2,9 +2,12 @@ import React ,{useState,useEffect}from "react";
 import axiosConfig from "../../service/axios";
 import { FaUsers, FaEdit, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
+import { Link } from "react-router-dom";
+
 
 interface Task {
-  projectName: string;
+    _id: string;
+    projectName: string;
     category: string;
     timeline: string;
     skills: string[];
@@ -12,6 +15,7 @@ interface Task {
     minRate: number | string;
     maxRate: number | string;
     timeLeft?: string;
+    bids?: number;
 }
 
 const MyTaskList: React.FC = () => {
@@ -25,13 +29,15 @@ const MyTaskList: React.FC = () => {
         const response = await axiosConfig.get("/client/my-tasks");
         const fetchedTasks = response.data;
 
-        // Calculate time left for each task
         const tasksWithTimeLeft = fetchedTasks.map((task: Task) => ({
           ...task,
           timeLeft: calculateTimeLeft(task.timeline),
         }));
         setTasks(tasksWithTimeLeft); 
         setLoading(false);
+        tasksWithTimeLeft.forEach((task: Task) => {
+          fetchBidCount(task._id);
+        });
       } catch (err) {
         setError("Failed to load tasks. Please try again later.");
         setLoading(false);
@@ -40,6 +46,20 @@ const MyTaskList: React.FC = () => {
 
     fetchTasks();
   }, []);
+
+  const fetchBidCount = async (taskId: string) => {
+    try {
+      const response = await axiosConfig.get(`/freelancers/task-bids/${taskId}`);
+      const bidCount = response.data.bids.length;
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task._id === taskId ? { ...task, bids: bidCount } : task
+        )
+      );
+    } catch (err) {
+      console.error(`Failed to fetch bids for task ${taskId}:`, err);
+    }
+  };
 
   const calculateTimeLeft = (timeline: string): string => {
     const deadline = new Date(timeline);
@@ -105,12 +125,14 @@ const MyTaskList: React.FC = () => {
                   {task.timeLeft}
                 </div>
                 <div className="flex items-center space-x-2 mt-4">
-                  <button className="flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
-                    <FaUsers className="mr-1" /> Manage Bidders
-                    <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">
-                      {}
-                    </span>
-                  </button>
+                <Link to={`/client/bidders-list/${task._id}`}>
+                    <button className="flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">
+                      <FaUsers className="mr-1" /> Manage Bidders
+                      <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">
+                        {task.bids || 0}
+                      </span>
+                    </button>
+                  </Link>
                   <button className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
                     <FaEdit className="mr-1" /> Edit
                   </button>
@@ -119,19 +141,12 @@ const MyTaskList: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 p-4 rounded-md flex justify-between w-1/4">
+              <div className="bg-gray-100 py-4  rounded-md flex justify-evenly w-1/4">
                 {/* Bids */}
                 <div className="text-center">
-                  <p className="text-lg font-medium">{}</p>
+                  <p className="text-lg font-medium">{task.bids || 0}</p>
                   <p className="text-sm text-gray-500">Bids</p>
                 </div>
-                
-                {/*Avg. Bid */}
-                <div className="text-center">
-                  <p className="text-lg font-medium">{}</p>
-                  <p className="text-sm text-gray-500">Avg. Bid</p>
-                </div>
-                
                 {/* Price Range */}
                 <div className="text-center">
                   <p className="text-lg font-medium">${task.minRate} - ${task.maxRate}</p>

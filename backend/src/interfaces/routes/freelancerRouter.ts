@@ -11,7 +11,7 @@ router.use(checkTokenBlacklist);
 
 router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfileController.createProfile);
 router.put("/update-freelancer-profile/:id", uploadFreelancerImages, FreelancerProfileController.updateProfile);
-router.get("/my-profile/:id",FreelancerProfileController.getFreelancerByUserId);
+router.get("/freelancer-profile/:id",FreelancerProfileController.getFreelancerByUserId);
 
 router.get("/tasks-list",TaskController.getTasks);
 router.get('/tasks/:id', TaskController.getTaskById);

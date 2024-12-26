@@ -10,7 +10,7 @@ const BidSubmissionSchema = new Schema<IBidSubmissionForm>(
         },
         bidderId: {
             type: Schema.Types.ObjectId,
-            ref:'freelancerProfile',
+            ref:'user',
             required: true,
         },
         rate: {

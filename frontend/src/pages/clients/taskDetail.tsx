@@ -33,6 +33,7 @@ const TaskDetail: React.FC = () => {
 
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem('userId')
+  console.log('uuuuuuuuuu',userId)
 
   useEffect(() => {
     const fetchTaskDetails = async () => {
@@ -96,7 +97,7 @@ const TaskDetail: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id, bidderId:userId});
+      const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
       alert("Bid placed successfully!");
       console.log(response.data);
     } catch (error) {
