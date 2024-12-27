@@ -96,6 +96,7 @@ export const TaskUseCase = {
     },
     getTasksByUserId: async (id:string) => {
         return await TaskRepository.getTaskByUserId(id)
-    }
+    },
+    
     
 };

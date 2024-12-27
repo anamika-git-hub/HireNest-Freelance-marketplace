@@ -34,7 +34,7 @@ import TaskSubmissionForm from './pages/clients/postTask';
 import TaskDetail from './pages/clients/taskDetail';
 import MyTaskList from './pages/clients/myTask';
 import BiddersList from './pages/clients/bidList';
-
+import TaskDetailForm from './pages/clients/myTaskDetail';
 
 //--------------Others------------------//
 import PrivateRoute from './context/adminPrivateRoute';
@@ -70,6 +70,7 @@ const App: React.FC = () => {
         <Route path="/freelancer/task-detail/:id" element={<LayoutWrapper><TaskDetail /></LayoutWrapper>} />
         <Route path="/client/tasks" element={<UserSidebar><MyTaskList /></UserSidebar>} />
         <Route path="/client/bidders-list/:id" element={<UserSidebar><BiddersList /></UserSidebar>} />
+        <Route path="/client/my-task-detail/:id" element={<UserSidebar><TaskDetailForm /></UserSidebar>} />
 
         {/* -----------admin-------------------*/}
         <Route path="/admin/login" element={<AdminLogin />} />

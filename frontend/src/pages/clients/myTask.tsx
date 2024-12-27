@@ -133,9 +133,11 @@ const MyTaskList: React.FC = () => {
                       </span>
                     </button>
                   </Link>
+                  <Link to={`/client/my-task-detail/${task._id}`}>
                   <button className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
                     <FaEdit className="mr-1" /> Edit
                   </button>
+                  </Link>
                   <button className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
                     <FaTrash className="mr-1" /> Delete
                   </button>

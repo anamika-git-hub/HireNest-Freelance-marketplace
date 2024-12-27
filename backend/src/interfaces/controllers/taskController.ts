@@ -71,6 +71,6 @@ export const TaskController = {
         } catch (error) {
             next(error)
         }
-    }
+    },
 
 };
