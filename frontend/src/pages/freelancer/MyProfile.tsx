@@ -52,7 +52,7 @@ const MyProfile: React.FC = () => {
       try {
         const userId = localStorage.getItem("userId");
         if (userId) {
-          const response = await axiosConfig.get(`/freelancers/freelancer-profile/${userId}`);
+          const response = await axiosConfig.get(`/freelancers/freelancer-profile`);
           setFreelancerProfile(response.data);
         }
       } catch (error) {
@@ -63,7 +63,6 @@ const MyProfile: React.FC = () => {
     fetchFreelancerProfile();
   }, []);
 
-  // Update formData when freelancerProfile changes
   useEffect(() => {
     if (freelancerProfile) {
       setFormData({
@@ -124,7 +123,7 @@ const MyProfile: React.FC = () => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        profileImage: URL.createObjectURL(file), // Set the preview image
+        profileImage: URL.createObjectURL(file), 
       }));
     }
   };
@@ -133,30 +132,29 @@ const MyProfile: React.FC = () => {
     e.preventDefault();
 
     const updatedData = new FormData();
-    console.log('formd',formData)
     updatedData.append("name", formData.name);
     updatedData.append("location", formData.location);
     updatedData.append("tagline", formData.tagline);
     updatedData.append("experience", formData.experience);
     updatedData.append("hourlyRate", formData.hourlyRate.toString());
-    updatedData.append("skills", JSON.stringify(skills));
+    skills.forEach((skill) => updatedData.append("skills[]", skill));
     updatedData.append("description", formData.description);
 
-    // Append the profile image if a file is selected
     if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
       updatedData.append("profileImage", fileInputRef.current.files[0]);
     }
 
     try {
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        const response = await axiosConfig.put(`/freelancers/update-freelancer-profile/${userId}`, updatedData, {
+        const response = await axiosConfig.put(`/freelancers/update-freelancer-profile`, updatedData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-        console.log("User details updated:", response.data);
-      }
+        console.log("freelancer profile updated:", response.data);
+        if(response.status === 200){
+          alert('freelancer profile updated successfully')
+        }
+      
     } catch (error) {
       console.error("Error updating user details:", error);
     }
@@ -293,7 +291,7 @@ const MyProfile: React.FC = () => {
                     Add
                   </button>
                 </div>
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-2 space-y-1 flex flex-wrap gap-2">
                   {skills.map((skill, index) => (
                       <span
                         key = {skill}

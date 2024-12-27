@@ -50,7 +50,6 @@ export const AccountDetailUseCase = {
                 profileImage: profileImageUrl,
 
             }
-            console.log('udpkdjfklsdjf',updatedProfileData)
             return await AccountDetailRepository.updateProfile(userId, updatedProfileData);
         } catch (error: any) {
             throw new Error(`Failed to update profile: ${error.message}`)

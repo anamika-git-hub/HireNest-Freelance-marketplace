@@ -28,9 +28,8 @@ export const FreelancerProfileController = {
             const updates = req.body;
             const files = req.files as { [ key: string]: Express.Multer.File[]};
             const id = req.user?.userId || ""
-
+            console.log('req.files:',req.files,)
             const result = await FreelancerProfileUseCase.updateProfile(id,updates, files);
-            console.log('rrr',result)
             res.status(200).json({message: 'Freelancer profile updated successfully', profile: result})
         } catch (error) {
             next (error);
@@ -50,7 +49,6 @@ export const FreelancerProfileController = {
             try {
                 const userId = req.user?.userId || ''
                 const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(userId);
-                console.log('ffffff',freelancer)
                 res.status(200).json(freelancer);
             } catch (error) {
                 next(error); 
