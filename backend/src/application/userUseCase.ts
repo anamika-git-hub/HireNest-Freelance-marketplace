@@ -53,7 +53,6 @@ export const userUseCase = {
     login: async (email: string, password: string) =>{
         
         const user = await UserRepository.findUserByEmail(email);
-        console.log('uuuuuuuuuuuuuuuuu',user)
         if(!user) throw { statusCode:404, message:'User not found'};
 
         const isValidPassword = await comparePassword(password,user.password);

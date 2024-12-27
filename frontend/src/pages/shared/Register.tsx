@@ -61,7 +61,7 @@ const Signup: React.FC = () => {
 
       if (response.status === 201) {
         console.log('rrrrrrrrrrrrrrrrr',response.data)
-        dispatch(registerUser({...response.data.user, id: response.data.user._id}));
+        dispatch(registerUser({...response.data.user, id: response.data.user._id,role:response.data.user.role}));
         toast.success("User registered successfully. Redirecting to OTP page...");
         navigate("/otp", { state: { email } });
         localStorage.setItem("email", email);

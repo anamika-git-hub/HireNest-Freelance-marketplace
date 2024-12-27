@@ -11,8 +11,8 @@ const router = express.Router();
 router.use(checkTokenBlacklist);
 
 router.post("/setup-freelancer-profile", uploadFreelancerImages,isUser, FreelancerProfileController.createProfile);
-router.put("/update-freelancer-profile/:id", uploadFreelancerImages,isUser, FreelancerProfileController.updateProfile);
-router.get("/freelancer-profile/:id",isUser,FreelancerProfileController.getFreelancerByUserId);
+router.put("/update-freelancer-profile", uploadFreelancerImages,isUser, FreelancerProfileController.updateProfile);
+router.get("/freelancer-profile",isUser,FreelancerProfileController.getFreelancerByUserId);
 
 router.get("/tasks-list",isUser,TaskController.getTasks);
 router.get('/tasks/:id',isUser, TaskController.getTaskById);

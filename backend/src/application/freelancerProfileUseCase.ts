@@ -15,8 +15,9 @@ export const FreelancerProfileUseCase = {
             const attachments = await Promise.all(
             (files.attachments || []).map(async (file, index) => {
                 const uploadedFile = await uploadToCloudinary(file.path);
+                
                 return {
-                    id: `${Date.now()}`,
+                    id: data.attachments[index]?.id ,
                     file: uploadedFile,
                     title: data.attachments[index]?.title || 'Default Title',
                     description: data.attachments[index]?.description || 'Default description'

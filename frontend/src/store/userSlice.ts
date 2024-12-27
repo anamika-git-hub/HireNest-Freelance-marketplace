@@ -26,6 +26,7 @@ interface UserState {
     currentUser?: User | null;
     currentUserDetail?: UserDetail | null;
     userId:string | null;
+    userRole:string | null;
     clients: User[];
     freelancers: User[];
 }
@@ -33,6 +34,7 @@ interface UserState {
 const initialState: UserState = {
     users: [],
     currentUser: null,
+    userRole:null,
     currentUserDetail: null,
     userId: null,
     clients: [],
@@ -43,9 +45,10 @@ const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        registerUser: (state, action: PayloadAction<{ user: User; id: string }>) => {
+        registerUser: (state, action: PayloadAction<{ user: User; id: string; role:string}>) => {
             state.users.push({ ...action.payload.user, id: action.payload.id });
             state.userId = action.payload.id;
+            state.userRole = action.payload.role;
         },        
         loginUser: (state, action: PayloadAction<{ user: User; userDetail: UserDetail }>
         ) => {

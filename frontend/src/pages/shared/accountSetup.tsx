@@ -23,6 +23,9 @@ const AccountSetup: React.FC = () => {
   const dispatch = useDispatch();
 
   const currentUserId = useSelector((state: RootState) => state.user.userId);
+  const currentRole = useSelector((state:RootState)=> state.user.userRole);
+  
+ 
   
 
   const initialValues = {
@@ -109,8 +112,12 @@ const AccountSetup: React.FC = () => {
           idBackImage: imageBackPreview,
         };
         dispatch(setAccountData(formDataToStore));
-        
-        navigate("/freelancer/freelancer-profile"); 
+        if(currentRole === 'freelancer'){
+          navigate("/freelancer/freelancer-profile"); 
+        }else{
+          navigate("/login")
+        }
+       
 
       }
     } catch (error) {

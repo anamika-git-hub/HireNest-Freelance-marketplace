@@ -112,30 +112,28 @@ const updateAccountType = async (newRole: string) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    // Prepare the form data for submission
     const updatedData = new FormData();
-    updatedData.append("firstName", formData.firstName);
-    updatedData.append("lastName", formData.lastName);
+
+    updatedData.append("firstname", formData.firstName);
+    updatedData.append("lastname", formData.lastName);
     updatedData.append("phone", formData.phone);
     updatedData.append("dob", formData.dob);
     
-    // Append the profile image (if exists)
-    if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
-      updatedData.append("profileImage", fileInputRef.current.files[0]);
-    }
-  
+   if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
+    updatedData.append("profileImage", fileInputRef.current.files[0]);
+}
     try {
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        // Make API call to update user details
-        const response = await axiosConfig.put(`/users/update-account/${userId}`, updatedData, {
+        const response = await axiosConfig.put(`/users/update-account`, updatedData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
         console.log("User details updated:", response.data);
-        // You can show a success message or redirect after success
-      }
+        if(response.status === 200){
+          alert("user details updated")
+        }
+        
+      
     } catch (error) {
       console.error("Error updating user details:", error);
     }

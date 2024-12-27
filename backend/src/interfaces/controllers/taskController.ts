@@ -1,7 +1,11 @@
 import { Req, Res, Next } from '../../infrastructure/types/serverPackageTypes';
 import { TaskUseCase } from '../../application/taskUseCase';
 
+interface CustomRequest extends Req {
+    user?: { userId: string }; // Extend the request to include `user` from middleware
+  }
 export const TaskController = {
+    
     createTask: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body; 
@@ -59,10 +63,10 @@ export const TaskController = {
         }
     },
 
-    getTasksByUserId: async(req: Req, res: Res, next: Next) => {
+    getTasksByUserId: async(req: CustomRequest, res: Res, next: Next) => {
         try {
-            const {id} = req.params;
-            const task = await TaskUseCase.getTasksByUserId(id);
+            const userId = req.user?.userId || '';
+            const task = await TaskUseCase.getTasksByUserId(userId);
             res.status(200).json(task);
         } catch (error) {
             next(error)

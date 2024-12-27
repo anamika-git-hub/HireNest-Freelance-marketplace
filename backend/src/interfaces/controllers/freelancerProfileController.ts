@@ -1,5 +1,8 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { FreelancerProfileUseCase } from '../../application/freelancerProfileUseCase';
+interface CustomRequest extends Req {
+    user?: { userId: string }; 
+  }
 
 export const FreelancerProfileController = {
     createProfile : async (req: Req, res: Res, next: Next) => {
@@ -20,12 +23,11 @@ export const FreelancerProfileController = {
         }
     },
 
-    updateProfile: async (req: Req, res: Res, next: Next) => {
+    updateProfile: async (req: CustomRequest, res: Res, next: Next) => {
         try {
-            const {id} = req.params;
             const updates = req.body;
             const files = req.files as { [ key: string]: Express.Multer.File[]};
-            
+            const id = req.user?.userId || ""
 
             const result = await FreelancerProfileUseCase.updateProfile(id,updates, files);
             console.log('rrr',result)
@@ -44,11 +46,10 @@ export const FreelancerProfileController = {
         }
     },
 
-     getFreelancerByUserId: async (req: Req, res: Res, next: Next) => {
+     getFreelancerByUserId: async (req: CustomRequest, res: Res, next: Next) => {
             try {
-                const { id } = req.params; 
-                console.log('idddd',id)
-                const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(id);
+                const userId = req.user?.userId || ''
+                const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(userId);
                 console.log('ffffff',freelancer)
                 res.status(200).json(freelancer);
             } catch (error) {

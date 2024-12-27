@@ -8,10 +8,10 @@ export const isUser = (req:CustomRequest, res: Res,next: Next) => {
     console.log(req.headers)
   const authHeader =  req.headers['authorization'] as string;
   const accessToken = authHeader.split(' ')[1]
-  const userData=JwtService.verifyToken(accessToken) as {_id:string}
+  const userData=JwtService.verifyToken(accessToken) as {id:string}
   if(userData){
-    console.log(userData)
-    req.user = {userId:userData._id}
+    console.log('uu',userData)
+    req.user = {userId:userData.id}
     checkTokenBlacklist(req,res,next);
     
   }else{

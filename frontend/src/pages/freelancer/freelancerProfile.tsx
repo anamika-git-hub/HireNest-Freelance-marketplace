@@ -100,12 +100,12 @@ if (imageFile) {
 skills.forEach((skill) => formData.append("skills[]", skill));
 
 attachments.forEach((attachment, index) => {
-  formData.append(`attachments[${index}].file`, attachment.file);
+  formData.append(`attachments`, attachment.file);
   formData.append(`attachments[${index}].title`, attachment.title);
   formData.append(`attachments[${index}].description`, attachment.description);
 });
 
- 
+ console.log('aaaattt',attachments)
 
     try {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
