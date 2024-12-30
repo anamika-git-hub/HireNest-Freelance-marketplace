@@ -28,17 +28,18 @@ const BiddersList: React.FC = () => {
         const fetchBids = async () => {
           try {
             const response = await axiosConfig.get(`/freelancers/task-bids/${id}`);
+            console.log('response',response)
             const fetchedBidders = response.data.bids; 
             const fetchedProfiles = await Promise.all(
                 fetchedBidders.map(async (bidder: Bid) => {
                   const freelancerProfileResponse = await axiosConfig.get(
                     `/freelancers/freelancer-profile/${bidder.bidderId}`
                   );
-                  return freelancerProfileResponse.data; // Assuming the response contains profile details
+                  return freelancerProfileResponse.data; 
                 })
               );
       
-              // Update the profiles state
+             
               setFreelancerProfiles(fetchedProfiles);
               setBids(fetchedBidders)
             setLoading(false);

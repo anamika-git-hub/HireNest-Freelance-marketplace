@@ -4,14 +4,13 @@ import path from "path";
 // Storage configuration for Multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Temporary upload directory
+        cb(null, "uploads/"); 
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`); // Correctly format the filename
+        cb(null, `${Date.now()}-${file.originalname}`); 
     },
 });
 
-// File filter to allow only specific image formats
 const fileFilter = (req: any, file: any, cb: any) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if ([".jpg", ".jpeg", ".png"].includes(ext)) {
@@ -21,7 +20,6 @@ const fileFilter = (req: any, file: any, cb: any) => {
     }
 };
 
-// Multer configuration
 export const upload = multer({ storage, fileFilter });
 
 // Middleware to handle multiple file uploads

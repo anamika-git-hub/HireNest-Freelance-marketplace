@@ -92,7 +92,7 @@ export const FreelancerProfileUseCase = {
             try {
                 return await FreelancerProfileRepository.getFreelancerByUserId(id);
             } catch (error: any) {
-                throw new Error(`Failed to get freelancer by ID: ${error.message}`);
+                throw new Error(`Failed to get freelancer by UserID: ${error.message}`);
             }
         },
         getFreelancerById: async (id: string) => {

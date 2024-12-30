@@ -38,6 +38,7 @@ export const BidController = {
         try {
             const { taskId } = req.params;
             const bids = await BidUseCase.getBidsByTask(taskId);
+            console.log('bids',bids)
             res.status(200).json({ message: "Bids fetched successfully", bids });
         } catch (error) {
             next(error);

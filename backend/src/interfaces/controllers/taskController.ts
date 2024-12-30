@@ -2,7 +2,7 @@ import { Req, Res, Next } from '../../infrastructure/types/serverPackageTypes';
 import { TaskUseCase } from '../../application/taskUseCase';
 
 interface CustomRequest extends Req {
-    user?: { userId: string }; // Extend the request to include `user` from middleware
+    user?: { userId: string }; 
   }
 export const TaskController = {
     

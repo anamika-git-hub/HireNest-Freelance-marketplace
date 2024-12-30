@@ -20,6 +20,7 @@ export const FreelancerProfileRepository = {
      getFreelancerByUserId: async (id: string) => {
             try {
                 const freelancer = await FreelancerProfileModel.findOne({userId:id});
+                
     
                 if (!freelancer) {
                     throw new Error("freelancer not found");

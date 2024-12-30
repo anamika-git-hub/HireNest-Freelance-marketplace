@@ -46,13 +46,13 @@ const MyProfile: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  // Fetch user details on component mount
   useEffect(() => {
     const fetchFreelancerProfile = async () => {
       try {
         const userId = localStorage.getItem("userId");
         if (userId) {
-          const response = await axiosConfig.get(`/freelancers/freelancer-profile`);
+          const response = await axiosConfig.get(`/freelancers/freelancer-profile/${userId}`);
+          console.log('rrrrrrrrrrrrrr',response.data)
           setFreelancerProfile(response.data);
         }
       } catch (error) {

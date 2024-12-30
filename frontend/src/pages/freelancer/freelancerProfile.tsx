@@ -231,7 +231,7 @@ attachments.forEach((attachment, index) => {
               className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               placeholder="35"
               value={hourlyRate}
-              onChange={handleChange} // Use the handleChange function
+              onChange={handleChange} 
             />
              <input
               type="range"

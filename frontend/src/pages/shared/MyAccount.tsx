@@ -56,7 +56,7 @@ const MyAccount: React.FC = () => {
         firstName: userDetail.firstname || "",
         lastName: userDetail.lastname || "",
         phone: userDetail.phone || "",
-        dob: userDetail.dateOfBirth ? userDetail.dateOfBirth.toString().split("T")[0] : "", // Formatting date as YYYY-MM-DD
+        dob: userDetail.dateOfBirth ? userDetail.dateOfBirth.toString().split("T")[0] : "", 
         profileImage: userDetail.profileImage || "",
       });
     }
@@ -75,7 +75,7 @@ const MyAccount: React.FC = () => {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        profileImage: URL.createObjectURL(file), // Set the preview image
+        profileImage: URL.createObjectURL(file), 
       }));
     }
   };
@@ -244,7 +244,6 @@ const updateAccountType = async (newRole: string) => {
                           ...prev,
                           role: newRole,
                         }));
-                        // Send a request to the backend to update the user's role
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
@@ -262,7 +261,6 @@ const updateAccountType = async (newRole: string) => {
                           ...prev,
                           role: newRole,
                         }));
-                        // Send a request to the backend to update the user's role
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${

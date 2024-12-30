@@ -45,10 +45,11 @@ export const FreelancerProfileController = {
         }
     },
 
-     getFreelancerByUserId: async (req: CustomRequest, res: Res, next: Next) => {
+     getFreelancerByUserId: async (req: Req, res: Res, next: Next) => {
             try {
-                const userId = req.user?.userId || ''
-                const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(userId);
+                const {id} = req.params;
+                console.log('iddddddddddddddd',id)
+                const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(id);
                 res.status(200).json(freelancer);
             } catch (error) {
                 next(error); 
@@ -56,7 +57,7 @@ export const FreelancerProfileController = {
         },
         getFreelancerById: async (req: Req, res: Res, next: Next) => {
             try {
-                const { id } = req.params; // Task ID
+                const { id } = req.params; 
                 const freelancer = await FreelancerProfileUseCase.getFreelancerById(id);
                 res.status(200).json({ freelancer, message: 'Task fetched successfully' });
             } catch (error) {

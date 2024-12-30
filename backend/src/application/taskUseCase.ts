@@ -13,17 +13,16 @@ export const TaskUseCase = {
                 return result.secure_url;
             };
 
-            // If there are attachments, process and upload them
             const attachments = await Promise.all(
                 (files.attachments || []).map(async (file) => {
                     const uploadedFileUrl = await uploadToCloudinary(file);
-                    return uploadedFileUrl; // Return only the URL of the uploaded file
+                    return uploadedFileUrl; 
                 })
             );
 
             const taskData = {
                 ...data,
-                attachments, // Attach the array of file URLs (strings) to the task data
+                attachments, 
             };
 
             return await TaskRepository.createTask(taskData);
@@ -48,12 +47,11 @@ export const TaskUseCase = {
 
             let updatedAttachments = updates.attachments || [];
 
-            // If there are new attachments, upload them and add to the existing ones
             if (files.attachments) {
                 const newAttachments = await Promise.all(
                     files.attachments.map(async (file) => {
                         const uploadedFileUrl = await uploadToCloudinary(file);
-                        return uploadedFileUrl; // Only store the file URL (as a string)
+                        return uploadedFileUrl; 
                     })
                 );
                 updatedAttachments.push(...newAttachments);
@@ -97,6 +95,6 @@ export const TaskUseCase = {
     getTasksByUserId: async (id:string) => {
         return await TaskRepository.getTaskByUserId(id)
     },
-    
+
     
 };

@@ -27,7 +27,7 @@ export const UserRepository = {
         const updatedUser = await UserModel.findByIdAndUpdate(
             userId,
             { role },
-            { new: true } // Return the updated user
+            { new: true } 
           );
           return updatedUser
     }

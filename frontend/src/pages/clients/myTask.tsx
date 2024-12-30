@@ -77,6 +77,20 @@ const MyTaskList: React.FC = () => {
     return `${days} days, ${hours} hours left`;
   };
 
+  const handleDelete = async (taskId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+    if (confirmDelete) {
+      try {
+        await axiosConfig.delete(`/client/delete-task/${taskId}`);
+        setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+        alert("Task deleted successfully.");
+      } catch (err) {
+        console.error("Error deleting task:", err);
+        alert("Failed to delete task. Please try again.");
+      }
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTasks((prevTasks) =>
@@ -85,9 +99,9 @@ const MyTaskList: React.FC = () => {
           timeLeft: calculateTimeLeft(task.timeline),
         }))
       );
-    }, 60000); // Update every minute
+    }, 60000); 
 
-    return () => clearInterval(timer); // Cleanup on unmount
+    return () => clearInterval(timer); 
   }, [tasks]);
 
 
@@ -138,7 +152,10 @@ const MyTaskList: React.FC = () => {
                     <FaEdit className="mr-1" /> Edit
                   </button>
                   </Link>
-                  <button className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
+                  <button
+                  onClick={() => handleDelete(task._id)}
+                   className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
+                    
                     <FaTrash className="mr-1" /> Delete
                   </button>
                 </div>

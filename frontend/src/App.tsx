@@ -10,6 +10,7 @@ import OTPVerification from './pages/shared/Otp';
 import LayoutWrapper from './components/shared/LayoutWrapper';
 import AccountSetup from './pages/shared/accountSetup';
 import Dashboard from './pages/shared/Dashboard';
+import About from './pages/shared/about';
 
 //------------Admin------------------//
 import AdminLogin from './pages/admin/Login';
@@ -55,6 +56,7 @@ const App: React.FC = () => {
         <Route path="/account-setup" element={<LayoutWrapper><AccountSetup /></LayoutWrapper>} />
         <Route path="/settings" element={<UserSidebar><MyAccount /></UserSidebar>} />
         <Route path="/dashboard" element={<UserSidebar><Dashboard /></UserSidebar>} />
+        <Route path="/about" element={<LayoutWrapper><About/></LayoutWrapper>} />
 
          {/* ---------freelancer--------------- */}
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />

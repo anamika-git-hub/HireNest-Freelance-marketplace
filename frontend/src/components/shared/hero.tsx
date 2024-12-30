@@ -1,4 +1,4 @@
-import React from "react";
+import { FaUsers, FaClipboardList, FaUserTie, FaCheckCircle } from "react-icons/fa";
 
 const HeroSection = () => {
   return (
@@ -54,7 +54,7 @@ const HeroSection = () => {
           {/* Stat Item 1 */}
           <div className="flex items-center gap-4 w-full md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-              <i className="bi bi-trophy text-blue-600 text-2xl"></i>
+            <FaUsers className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,303</h4>
@@ -65,7 +65,7 @@ const HeroSection = () => {
           {/* Stat Item 2 */}
           <div className="flex items-center gap-4 w-full md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-              <i className="bi bi-briefcase text-blue-600 text-2xl"></i>
+            <FaClipboardList className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,393</h4>
@@ -76,7 +76,7 @@ const HeroSection = () => {
           {/* Stat Item 3 */}
           <div className="flex items-center gap-4 w-full md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-              <i className="bi bi-graph-up text-blue-600 text-2xl"></i>
+              <FaUserTie className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,321</h4>
@@ -87,7 +87,7 @@ const HeroSection = () => {
           {/* Stat Item 4 */}
           <div className="flex items-center gap-4 w-full md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-              <i className="bi bi-award text-blue-600 text-2xl"></i>
+              <FaCheckCircle className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,004</h4>
