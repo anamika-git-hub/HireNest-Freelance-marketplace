@@ -74,6 +74,7 @@ const Header: React.FC = () => {
     }
   };
 
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (

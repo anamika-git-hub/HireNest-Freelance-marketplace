@@ -2,11 +2,6 @@ import mongoose, {Schema} from "mongoose";
 import { Iuser } from "../../entities/User";
 
 const UserSchema = new Schema<Iuser>({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'userDetail',
-        default:null
-    },
     email: {
         type: String,
         required: true,

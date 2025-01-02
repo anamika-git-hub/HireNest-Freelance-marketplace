@@ -12,7 +12,10 @@ const CategorySchema = new Schema<Icategory> (
             type: String,
             default:''
         },
-        
+        image:{
+            type: String,
+            required: true,
+        },
         state: {
             type: String,
             enum:  ["active", "inactive"],

@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store"; 
-import {
-  getCategories,
-  deleteCategory
-} from "../../store/categorySlice";
+import { getCategories, deleteCategory } from "../../store/categorySlice";
 import axiosConfig from "../../service/axios";
 import { useNavigate } from "react-router-dom";
 
@@ -12,14 +9,12 @@ const ManageCategories: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const categories = useSelector((state: RootState) => state.category.categories);
-  console.log('mangage',categories)
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axiosConfig.get("/admin/categories");
-        console.log('rrrr',response.data.name)
         dispatch(getCategories(response.data));
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -45,8 +40,10 @@ const ManageCategories: React.FC = () => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  console.log('filtered categories:', filteredCategories)
+
   return (
-    <div className="p-6 bg-gray-100 ">
+    <div className="p-6 bg-gray-100">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold">Category Management</h1>
         <button
@@ -70,8 +67,9 @@ const ManageCategories: React.FC = () => {
       <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
         <thead>
           <tr className="bg-gray-800 text-white text-left text-sm">
-            <th className="p-4">Category Name</th>
+            <th className="p-4">Image</th>
             <th className="p-4">Description</th>
+            <th className="p-4">Category Name</th>
             <th className="p-4">Status</th>
             <th className="p-4">Actions</th>
           </tr>
@@ -79,11 +77,23 @@ const ManageCategories: React.FC = () => {
         <tbody>
           {filteredCategories.map((category, index) => (
             <tr
-              key={category.id  || `${category.name}-${index}`}
+              key={category.id || `${category.name}-${index}`}
               className="border-b text-sm hover:bg-gray-100 transition-colors"
             >
+              <td className="p-4">
+                {category.image ? (
+                  <img
+                    src={category.image}
+                    alt={`${category.name} thumbnail`}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                ) : (
+                  <span className="text-gray-500 italic">No image</span>
+                )}
+              </td>
               <td className="p-4">{category.name}</td>
               <td className="p-4">{category.description}</td>
+              
               <td
                 className={`p-4 font-semibold ${
                   category.state === "active" ? "text-green-600" : "text-orange-600"
@@ -92,15 +102,12 @@ const ManageCategories: React.FC = () => {
                 {category.state}
               </td>
               <td className="p-4">
-              <button
-                className="text-blue-500 hover:underline"
-                onClick={() => {
-                  navigate(`/admin/categories/edit/${category.id}`);
-                }}
-              >
-                Edit
-              </button>
-
+                <button
+                  className="text-blue-500 hover:underline"
+                  onClick={() => navigate(`/admin/categories/edit/${category.id}`)}
+                >
+                  Edit
+                </button>
                 <button
                   className="text-red-500 hover:underline ml-4"
                   onClick={() => handleDeleteCategory(category.id!)}

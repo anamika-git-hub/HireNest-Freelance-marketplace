@@ -10,7 +10,7 @@ import { isUser } from '../middlewares/auth';
 const router = express.Router();
 router.use(checkTokenBlacklist);
 
-router.post("/setup-freelancer-profile", uploadFreelancerImages,isUser, FreelancerProfileController.createProfile);
+router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfileController.createProfile);
 router.put("/update-freelancer-profile", uploadFreelancerImages,isUser, FreelancerProfileController.updateProfile);
 router.get("/freelancer-profile/:id",isUser,FreelancerProfileController.getFreelancerByUserId);
 

@@ -16,7 +16,7 @@ export const FreelancerProfileController = {
             const result = await FreelancerProfileUseCase.createProfile(data, files);
             res.status(201).json({message: 'Profile setup successful', profile: result})
         } catch (error) {
-            console.log('errr:', error);
+            console.log('err:', error);
             
             next (error)
 

@@ -100,7 +100,7 @@ const TaskSubmissionForm: React.FC = () => {
           Post a Task <br />
         </h1>
         <p className="text-gray-600 mb-6 text-center">
-          Fill in your task details and submit to get started.
+          Fill in your task details and submit to post the task.
         </p>
         <div className="flex justify-center items-center">
           <Formik

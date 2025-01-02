@@ -19,6 +19,7 @@ const FreelancerDetail: React.FC = () => {
   const [freelancerDetail, setFreelancerDetail] = useState<FreelancerDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
   
 
   const {id}  = useParams<{id: string}>();
@@ -131,9 +132,82 @@ const FreelancerDetail: React.FC = () => {
       </div>
 
       {/* Button */}
-      <button className="bg-blue-600 text-white text-center w-full py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+      <button
+      onClick={() => setShowModal(true)}
+       className="bg-blue-600 text-white text-center w-full py-2 rounded-lg hover:bg-blue-700 transition duration-200">
         Make an Offer →
       </button>
+
+       {/* Modal */}
+       {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+          <button
+        onClick={() => setShowModal(false)}
+        className=" top-3 right-3 text-gray-900 hover:text-gray-600 focus:outline-none"
+        aria-label="Close"
+      >
+        ✖
+      </button>
+            <div className="text-center mb-6">
+              <img
+                src={freelancerDetail.profileImage || "https://via.placeholder.com/50"}
+                alt="Profile"
+                className="w-12 h-12 rounded-full mx-auto"
+              />
+              <h2 className="text-xl font-semibold mt-2">Connect with {freelancerDetail.name}</h2>
+              <p className="text-sm text-gray-500">Responds within a few days</p>
+            </div>
+            <form className="space-y-4">
+              <p className="text-center text-gray-600 mb-4">
+                I am interested in working with {freelancerDetail.name}
+              </p>
+              <div>
+                <label htmlFor="projectDetails" className="block text-sm font-medium text-gray-700">
+                  Project Details
+                </label>
+                <textarea
+                  id="projectDetails"
+                  rows={4}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Describe your project..."
+                />
+              </div>
+              <div>
+                <label htmlFor="targetDate" className="block text-sm font-medium text-gray-700">
+                  Target Date
+                </label>
+                <select
+                  id="targetDate"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option>Please select...</option>
+                  <option>1-2 weeks</option>
+                  <option>3-4 weeks</option>
+                  <option>1-2 months</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
+                  Project Budget
+                </label>
+                <input
+                  type="number"
+                  id="budget"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter amount..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Stats Section */}
 <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6">

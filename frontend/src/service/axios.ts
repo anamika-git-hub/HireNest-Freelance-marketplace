@@ -33,21 +33,32 @@ axiosConfig.interceptors.request.use(
 )
 
 axiosConfig.interceptors.response.use(
-    
-    response => {
-        return response;
-    },
-    (error) => {
+    (response) => response,
+    async (error) => {
         if (error.response && error.response.status === 403) {
             toast.error('Your account has been blocked by the admin.');
             store.dispatch(logoutUser());
-            window.location.href = '/login'; 
-        }else {
-            console.log(error);
-            
+            window.location.href = '/login';
+        } else if (error.response && error.response.status === 401) {
+            // Handle access token expiry
+            const originalRequest = error.config;
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            if (refreshToken) {
+                try {
+                    const response = await axios.post('/auth/refresh-token', { refreshToken });
+                    localStorage.setItem('accessToken', response.data.accessToken);
+                    originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
+                    return axios(originalRequest);
+                } catch (refreshError) {
+                    toast.error('Session expired. Please log in again.');
+                    store.dispatch(logoutUser());
+                    window.location.href = '/login';
+                }
+            }
         }
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
-)
+);
 
 export default axiosConfig;

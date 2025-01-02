@@ -4,6 +4,7 @@ interface Category {
     id?: string;
     name: string;
     description: string;
+    image: string;
     state?:'active'| 'inactive'
 }
 

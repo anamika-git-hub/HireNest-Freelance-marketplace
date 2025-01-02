@@ -1,68 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axiosConfig from '../../service/axios'; 
 import HeroSection from '../../components/shared/hero';
 
 const Home: React.FC = () => {
+
+    const [categories, setCategories] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosConfig.get("/admin/categories");
+                setCategories(response.data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <>
            <HeroSection/>
-            <div className="py-16 bg-gray-100">
-                <h2 className="text-3xl font-bold text-center mb-12">Popular Categories</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-4">
-                    {/* Category Card 1 */}
-                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                        <img
-                            src="https://via.placeholder.com/300x200"
-                            alt="Web / Software Dev"
-                            className="w-full h-40 object-cover"
-                        />
-                        <div className="p-4 text-center">
-                            <h3 className="text-lg font-semibold">Web / Software Dev</h3>
-                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">612</span>
-                        </div>
-                    </div>
-
-                    {/* Category Card 2 */}
-                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                        <img
-                            src="https://via.placeholder.com/300x200"
-                            alt="Data Science / Analytics"
-                            className="w-full h-40 object-cover"
-                        />
-                        <div className="p-4 text-center">
-                            <h3 className="text-lg font-semibold">Data Science / Analytics</h3>
-                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">113</span>
-                        </div>
-                    </div>
-
-                    {/* Category Card 3 */}
-                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                        <img
-                            src="https://via.placeholder.com/300x200"
-                            alt="Accounting / Consulting"
-                            className="w-full h-40 object-cover"
-                        />
-                        <div className="p-4 text-center">
-                            <h3 className="text-lg font-semibold">Accounting / Consulting</h3>
-                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">186</span>
-                        </div>
-                    </div>
-
-                    {/* Category Card 4 */}
-                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                        <img
-                            src="https://via.placeholder.com/300x200"
-                            alt="Writing & Translations"
-                            className="w-full h-40 object-cover"
-                        />
-                        <div className="p-4 text-center">
-                            <h3 className="text-lg font-semibold">Writing & Translations</h3>
-                            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">298</span>
-                        </div>
-                    </div>
-
-                    {/* More Cards... */}
+           <div className="py-16 bg-gray-50">
+    <h2 className="text-3xl font-bold text-center mb-12">Popular Categories</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-6">
+        {/* Category Card */}
+        {categories.map((category, index) => (
+            <div key={index} className="relative group bg-white shadow-lg rounded-lg overflow-hidden">
+                <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                    <h3 className="text-white text-lg font-semibold mb-2">{category.name}</h3>
+                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">100</span>
                 </div>
             </div>
+        ))}
+    </div>
+</div>
+
             <div className="py-16 bg-white">
                 <h2 className="text-3xl font-bold text-center mb-12">How It Works?</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">

@@ -4,26 +4,42 @@ import checkTokenBlacklist from "./TokenBlocklist";
 interface CustomRequest extends Req{
     user?:{userId:string};
 }
-export const isUser = (req:CustomRequest, res: Res,next: Next) => {
-    console.log(req.headers)
-  const authHeader =  req.headers['authorization'] as string;
-  const accessToken = authHeader.split(' ')[1]
-  const userData=JwtService.verifyToken(accessToken) as {id:string}
-  if(userData){
-    console.log('uu',userData)
-    req.user = {userId:userData.id}
-    checkTokenBlacklist(req,res,next);
-    
-  }else{
-    console.log(req.headers)
-    const authHeader = req.headers['refreshtoken'] as string;
-    const refreshToken = authHeader.split(' ')[1]
-    const userData = JwtService.verifyRefreshToken(refreshToken) as {_id:string}
-    if(userData){
-        console.log(userData)
-        req.user = {userId:userData._id}
-        checkTokenBlacklist(req,res,next);
-        
-    }
+export const isUser = (req: CustomRequest, res: Res, next: Next) => {
+  try {
+      const authHeader = req.headers['authorization'] as string;
+      const accessToken = authHeader.split(' ')[1];
+
+      let userData;
+      try {
+          // Try verifying access token
+          userData = JwtService.verifyToken(accessToken) as { id: string };
+          if (userData) {
+              req.user = { userId: userData.id };
+              return checkTokenBlacklist(req, res, next);
+          }
+      } catch (error:any) {
+          if (error.name === 'TokenExpiredError') {
+              // Handle token expiry
+              const refreshHeader = req.headers['refreshtoken'] as string;
+              const refreshToken = refreshHeader.split(' ')[1];
+              try {
+                  // Verify refresh token
+                  const refreshData = JwtService.verifyRefreshToken(refreshToken) as { _id: string };
+                  if (refreshData) {
+                      req.user = { userId: refreshData._id };
+                      return checkTokenBlacklist(req, res, next);
+                  }
+              } catch (refreshError) {
+                throw new Error('Refresh token expired. Please log in again.' )
+                  // return res.status(401).json({ message: 'Refresh token expired. Please log in again.' });
+              }
+          } else {
+            throw new Error( 'Invalid token. Please log in again.' )
+              // return res.status(401).json({ message: 'Invalid token. Please log in again.' });
+          }
+      }
+  } catch (error) {
+    throw new Error( 'Internal Server Errorsss')
+      // return res.status(500).json({ message: 'Internal Server Error', error });
   }
-}
+};

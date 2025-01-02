@@ -7,7 +7,7 @@ const About: React.FC = () => {
       <div className="py-12 sm:px-8 lg:px-40">
         <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
           <div className="w-full lg:w-1/2">
-          <h2 className="text-5xl font-semibold">About our company</h2>
+          <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-4">About our company</h2>
           <p className="text-gray-500 mt-4 mb-5">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Donec magna pharetra 
             dignissim nibh turpis pretium. Integer placerat in magna laoreet nibh.
@@ -32,7 +32,7 @@ const About: React.FC = () => {
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
                 Hire freelancer
               </button>
-              <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200">
+              <button className="bg-gray-100 border border-blue-600 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200">
                 Learn more
               </button>
             </div>
@@ -74,7 +74,7 @@ const About: React.FC = () => {
       </div>
 
       {/* Values Section */}
-      <div className="bg-white flex gap-8 py-12 px-4 sm:px-8 lg:px-20">
+      <div className="bg-slate-200 flex gap-8 py-12 px-4 sm:px-8 lg:px-20">
         <div className="w-full lg:w-1/4 ">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-semibold">The values that drive everything we do</h2>

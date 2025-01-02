@@ -22,6 +22,9 @@ const fileFilter = (req: any, file: any, cb: any) => {
 
 export const upload = multer({ storage, fileFilter });
 
+// Middleware to handle single image uploads (e.g., for categories)
+export const uploadCategoryImage = upload.single("image");
+
 // Middleware to handle multiple file uploads
 export const uploadProfileImages = upload.fields([
     { name: "profileImage", maxCount: 1 },
