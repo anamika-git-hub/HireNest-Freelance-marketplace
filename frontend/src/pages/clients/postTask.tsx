@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { TaskFormValidation } from "../../components/Schemas/taskFormValidation";
+
+interface Category {
+  _id: string;
+  name: string;
+}
 
 const TaskSubmissionForm: React.FC = () => {
   const [skills, setSkills] = useState<string[]>([]);
@@ -11,9 +16,9 @@ const TaskSubmissionForm: React.FC = () => {
   const [description, setDescription] = useState<string>("");
   const [minRate, setMinRate] = useState<string>(""); 
   const [maxRate, setMaxRate] = useState<string>("");
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const clientId = localStorage.getItem("userId")
- 
 
   const initialValues = {
     projectName: "",
@@ -27,6 +32,22 @@ const TaskSubmissionForm: React.FC = () => {
     description: "",
     attachments: [] as File[],
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosConfig.get("/admin/categories"); 
+        if (response.status === 200) {
+        setCategories(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories", error);
+        alert("Failed to load categories.");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleAddSkill = () => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
@@ -134,9 +155,11 @@ const TaskSubmissionForm: React.FC = () => {
                       className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     >
                       <option value="">Select Category</option>
-                      <option value="web_development">Web Development</option>
-                      <option value="graphic_design">Graphic Design</option>
-                      <option value="marketing">Marketing</option>
+                      {categories.map((category) => (
+                        <option key={category.name} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
                     </Field>
                     <ErrorMessage
                       name="category"
