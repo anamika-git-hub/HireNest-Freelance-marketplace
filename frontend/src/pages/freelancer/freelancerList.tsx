@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import axiosConfig from "../../service/axios";
 import FilterSidebar from "../../components/shared/FilterSideBar";
 import { Link } from "react-router-dom";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 const FreelancerList: React.FC = () => {
   const [freelancers, setFreelancers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [bookmarkedFreelancers, setBookmarkedFreelancers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     axiosConfig
@@ -22,20 +24,36 @@ const FreelancerList: React.FC = () => {
       });
   }, []);
 
+  const toggleBookmark = (id: string) => {
+    const updatedBookmarks = new Set(bookmarkedFreelancers);
+    if (updatedBookmarks.has(id)) {
+      updatedBookmarks.delete(id); // Remove if already bookmarked
+    } else {
+      updatedBookmarks.add(id); // Add if not bookmarked
+    }
+    setBookmarkedFreelancers(updatedBookmarks);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   const categories = ["All Categories", "Web Development", "Graphic Design"];
 
   return (
-    <div className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
+    <div className="hero section pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Search Filter Section */}
         <FilterSidebar/>
 
         {/* Freelancer List Section */}
-        <div className="flex-grow">
+        <div className="pt-14 flex-grow">
+        <h2 className="pb-5 text-2xl font-semibold">Freelancers</h2>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Search Results</h2>
+           
+            <input
+            type="text"
+            placeholder="Search"
+            className="p-2 border border-gray-300 bg-gray-100 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
             <select className="p-2 border rounded-md text-sm">
               <option>Sort by: Relevance</option>
             </select>
@@ -45,9 +63,24 @@ const FreelancerList: React.FC = () => {
               <Link to={`/client/freelancer-detail/${freelancer._id}`}>
               <div
                 key={index}
-                className="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
+                className="relative bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
               >
-                
+                {/* Bookmark Icon */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent default link behavior
+                    toggleBookmark(freelancer._id);
+                  }}
+                  className={`absolute top-2 right-4 p-2 rounded-full ${
+                    bookmarkedFreelancers.has(freelancer._id) ? "bg-orange-400" : "bg-gray-200"
+                  }`}
+                >
+                  {bookmarkedFreelancers.has(freelancer._id) ? (
+                    <FaStar className="text-white w-6 h-6" />
+                  ) : (
+                    <FaRegStar className="text-gray-500 w-6 h-6" />
+                  )}
+                </button>
                 <img
                   src={freelancer.profileImage}
                   alt="Avatar"

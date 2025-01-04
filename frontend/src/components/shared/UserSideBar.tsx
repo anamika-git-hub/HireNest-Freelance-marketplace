@@ -86,7 +86,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <span className="ml-auto text-blue-600 text-sm font-bold">2</span>
             </NavLink>
             <NavLink
-              to="/user/bookmarks"
+              to="/bookmarks"
               className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
             >
               <FaBookmark className="mr-3" /> Bookmarks

@@ -1,12 +1,18 @@
 import React ,{useState,useEffect}from "react";
 import axiosConfig from "../../service/axios";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import { toggleBookmark } from "../../store/bookmarkSlice";
 import { Link } from "react-router-dom";
 import FilterSidebar from "../../components/shared/FilterSideBar";
+import {FaBookmark, FaRegBookmark} from "react-icons/fa";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>("");  
+  const dispatch = useDispatch();
+  const bookmarks = useSelector((state: RootState) => state.bookmarks.bookmarks);
 
   useEffect(() => {
     axiosConfig
@@ -22,18 +28,24 @@ const TaskList: React.FC = () => {
       });
   }, []);
 
+  const handleBookmark = (id: string) => {
+    dispatch(toggleBookmark(id));
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   
   return (
-    <div className="flex pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
+    <div className="flex pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       {/* Sidebar */}
       <FilterSidebar/>
 
       {/* Main Content */}
-      <div className="w-3/4 p-5 pt-16">
+      <div className="pt-14 flex-grow p-4">
+      <h2 className="pb-5 text-2xl font-semibold">Tasks</h2>
         {/* Search Alerts */}
         <div className="flex items-center justify-between mb-5 ">
+
           {/* Search bar on the left */}
           <input
             type="text"
@@ -61,9 +73,23 @@ const TaskList: React.FC = () => {
       key={index}
       className="border border-gray-300 p-5 rounded-lg shadow-md bg-white"
     >
+      <div className="flex">
+       
       {/* Top Section: Project Name */}
       <h3 className="text-lg font-semibold mb-2">{task.projectName}</h3>
-
+       {/* Bookmark Button */}
+       <button
+                onClick={() => handleBookmark(task._id)}
+                className="flex items-center ml-auto  gap-2 text-blue-600 hover:text-blue-700"
+              >
+                {bookmarks.includes(task._id) ? (
+                  <FaBookmark className="text-lg" />
+                ) : (
+                  <FaRegBookmark className="text-lg" />
+                )}
+              </button>
+    
+</div>
       {/* Location and Time */}
       <div className="flex items-center text-sm text-gray-500 mb-4">
         <span className="flex items-center mr-4">

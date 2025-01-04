@@ -93,7 +93,7 @@ useEffect(() => {
         );
     setFormData(prevState => ({
       ...prevState,
-      attachments: [...newFiles]
+      attachments: [...prevState.attachments,...newFiles]
     }));
   };
   };

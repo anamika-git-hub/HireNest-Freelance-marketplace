@@ -1,4 +1,5 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { FaRegBookmark, FaCopy, FaShareAlt } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
 
@@ -105,6 +106,16 @@ const TaskDetail: React.FC = () => {
       alert("Failed to place bid. Please try again.");
     }
   };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied to clipboard!");
+  };
+
+  const handleShare = () => {
+    alert("Sharing functionality coming soon!");
+  };
+  
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -232,6 +243,30 @@ const TaskDetail: React.FC = () => {
                   Place a Bid
                 </button>
               </form>
+              {/* Bookmark, Copy, and Share Section */}
+          <div className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-md mt-6">
+            <button
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+              onClick={() => alert("Task bookmarked!")}
+            >
+              <FaRegBookmark className="text-lg" />
+              <span>Bookmark</span>
+            </button>
+            <button
+              className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+              onClick={handleCopyLink}
+            >
+              <FaCopy className="text-lg" />
+              <span>Copy Link</span>
+            </button>
+            <button
+              className="flex items-center gap-2 text-green-600 hover:text-green-700"
+              onClick={handleShare}
+            >
+              <FaShareAlt className="text-lg" />
+              <span>Share It!</span>
+            </button>
+          </div>
             </div>
           </div>
         </div>
