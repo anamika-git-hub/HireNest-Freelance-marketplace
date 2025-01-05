@@ -79,7 +79,7 @@ const MyProfile: React.FC = () => {
     }
   }, [freelancerProfile]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -257,12 +257,14 @@ const MyProfile: React.FC = () => {
                   <span className="text-gray-500 text-lg font-medium">$</span>
                   <input
                     type="number"
+                    name="hourlyRate"
                     className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                     value={formData.hourlyRate}
                     onChange={handleChange}
                   />
             <input
               type="range"
+              name="hourlyRate"
               className="flex-grow w-72"
               min="10"
               max="100"
@@ -318,6 +320,7 @@ const MyProfile: React.FC = () => {
                 <textarea
                   name="description"
                   value={formData.description}
+                  onChange={handleChange}
                   className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   rows={4}
                 />

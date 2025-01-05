@@ -13,6 +13,7 @@ export const isUser = (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string };
+          console.log('uuuuuuuuuuserdata',userData)
           if (userData) {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);

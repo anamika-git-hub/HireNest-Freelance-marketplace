@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import axiosConfig from "../../service/axios";
 import { FaEdit } from "react-icons/fa";
+import Loader from "../../components/shared/Loader";
 
 interface UserDetail {
   profileImage: string;
@@ -13,12 +16,18 @@ interface UserDetail {
 const MyAccount: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     phone: "",
     dob: "",
     profileImage: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword:"",
+    newPassword:"", 
+    confirmPassword:""
   });
   const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'client');
   const email = localStorage.getItem('email');
@@ -28,7 +37,13 @@ const MyAccount: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   // Fetch user details on component mount
   useEffect(() => {
@@ -80,31 +95,27 @@ const MyAccount: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const storedRole = localStorage.getItem('role');
-  //   if (storedRole) {
-  //     setUserRole(storedRole);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   localStorage.setItem('role', userRole);
-  // }, [role]);
-
 // Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
   const userId = localStorage.getItem('userId')
+  setIsLoading(true);
   try {
     const response = await axiosConfig.post('/users/update-role', { role: newRole,userId:userId });
     if (response.status === 200) {
       localStorage.setItem('role', newRole);
       setUserRole(newRole)
       console.log('Account type updated successfully');
+      
+   
+      window.location.reload();
+
     } else {
       console.error('Failed to update account type');
     }
   } catch (error) {
     console.error('Error updating account type:', error);
+  } finally {
+    setIsLoading(false); // Hide loader
   }
 };
 
@@ -122,6 +133,10 @@ const updateAccountType = async (newRole: string) => {
    if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
     updatedData.append("profileImage", fileInputRef.current.files[0]);
 }
+   if(passwordData.newPassword) {
+    updatedData.append("newPassword", passwordData.newPassword);
+    
+   }
     try {
         const response = await axiosConfig.put(`/users/update-account`, updatedData, {
           headers: {
@@ -139,11 +154,15 @@ const updateAccountType = async (newRole: string) => {
     }
   };
   
+  if (isLoading) {
+    return <Loader visible={isLoading} />;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="p-10 pt-20 bg-white rounded-lg shadow-lg">
       <div className="space-y-6">
         <div>
+        
           <h3 className="text-lg font-semibold text-gray-800 mb-6">My Account</h3>
           <div className="flex items-start space-x-6">
             {/* Profile Picture */}

@@ -6,7 +6,7 @@ export const FreelancerProfileRepository = {
     createProfile : async (data: IFreelancerProfile) => new FreelancerProfileModel(data).save(),
 
     updateProfile: async (id: string, updates: Partial<IFreelancerProfile>) => 
-        FreelancerProfileModel.findOneAndUpdate({userId:id}, updates, {new: true}),
+        FreelancerProfileModel.findOneAndUpdate({userId:id}, updates, {upsert:true,new: true}),
 
     
     getFreelancers: async () => {
