@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Formik, Field, Form, ErrorMessage } from "formik";
-import * as Yup from "yup";
 import axiosConfig from "../../service/axios";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaEye, FaEyeSlash} from "react-icons/fa";
 import Loader from "../../components/shared/Loader";
 
 interface UserDetail {
@@ -30,6 +28,13 @@ const MyAccount: React.FC = () => {
     confirmPassword:""
   });
   const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'client');
+  const [passwordVisible, setPasswordVisible] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+
   const email = localStorage.getItem('email');
   const role = localStorage.getItem('role');
 
@@ -44,6 +49,15 @@ const MyAccount: React.FC = () => {
       [name]: value,
     }));
   };
+
+  const handlePasswordVisibilityToggle = (field: 'currentPassword' | 'newPassword' | 'confirmPassword') => {
+    setPasswordVisible((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+  
+
 
   // Fetch user details on component mount
   useEffect(() => {
@@ -95,6 +109,17 @@ const MyAccount: React.FC = () => {
     }
   };
 
+
+
+  const validateCurrentPassword = () => {
+    const userId = localStorage.getItem("userId"); 
+    // const fetchCurrentPassword = axiosConfig.get(`/users/`)
+    if (passwordData.currentPassword === "123456") {
+      return true;
+    }
+    return false;
+  };
+
 // Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
   const userId = localStorage.getItem('userId')
@@ -122,6 +147,10 @@ const updateAccountType = async (newRole: string) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateCurrentPassword()) {
+      alert("Incorrect current password.");
+      return;
+    }
   
     const updatedData = new FormData();
 
@@ -312,21 +341,43 @@ const updateAccountType = async (newRole: string) => {
             {/* Current Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Current Password</label>
-              <input
-                type="password"
-                className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter current Password"
-              />
+              <div className="relative">
+                <input
+                  type={passwordVisible.currentPassword ? "text" : "password"}
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter current Password"
+                />
+                <div
+                  className="absolute right-3 top-5 cursor-pointer"
+                  onClick={() => handlePasswordVisibilityToggle("currentPassword")}
+                >
+                  {passwordVisible.currentPassword ? <FaEyeSlash /> : <FaEye />}
+                </div>
+              </div>
             </div>
 
             {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">New Password</label>
-              <input
-                type="password"
-                className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter new Password"
-              />
+              <div className="relative">
+                <input
+                  type={passwordVisible.newPassword ? "text" : "password"}
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter new password"
+                />
+                <div
+                  className="absolute right-3 top-5 cursor-pointer"
+                  onClick={() => handlePasswordVisibilityToggle("newPassword")}
+                >
+                  {passwordVisible.newPassword ? <FaEyeSlash /> : <FaEye />}
+                </div>
+              </div>
             </div>
 
             {/* Repeat New Password */}
@@ -334,11 +385,22 @@ const updateAccountType = async (newRole: string) => {
               <label className="block text-sm font-medium text-gray-700">
                 Repeat New Password
               </label>
-              <input
-                type="password"
-                className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Confirm the password"
-              />
+              <div className="relative">
+                <input
+                  type={passwordVisible.confirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Confirm new password"
+                />
+                <div
+                  className="absolute right-3 top-5 cursor-pointer"
+                  onClick={() => handlePasswordVisibilityToggle("confirmPassword")}
+                >
+                  {passwordVisible.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+                </div>
+              </div>
             </div>
           </div>
         </div>

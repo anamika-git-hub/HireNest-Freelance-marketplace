@@ -30,6 +30,14 @@ export const UserRepository = {
             { new: true } 
           );
           return updatedUser
+    },
+    updatePassword: async (userId:string,password:string) => {
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            { password },
+            { new: true } 
+          );
+          return updatedUser
     }
 
 };
