@@ -8,11 +8,30 @@ export const BookMarkUseCase = {
                     throw new Error(`Failed to create bid: ${error.message}`);
                 }
     },
-    getBookmarks : async(id: string) => {
+    getBookmarks : async(userId: string) => {
         try {
-            return await BookmarkRepository.getBookmarks(id);
+            const bookmark = await BookmarkRepository.getBookmarks(userId);
+            return bookmark
         } catch (error: any) {
-            throw new Error(`Failed to create bid: ${error.message}`);
+            throw new Error(`Failed to get bookmark: ${error.message}`);
         }
-    }
+    },
+    deleteBookmark: async (userId: string, itemId: string, type: string) => {
+        try {
+            const bookmark = await BookmarkRepository.getBookmarks(userId);
+            if (!bookmark) {
+                return false;
+            }
+            const itemIndex = bookmark.items.findIndex((item) => item.itemId.toString() === itemId && item.type === type);
+            if (itemIndex > -1) {
+                bookmark.items.splice(itemIndex, 1);
+                await bookmark.save();
+                return true;
+            }
+            return false;
+        } catch (error: any) {
+            throw new Error(`Failed to remove bookmark: ${error.message}`);
+        }
+    },
+    
 }

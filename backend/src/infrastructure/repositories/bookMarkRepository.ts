@@ -12,7 +12,8 @@ export const BookmarkRepository = {
     },
 
     getBookmarks: async (userId: string) => {
-        return await BookmarkModel.find({ userId});   
+        const bookmark = await BookmarkModel.findOne({ userId});   
+        return bookmark
     },
     
 }

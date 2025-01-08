@@ -20,11 +20,26 @@ export const BookMarkController = {
         try {
                 
             const userId = req.user?.userId || '';
-            let bookmark = BookMarkUseCase.getBookmarks(userId);
-
+            let bookmark = await BookMarkUseCase.getBookmarks(userId);
             res.status(201).json({bookmark });
         } catch (error) {
             next(error);
         }
-    }
+    },
+    deleteBookmarks: async (req: Req, res: Res, next: Next) => {
+        try {
+            const { itemId, type, userId } = req.body;
+            
+            const result = await BookMarkUseCase.deleteBookmark(userId, itemId, type);
+    
+            if (result) {
+                res.status(200).json({ message: "Bookmark removed successfully" });
+            } else {
+                res.status(404).json({ message: "Bookmark not found" });
+            }
+        } catch (error) {
+            next(error);
+        }
+    },
+    
 }

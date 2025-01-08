@@ -12,7 +12,7 @@ const TaskList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");  
   const dispatch = useDispatch();
-  const bookmarks = useSelector((state: RootState) => state.bookmarks.bookmarks);
+  const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
   const userId = localStorage.getItem('userId')
 
   useEffect(() => {
@@ -29,15 +29,39 @@ const TaskList: React.FC = () => {
       });
   }, []);
 
-  const handleBookmark = (itemId: string) => {
-    console.log('hello')
-    const type = 'task'
-    axiosConfig
-    .post('/users/bookmarks', { userId,itemId, type })
-    .catch((err) => {
-      console.error('Error adding bookmark:', err);
-    });
-  };
+  const handleBookmark = async (itemId: string) => {
+    const type = 'task';
+
+    if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
+      
+        try {
+            await axiosConfig.delete('/users/bookmarks', {
+                data: { userId, itemId, type }
+            });
+            setBookmarks(bookmarks.filter((bookmark) => bookmark.itemId !== itemId)); 
+        } catch (err) {
+            console.error('Error removing bookmark:', err);
+        }
+    } else {
+        try {
+            await axiosConfig.post('/users/bookmarks', { userId, itemId, type });
+            setBookmarks([...bookmarks, { itemId, type }]); 
+        } catch (err) {
+            console.error('Error adding bookmark:', err);
+        }
+    }
+};
+
+  useEffect(()=>{
+    const getBookmark = async() => {
+      const response = await axiosConfig.get(`/users/bookmarks`);
+      if(response){
+        setBookmarks(response.data.bookmark.items)
+      }
+    }
+    getBookmark()
+  },[])
+ 
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -86,15 +110,16 @@ const TaskList: React.FC = () => {
       <h3 className="text-lg font-semibold mb-2">{task.projectName}</h3>
        {/* Bookmark Button */}
        <button
-                onClick={() => handleBookmark(task._id)}
-                className="flex items-center ml-auto  gap-2 text-blue-600 hover:text-blue-700"
-              >
-                {bookmarks.includes(task._id) ? (
-                  <FaBookmark className="text-lg" />
-                ) : (
-                  <FaRegBookmark className="text-lg" />
-                )}
-              </button>
+    onClick={() => handleBookmark(task._id)}
+    className="flex items-center ml-auto gap-2 text-blue-600 hover:text-blue-700"
+>
+    {bookmarks.some((bookmark) => bookmark.itemId === task._id) ? (
+        <FaBookmark className="text-lg" />
+    ) : (
+        <FaRegBookmark className="text-lg" />
+    )}
+</button>
+
     
 </div>
       {/* Location and Time */}

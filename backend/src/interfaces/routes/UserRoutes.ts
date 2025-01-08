@@ -24,8 +24,8 @@ router.get('/account-detail/:id',AccountDetailController.getAccountDetail);
 router.post('/update-role',UserController.updateRole);
 
 router.post('/bookmarks',BookMarkController.createBookmarks); 
-router.get('/bookmarks',BookMarkController.getBookmarks);
-
+router.get('/bookmarks',isUser,BookMarkController.getBookmarks);
+router.delete('/bookmarks',BookMarkController.deleteBookmarks);
 
 
 export default router;
