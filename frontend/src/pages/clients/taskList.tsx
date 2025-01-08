@@ -13,6 +13,7 @@ const TaskList: React.FC = () => {
   const [error, setError] = useState<string>("");  
   const dispatch = useDispatch();
   const bookmarks = useSelector((state: RootState) => state.bookmarks.bookmarks);
+  const userId = localStorage.getItem('userId')
 
   useEffect(() => {
     axiosConfig
@@ -28,8 +29,14 @@ const TaskList: React.FC = () => {
       });
   }, []);
 
-  const handleBookmark = (id: string) => {
-    dispatch(toggleBookmark(id));
+  const handleBookmark = (itemId: string) => {
+    console.log('hello')
+    const type = 'task'
+    axiosConfig
+    .post('/users/bookmarks', { userId,itemId, type })
+    .catch((err) => {
+      console.error('Error adding bookmark:', err);
+    });
   };
 
   if (loading) return <div>Loading...</div>;

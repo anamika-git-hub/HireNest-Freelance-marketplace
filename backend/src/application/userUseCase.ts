@@ -4,6 +4,8 @@ import { UserRepository } from '../infrastructure/repositories/UserRepository';
 import { AccountDetailRepository } from '../infrastructure/repositories/accountDetail';
 import { hashPassword, comparePassword } from '../infrastructure/services/HashPassword';
 import { OtpService } from '../infrastructure/services/OtpService';
+import { encrypt ,decrypt} from '../utils/hashHelper';
+import { forgotPassword } from '../infrastructure/services/EmailService';
 
 
 export const userUseCase = {
@@ -79,6 +81,31 @@ export const userUseCase = {
     updatePassword: async (userId:string, newPassword:string) => {
         const password = await hashPassword(newPassword);
         const updatedUser = await UserRepository.updatePassword(userId,password);
+        if (!updatedUser) {
+            throw {statusCode:404, message:'User not found'};
+          }
+          return {updatedUser}
+    },
+    forgotPassword: async (email: string) => {
+        let user = await UserRepository.findUserByEmail(email); 
+        if (!user) {
+            throw new Error("User not found with the provided email");
+        }
+        const userId: string = user._id.toString(); 
+       const token =  await  encrypt(userId);
+       
+        const resetLink = `http://localhost:3000/reset-password/${token}`
+       await forgotPassword(email,resetLink)
+       
+       console.log('token',token)
+    },
+
+    resetPassword: async (password:string, id: string) => {
+      
+       const userId = await decrypt(id);
+       console.log('ppppp',password)
+       const newPassword = await hashPassword(password);
+        const updatedUser = await UserRepository.updatePassword(userId,newPassword);
         if (!updatedUser) {
             throw {statusCode:404, message:'User not found'};
           }

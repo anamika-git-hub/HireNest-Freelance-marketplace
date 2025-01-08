@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 //---------Shared----------------//
 import Home from './pages/shared/Home';
 import Login from './pages/shared/Login';
+import ForgotPassword from './pages/shared/forgotPassword';
+import ResetPassword from './pages/shared/resetPassword';
 import Register from './pages/shared/Register';
 import OTPVerification from './pages/shared/Otp';
 import LayoutWrapper from './components/shared/LayoutWrapper';
@@ -13,6 +15,7 @@ import Dashboard from './pages/shared/Dashboard';
 import About from './pages/shared/about';
 import Contact from './pages/shared/contact';
 import Bookmarks from './pages/shared/bookmarks';
+import Chat from './components/chat/chatPage';
 
 //------------Admin------------------//
 import AdminLogin from './pages/admin/Login';
@@ -38,9 +41,11 @@ import TaskDetail from './pages/clients/taskDetail';
 import MyTaskList from './pages/clients/myTask';
 import BiddersList from './pages/clients/bidList';
 import TaskDetailForm from './pages/clients/myTaskDetail';
+import RequestList from './pages/clients/myRequests';
 
 //--------------Others------------------//
 import PrivateRoute from './context/adminPrivateRoute';
+import UserPrivateRoute from './context/userPrivateRoute';
 import UserSidebar from './components/shared/UserSideBar';
 import { Toaster } from 'react-hot-toast';
 
@@ -53,30 +58,34 @@ const App: React.FC = () => {
         {/* ---------shared ------------------*/}
         <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
         <Route path="/login" element={<LayoutWrapper><Login /></LayoutWrapper>} />
+        <Route path="/forgot-password" element={<LayoutWrapper><ForgotPassword /></LayoutWrapper>} />
+        <Route path="/reset-password/:id" element={<LayoutWrapper><ResetPassword /></LayoutWrapper>} />
         <Route path="/register" element={<LayoutWrapper><Register /></LayoutWrapper>} />
         <Route path="/otp" element={<LayoutWrapper><OTPVerification /></LayoutWrapper>} />
         <Route path="/account-setup" element={<LayoutWrapper><AccountSetup /></LayoutWrapper>} />
-        <Route path="/settings" element={<UserSidebar><MyAccount /></UserSidebar>} />
-        <Route path="/dashboard" element={<UserSidebar><Dashboard /></UserSidebar>} />
+        <Route path="/settings" element={<UserPrivateRoute><UserSidebar><MyAccount /></UserSidebar></UserPrivateRoute>} />
+        <Route path="/dashboard" element={<UserPrivateRoute><UserSidebar><Dashboard /></UserSidebar></UserPrivateRoute>} />
         <Route path="/about" element={<LayoutWrapper><About/></LayoutWrapper>} />
         <Route path="/contact" element={<LayoutWrapper><Contact/></LayoutWrapper>} />
-        <Route path="/bookmarks" element={<UserSidebar><Bookmarks/></UserSidebar>} />
+        <Route path="/bookmarks" element={<UserPrivateRoute><UserSidebar><Bookmarks/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/messages" element={<UserPrivateRoute><UserSidebar><Chat/></UserSidebar></UserPrivateRoute>} />
 
          {/* ---------freelancer--------------- */}
-        <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
-        <Route path="/client/freelancer-list" element={<LayoutWrapper><FreelancerList/></LayoutWrapper>} />
-        <Route path="/client/freelancer-detail/:id" element={<LayoutWrapper><FreelancerDetail/></LayoutWrapper>} />
-        <Route path="/freelancer/dashboard" element={<UserSidebar><DashboardFreelancer/></UserSidebar>} />
-        <Route path="/freelancer/bids" element={<UserSidebar><ActiveBids/></UserSidebar>} />
-        <Route path="/freelancer/my-profile" element={<UserSidebar><MyProfile/></UserSidebar>} />
+        <Route path="/freelancer/freelancer-profile" element={<UserPrivateRoute><LayoutWrapper><FreelancerProfile /></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/client/freelancer-list" element={<UserPrivateRoute><LayoutWrapper><FreelancerList/></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/client/freelancer-detail/:id" element={<UserPrivateRoute><LayoutWrapper><FreelancerDetail/></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/freelancer/dashboard" element={<UserPrivateRoute><UserSidebar><DashboardFreelancer/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/freelancer/bids" element={<UserPrivateRoute><UserSidebar><ActiveBids/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/freelancer/my-profile" element={<UserPrivateRoute><UserSidebar><MyProfile/></UserSidebar></UserPrivateRoute>} />
 
          {/* ----------client-------------------*/}
-        <Route path="/client/task-form" element={<LayoutWrapper><TaskSubmissionForm/></LayoutWrapper>} />
-        <Route path="/freelancer/task-list" element={<LayoutWrapper><TaskList /></LayoutWrapper>} />
-        <Route path="/freelancer/task-detail/:id" element={<LayoutWrapper><TaskDetail /></LayoutWrapper>} />
-        <Route path="/client/tasks" element={<UserSidebar><MyTaskList /></UserSidebar>} />
-        <Route path="/client/bidders-list/:id" element={<UserSidebar><BiddersList /></UserSidebar>} />
-        <Route path="/client/my-task-detail/:id" element={<UserSidebar><TaskDetailForm /></UserSidebar>} />
+        <Route path="/client/task-form" element={<UserPrivateRoute><LayoutWrapper><TaskSubmissionForm/></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/freelancer/task-list" element={<UserPrivateRoute><LayoutWrapper><TaskList /></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/freelancer/task-detail/:id" element={<UserPrivateRoute><LayoutWrapper><TaskDetail /></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/client/tasks" element={<UserPrivateRoute><UserSidebar><MyTaskList /></UserSidebar></UserPrivateRoute>} />
+        <Route path="/client/bidders-list/:id" element={<UserPrivateRoute><UserSidebar><BiddersList /></UserSidebar></UserPrivateRoute>} />
+        <Route path="/client/my-task-detail/:id" element={<UserPrivateRoute><UserSidebar><TaskDetailForm /></UserSidebar></UserPrivateRoute>} />
+        <Route path="/client/my-request-list" element={<UserPrivateRoute><UserSidebar><RequestList/></UserSidebar></UserPrivateRoute>} />
 
         {/* -----------admin-------------------*/}
         <Route path="/admin/login" element={<AdminLogin />} />

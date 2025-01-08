@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, ChangeEvent, FormEvent} from "react";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
 
@@ -14,15 +14,27 @@ interface FreelancerDetail {
   attachments : string []
 }
 
+interface RequestFormData {
+  fullName:string;
+  email: string;
+  description: string;
+} 
+
 const FreelancerDetail: React.FC = () => {
 
   const [freelancerDetail, setFreelancerDetail] = useState<FreelancerDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
+   const [formData, setFormData] = useState<RequestFormData>({
+      fullName: "",
+      email: "",
+      description: "",
+    });
   
 
   const {id}  = useParams<{id: string}>();
+  const userId = localStorage.getItem('userId')
   
  useEffect(() => {
   const getFreelancerDetail = async () => {
@@ -38,6 +50,29 @@ const FreelancerDetail: React.FC = () => {
   };
   getFreelancerDetail();
  }, [id])
+
+
+ const handleChange = (
+  e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement >
+) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+  try {
+    const response = await axiosConfig.post(`client/create-request`, {...formData,freelancerId:id,requesterId:userId});
+    alert("Request placed successfully!");
+    console.log(response.data);
+  } catch (error) {
+    console.error("Error placing request:", error);
+    alert("Failed to place request. Please try again.");
+  }
+};
 
  if (loading) return <div> Loading...</div>;
  if(error ) return <div>{error}</div>
@@ -158,44 +193,56 @@ const FreelancerDetail: React.FC = () => {
               <h2 className="text-xl font-semibold mt-2">Connect with {freelancerDetail.name}</h2>
               <p className="text-sm text-gray-500">Responds within a few days</p>
             </div>
-            <form className="space-y-4">
+            <form
+              onSubmit={handleSubmit}
+             className="space-y-4">
               <p className="text-center text-gray-600 mb-4">
                 I am interested in working with {freelancerDetail.name}
               </p>
               <div>
-                <label htmlFor="projectDetails" className="block text-sm font-medium text-gray-700">
-                  Project Details
+          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+            Full Name
+          </label>
+          <input
+            type="text"
+            name="fullName"
+            id="fullName"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Enter your full name"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        {/* Email Field */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  Description
                 </label>
                 <textarea
-                  id="projectDetails"
+                  id="Description"
+                  name="description"
                   rows={4}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={formData.description}
+                  onChange={handleChange}
                   placeholder="Describe your project..."
-                />
-              </div>
-              <div>
-                <label htmlFor="targetDate" className="block text-sm font-medium text-gray-700">
-                  Target Date
-                </label>
-                <select
-                  id="targetDate"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                >
-                  <option>Please select...</option>
-                  <option>1-2 weeks</option>
-                  <option>3-4 weeks</option>
-                  <option>1-2 months</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="budget" className="block text-sm font-medium text-gray-700">
-                  Project Budget
-                </label>
-                <input
-                  type="number"
-                  id="budget"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter amount..."
                 />
               </div>
               <button

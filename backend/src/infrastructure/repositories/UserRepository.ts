@@ -4,6 +4,7 @@ import { UserDetailModel } from "../models/UserDetailModel";
 export const UserRepository = {
 
     findUserByEmail: async (email: string) => UserModel.findOne({ email }),
+    findUserById: async (id: string) => UserModel.findById(id),
     findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}).populate('userId'),
     
     createUser: async (userData: any) => new UserModel(userData).save(),

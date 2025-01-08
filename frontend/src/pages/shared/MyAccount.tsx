@@ -113,7 +113,7 @@ const MyAccount: React.FC = () => {
 
   const validateCurrentPassword = () => {
     const userId = localStorage.getItem("userId"); 
-    // const fetchCurrentPassword = axiosConfig.get(`/users/`)
+    // const fetchCurrentPassword = axiosConfig.get(`/users/password`)
     if (passwordData.currentPassword === "123456") {
       return true;
     }

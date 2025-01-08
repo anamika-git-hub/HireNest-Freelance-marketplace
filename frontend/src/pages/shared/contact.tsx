@@ -68,7 +68,7 @@ const ContactPage: React.FC = () => {
               <input
                 type="text"
                 id="name"
-                className="px-2 mt-1 block w-full rounded-md border-2 border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
+                className="px-2 mt-1 block w-full rounded-md border-2 border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
                 placeholder="Your Name"
               />
             </div>
@@ -76,7 +76,7 @@ const ContactPage: React.FC = () => {
               <input
                 type="email"
                 id="email"
-                className="px-2 mt-1 block w-full rounded-md border-2 border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
+                className="px-2 mt-1 block w-full rounded-md border-2 border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
                 placeholder="Your Email"
               />
             </div>
@@ -85,7 +85,7 @@ const ContactPage: React.FC = () => {
             <input
               type="text"
               id="subject"
-              className="px-2 mt-1 block w-full rounded-md border-2 border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
+              className="px-2 mt-1 block w-full rounded-md border-2 border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-10"
               placeholder="Subject"
             />
           </div>
@@ -93,7 +93,7 @@ const ContactPage: React.FC = () => {
             <textarea
               id="message"
               rows={4}
-              className="px-2 mt-1 block w-full rounded-md border-2 border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-20"
+              className="px-2 mt-1 block w-full rounded-md border-2 border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:text-sm h-20"
               placeholder="Message"
             ></textarea>
           </div>

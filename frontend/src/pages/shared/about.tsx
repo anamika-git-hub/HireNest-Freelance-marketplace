@@ -41,7 +41,7 @@ const About: React.FC = () => {
       </div>
 
       {/* Numbers Section */}
-      <div className="bg-gray-50 py-12 px-4  sm:px-8 lg:px-20">
+      <div className="bg-gray-100 py-12 px-4  sm:px-8 lg:px-20">
       
         <div className="text-center mb-12">
           <h2 className="text-4xl font-semibold">Our amazing numbers</h2>
@@ -74,7 +74,7 @@ const About: React.FC = () => {
       </div>
 
       {/* Values Section */}
-      <div className="bg-slate-200 flex gap-8 py-12 px-4 sm:px-8 lg:px-20">
+      <div className="bg-white flex gap-8 py-12 px-4 sm:px-8 lg:px-20">
         <div className="w-full lg:w-1/4 ">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-semibold">The values that drive everything we do</h2>

@@ -34,7 +34,6 @@ const TaskDetail: React.FC = () => {
 
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem('userId')
-  console.log('uuuuuuuuuu',userId)
 
   useEffect(() => {
     const fetchTaskDetails = async () => {

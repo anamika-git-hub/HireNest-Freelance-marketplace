@@ -58,6 +58,24 @@ export const UserController = {
         } catch (error) {
           next(error)   
         }
+    },
+    forgotPassword: async (req: Req, res: Res, next: Next) => {
+        try {
+            const {email} = req.body;
+            const result = await userUseCase.forgotPassword(email);
+            res.status(200).json(result)
+        } catch (error) {
+            next(error)
+        }
+    },
+    resetPassword: async (req: Req, res: Res, next: Next) => {
+        try {
+            const {password,id} = req.body;
+            const result = await userUseCase.resetPassword(password,id);
+            res.status(200).json(result)
+        } catch (error) {
+            next(error)
+        }
     }
    
 }

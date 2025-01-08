@@ -8,6 +8,7 @@ import { loginValidationSchema } from "../../components/Schemas/signInValidation
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
@@ -126,7 +127,10 @@ const Login: React.FC = () => {
               Login
             </button>
           </form>
-          <div className="text-center my-4 text-white">or</div>
+          <Link to={'/forgot-password'} className="text-start my-4 text-blue-700">
+            Forgot password?
+          </Link>
+          <div className="text-center my-4 text-blue-600">or</div>
           {/* Google Login Button */}
           <div className="flex justify-center">
             <GoogleLogin

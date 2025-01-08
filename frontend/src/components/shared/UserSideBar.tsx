@@ -51,7 +51,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       return (
         <>
           <NavLink
-            to="/user/jobs"
+            to="/client/my-request-list"
             className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
           >
             <FaSuitcase className="mr-3" /> Requests
@@ -79,7 +79,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <MdDashboard className="mr-3" /> Dashboard
             </NavLink>
             <NavLink
-              to="/user/messages"
+              to="/messages"
               className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
             >
               <FaEnvelope className="mr-3" /> Messages

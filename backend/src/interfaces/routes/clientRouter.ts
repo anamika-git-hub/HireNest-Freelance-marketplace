@@ -2,7 +2,7 @@ import express from 'express';
 
 import { TaskController } from '../controllers/taskController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
-import { BidController } from '../controllers/bidController';
+import { RequestController } from '../controllers/requestController';
 import { uploadTaskFiles } from '../middlewares/uploadFileImages';  
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { isUser } from '../middlewares/auth';
@@ -19,4 +19,10 @@ router.get('/my-tasks',isUser,TaskController.getTasksByUserId);
 router.get('/freelancer-list',isUser,FreelancerProfileController.getFreelancers);
 router.get('/freelancer/:id',isUser,FreelancerProfileController.getFreelancerById);
 
+
+router.post("/create-request",isUser,  RequestController.createRequest);
+router.put("/update-request/:id", isUser, RequestController.updateRequest);
+router.delete("/delete-request/:id",isUser, RequestController.deleteRequest);
+router.get("/client-request",isUser,RequestController.getRequestByUserId)
+router.get("/request/:id",isUser, RequestController.getRequestById);
 export default router;

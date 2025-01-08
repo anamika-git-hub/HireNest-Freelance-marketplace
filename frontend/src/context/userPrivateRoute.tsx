@@ -7,16 +7,16 @@ interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+const UserPrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   // const currentUser = useSelector((state: RootState) => state.user.currentUser);
-const currentUser = localStorage.getItem('accessToken')
 
-  if (!currentUser) {
-    return <Navigate to="/admin/login" replace />;
+  const userRole = localStorage.getItem('role') 
+
+  if(!userRole) {
+    return <Navigate to="/" replace />;
   }
-
 
   return <>{children}</>;
 };
 
-export default PrivateRoute;
+export default UserPrivateRoute;
