@@ -84,17 +84,24 @@ const FreelancerBookmarks: React.FC = () => {
             >
               <div className="w-3/4">
                 <div className="flex items-center space-x-2">
+                <img
+                    src={freelancer.profileImage || "/default-avatar.jpg"}
+                    alt={freelancer.name}
+                    className="w-12 h-12 rounded-full border-2 border-gray-300"
+                  />
+                  <div>
                   <h2 className="text-lg font-medium">{freelancer.name}</h2>
-                 
+                  <div className="flex items-center text-gray-500 text-sm ">
+                  {freelancer.tagline}
+                </div>
+                </div>
                   {/* {task.isExpiring && (
                     <span className="bg-yellow-100 text-yellow-600 text-xs font-semibold px-2 py-1 rounded">
                       Expiring
                     </span>
                   )} */}
                 </div>
-                <div className="flex items-center text-gray-500 text-sm mt-2">
-                  {freelancer.tagline}
-                </div>
+              
                
               </div>
              

@@ -126,14 +126,14 @@ const ActiveBids: React.FC = () => {
         </div>
         <ul>
           {bids.map((bid, index) => (
-              <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
             <li
               key={index}
               className="flex justify-between items-center border-b last:border-b-0 py-4"
             >
               <div>
+              <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
                 <h2 className="text-lg font-medium">{bid.taskId.projectName}</h2>
-                
+                </Link>
                 <div className="flex items-center space-x-2 mt-2">
                   <button
                     onClick={() => handleEditClick(bid)}
@@ -163,7 +163,6 @@ const ActiveBids: React.FC = () => {
                 
               </div>
             </li>
-            </Link>
           ))}
         </ul>
       </div>
