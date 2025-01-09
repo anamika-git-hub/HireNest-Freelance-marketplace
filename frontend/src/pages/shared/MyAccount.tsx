@@ -111,14 +111,23 @@ const MyAccount: React.FC = () => {
 
 
 
-  const validateCurrentPassword = () => {
+  const validateCurrentPassword = async () => {
     const userId = localStorage.getItem("userId"); 
-    // const fetchCurrentPassword = axiosConfig.get(`/users/password`)
-    if (passwordData.currentPassword === "123456") {
-      return true;
+    console.log(userId)
+    const response = await axiosConfig.post("/users/validate-password", {
+      userId,
+      currentPassword: passwordData.currentPassword
+    });
+    console.log('reeeleldk',response)
+   
+    if (response.status === 200) {
+      return true; 
+    } else {
+      alert("Incorrect current password.");
+      return false;
     }
-    return false;
   };
+  
 
 // Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
@@ -140,14 +149,16 @@ const updateAccountType = async (newRole: string) => {
   } catch (error) {
     console.error('Error updating account type:', error);
   } finally {
-    setIsLoading(false); // Hide loader
+    setIsLoading(false);
   }
 };
 
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('lksfjlkdjf')
     e.preventDefault();
-    if (!validateCurrentPassword()) {
+    const isPasswordValid = await validateCurrentPassword();
+    if (!isPasswordValid) {
       alert("Incorrect current password.");
       return;
     }

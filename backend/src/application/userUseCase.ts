@@ -78,6 +78,16 @@ export const userUseCase = {
           }
           return {updatedUser}
     },
+    validatePassword: async (userId:string, currentPassword:string) => {
+        
+        const user = await UserRepository.findUserById(userId);
+        if(!user) throw { statusCode:404, message:'User not found'};
+        
+         const isValidPassword = await comparePassword(currentPassword,user.password);
+         return isValidPassword
+        
+    },
+   
     updatePassword: async (userId:string, newPassword:string) => {
         const password = await hashPassword(newPassword);
         const updatedUser = await UserRepository.updatePassword(userId,password);

@@ -66,7 +66,6 @@ export const TaskController = {
     getTasksByUserId: async(req: CustomRequest, res: Res, next: Next) => {
         try {
             const userId = req.user?.userId || '';
-            console.log('fkjfdkfjsj',userId)
             const task = await TaskUseCase.getTasksByUserId(userId);
             res.status(200).json(task);
         } catch (error) {

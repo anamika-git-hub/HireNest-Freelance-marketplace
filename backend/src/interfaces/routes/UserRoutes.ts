@@ -15,17 +15,18 @@ router.post ('/google-signup',UserController.googleSignUp)
 router.post ('/verify-otp',UserController.verifyOtp);
 router.post ('/resend-otp', UserController.resendOtp);
 router.post('/login', UserController.login);
+router.post('/validate-password',UserController.validatePassword);
 router.post('/forgot-password',UserController.forgotPassword);
 router.post('/reset-password',UserController.resetPassword);
 
 router.post('/setup-account', uploadProfileImages, AccountDetailController.setUpAccount);
 router.put ('/update-account',uploadProfileImages,isUser, AccountDetailController.updateAccount);
-router.get('/account-detail/:id',AccountDetailController.getAccountDetail);
-router.post('/update-role',UserController.updateRole);
+router.get('/account-detail/:id',isUser,AccountDetailController.getAccountDetail);
+router.post('/update-role',isUser,UserController.updateRole);
 
-router.post('/bookmarks',BookMarkController.createBookmarks); 
+router.post('/bookmarks',isUser,BookMarkController.createBookmarks); 
 router.get('/bookmarks',isUser,BookMarkController.getBookmarks);
-router.delete('/bookmarks',BookMarkController.deleteBookmarks);
+router.delete('/bookmarks',isUser,BookMarkController.deleteBookmarks);
 
 
 export default router;

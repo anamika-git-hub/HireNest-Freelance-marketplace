@@ -1,6 +1,10 @@
 import { Req, Res, Next } from "../../infrastructure/types/serverPackageTypes";
 import { userUseCase } from "../../application/userUseCase";
 
+
+interface CustomRequest extends Req {
+    user?: { userId: string }; 
+  }
 export const UserController = {
     signUp: async (req: Req, res: Res, next: Next)=> {
         try {
@@ -59,6 +63,25 @@ export const UserController = {
           next(error)   
         }
     },
+    validatePassword: async (req: Req, res: Res, next: Next) => {
+        try {
+            const { userId, currentPassword } = req.body;
+            console.log('userId, currentPassword:', userId, currentPassword);
+            
+            const result = await userUseCase.validatePassword(userId, currentPassword);
+            console.log('Password validation result:', result);
+    
+            if (!result) {
+                res.json(result);
+            } else {
+                res.status(200).json({ message: 'Password is correct.' });
+            }
+        } catch (error) {
+            console.error('Error in password validation:', error);
+            next(error);   
+        }
+    },
+
     forgotPassword: async (req: Req, res: Res, next: Next) => {
         try {
             const {email} = req.body;

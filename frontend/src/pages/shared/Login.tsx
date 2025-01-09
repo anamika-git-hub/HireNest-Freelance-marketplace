@@ -64,6 +64,7 @@ const Login: React.FC = () => {
 
           toast.success("User logged in successfully");
           navigate("/");
+          window.location.reload()
         }
       } catch (error: any) {
         console.log("Login failed:", error);
