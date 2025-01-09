@@ -3,6 +3,7 @@ import axiosConfig from "../../service/axios";
 import { FaUsers, FaEdit, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import Loader from "../../components/shared/Loader";
 
 
 interface Task {
@@ -106,7 +107,7 @@ const MyTaskList: React.FC = () => {
 
 
   if (loading) {
-    return <div>Loading tasks...</div>;
+    return <Loader visible={loading} />;
   }
 
   if (error) {

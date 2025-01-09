@@ -2,6 +2,7 @@ import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { FaRegBookmark, FaCopy, FaShareAlt } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
+import Loader from "../../components/shared/Loader";
 
 interface TaskDetails {
   projectName: string;
@@ -116,7 +117,7 @@ const TaskDetail: React.FC = () => {
   };
   
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
 
   if (!taskDetails) return <div>No task found</div>;

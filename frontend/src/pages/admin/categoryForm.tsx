@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import { useFormik } from "formik";
 import { categoryValidationSchema } from "../../components/Schemas/categoryValidationSchema";
+import Loader from "../../components/shared/Loader";
 
 const CategoryForm: React.FC = () => {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ const CategoryForm: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+      return <Loader visible={loading} />;
   }
 
   return (

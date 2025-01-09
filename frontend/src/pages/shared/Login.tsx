@@ -33,7 +33,7 @@ const Login: React.FC = () => {
   
         dispatch(loginUser(user));
         toast.success("User logged in successfully");
-        navigate("/");
+        navigate("/account-setup");
       }
      } catch (error) {
       toast.error('There was an error during signUp')

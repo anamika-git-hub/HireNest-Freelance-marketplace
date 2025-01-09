@@ -3,6 +3,7 @@ import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import FilterSidebar from "../../components/shared/FilterSideBar";
 import {FaBookmark, FaRegBookmark} from "react-icons/fa";
+import Loader from "../../components/shared/Loader";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -59,7 +60,7 @@ const TaskList: React.FC = () => {
   },[])
  
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
   
   return (

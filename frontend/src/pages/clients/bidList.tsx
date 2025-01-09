@@ -2,6 +2,7 @@ import React,{useState,useEffect} from "react";
 import { FaUser,FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import axiosConfig from "../../service/axios";
+import Loader from "../../components/shared/Loader";
 
 interface Bid {
  rate:string;
@@ -55,7 +56,8 @@ const BiddersList: React.FC = () => {
       }, [id]);
     
       if (loading) {
-        return <div>Loading bidders...</div>;
+          return <Loader visible={loading} />;
+        
       }
     
       if (error) {

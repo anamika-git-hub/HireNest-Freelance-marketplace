@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
+import Loader from "../../components/shared/Loader";
 
 interface Bid {
   _id: string;
@@ -111,7 +112,7 @@ const ActiveBids: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader visible={loading} />;
   }
 
   if (error) {

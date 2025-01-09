@@ -175,31 +175,34 @@ const handleSubmit = async (e: FormEvent) => {
 
        {/* Modal */}
        {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-          <button
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-8">
+      {/* Close Button */}
+      <button
         onClick={() => setShowModal(false)}
-        className=" top-3 right-3 text-gray-900 hover:text-gray-600 focus:outline-none"
+        className="relative top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none"
         aria-label="Close"
       >
         ✖
       </button>
-            <div className="text-center mb-6">
-              <img
-                src={freelancerDetail.profileImage || "https://via.placeholder.com/50"}
-                alt="Profile"
-                className="w-12 h-12 rounded-full mx-auto"
-              />
-              <h2 className="text-xl font-semibold mt-2">Connect with {freelancerDetail.name}</h2>
-              <p className="text-sm text-gray-500">Responds within a few days</p>
-            </div>
-            <form
-              onSubmit={handleSubmit}
-             className="space-y-4">
-              <p className="text-center text-gray-600 mb-4">
-                I am interested in working with {freelancerDetail.name}
-              </p>
-              <div>
+
+      <div className="text-center mb-6">
+        <img
+          src={freelancerDetail.profileImage || "https://via.placeholder.com/50"}
+          alt="Profile"
+          className="w-16 h-16 rounded-full mx-auto mb-4"
+        />
+        <h2 className="text-2xl font-semibold text-gray-800">Connect with {freelancerDetail.name}</h2>
+        <p className="text-sm text-gray-500 mt-2">Responds within a few days</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <p className="text-center text-gray-600 mb-4">
+          I am interested in working with {freelancerDetail.name}
+        </p>
+
+        {/* Full Name Field */}
+        <div>
           <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
             Full Name
           </label>
@@ -207,7 +210,7 @@ const handleSubmit = async (e: FormEvent) => {
             type="text"
             name="fullName"
             id="fullName"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
             placeholder="Enter your full name"
             value={formData.fullName}
             onChange={handleChange}
@@ -224,37 +227,42 @@ const handleSubmit = async (e: FormEvent) => {
             type="email"
             name="email"
             id="email"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleChange}
             required
           />
         </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <textarea
-                  id="Description"
-                  name="description"
-                  rows={4}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Describe your project..."
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
-              >
-                Send Message
-              </button>
-            </form>
-          </div>
+
+        {/* Description Field */}
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows={5}
+            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Describe your project..."
+          />
         </div>
-      )}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+        >
+          Send Message
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+
 
       {/* Stats Section */}
 <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6">

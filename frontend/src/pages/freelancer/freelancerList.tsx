@@ -3,6 +3,7 @@ import axiosConfig from "../../service/axios";
 import FilterSidebar from "../../components/shared/FilterSideBar";
 import { Link } from "react-router-dom";
 import { FaStar, FaRegStar } from "react-icons/fa";
+import Loader from "../../components/shared/Loader";
 
 const FreelancerList: React.FC = () => {
   const [freelancers, setFreelancers] = useState<any[]>([]);
@@ -56,7 +57,7 @@ const FreelancerList: React.FC = () => {
     getBookmark()
   },[])
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
   const categories = ["All Categories", "Web Development", "Graphic Design"];
 
