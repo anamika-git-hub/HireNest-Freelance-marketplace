@@ -14,7 +14,7 @@ import AccountSetup from './pages/shared/accountSetup';
 import Dashboard from './pages/shared/Dashboard';
 import About from './pages/shared/about';
 import Contact from './pages/shared/contact';
-import Bookmarks from './pages/shared/bookmarks';
+
 import Chat from './components/chat/chatPage';
 
 //------------Admin------------------//
@@ -33,6 +33,7 @@ import FreelancerDetail from './pages/freelancer/freelancerDetail';
 import DashboardFreelancer from './pages/freelancer/dashboardFreelancer';
 import ActiveBids from './pages/freelancer/Mybids';
 import MyProfile from './pages/freelancer/MyProfile';
+import TaskBookmarks from './pages/freelancer/taskBookmarks';
 
 //--------------Clients----------------//
 import TaskList from './pages/clients/taskList';
@@ -42,6 +43,8 @@ import MyTaskList from './pages/clients/myTask';
 import BiddersList from './pages/clients/bidList';
 import TaskDetailForm from './pages/clients/myTaskDetail';
 import RequestList from './pages/clients/myRequests';
+
+import FreelancerBookmarks from './pages/clients/freelancerBookamark';
 
 //--------------Others------------------//
 import PrivateRoute from './context/adminPrivateRoute';
@@ -67,7 +70,6 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<UserPrivateRoute><UserSidebar><Dashboard /></UserSidebar></UserPrivateRoute>} />
         <Route path="/about" element={<LayoutWrapper><About/></LayoutWrapper>} />
         <Route path="/contact" element={<LayoutWrapper><Contact/></LayoutWrapper>} />
-        <Route path="/bookmarks" element={<UserPrivateRoute><UserSidebar><Bookmarks/></UserSidebar></UserPrivateRoute>} />
         <Route path="/messages" element={<UserPrivateRoute><UserSidebar><Chat/></UserSidebar></UserPrivateRoute>} />
 
          {/* ---------freelancer--------------- */}
@@ -77,6 +79,7 @@ const App: React.FC = () => {
         <Route path="/freelancer/dashboard" element={<UserPrivateRoute><UserSidebar><DashboardFreelancer/></UserSidebar></UserPrivateRoute>} />
         <Route path="/freelancer/bids" element={<UserPrivateRoute><UserSidebar><ActiveBids/></UserSidebar></UserPrivateRoute>} />
         <Route path="/freelancer/my-profile" element={<UserPrivateRoute><UserSidebar><MyProfile/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/task-bookmarks" element={<UserPrivateRoute><UserSidebar><TaskBookmarks/></UserSidebar></UserPrivateRoute>} />
 
          {/* ----------client-------------------*/}
         <Route path="/client/task-form" element={<UserPrivateRoute><LayoutWrapper><TaskSubmissionForm/></LayoutWrapper></UserPrivateRoute>} />
@@ -86,6 +89,7 @@ const App: React.FC = () => {
         <Route path="/client/bidders-list/:id" element={<UserPrivateRoute><UserSidebar><BiddersList /></UserSidebar></UserPrivateRoute>} />
         <Route path="/client/my-task-detail/:id" element={<UserPrivateRoute><UserSidebar><TaskDetailForm /></UserSidebar></UserPrivateRoute>} />
         <Route path="/client/my-request-list" element={<UserPrivateRoute><UserSidebar><RequestList/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/freelancer-bookmarks" element={<UserPrivateRoute><UserSidebar><FreelancerBookmarks/></UserSidebar></UserPrivateRoute>} />
 
         {/* -----------admin-------------------*/}
         <Route path="/admin/login" element={<AdminLogin />} />

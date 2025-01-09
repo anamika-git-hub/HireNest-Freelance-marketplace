@@ -1,11 +1,8 @@
 import React ,{useState,useEffect}from "react";
-import { useSelector,useDispatch } from "react-redux";
 import axiosConfig from "../../service/axios";
-import { FaUsers, FaEdit, FaTrash } from "react-icons/fa";
+import { FaUsers, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
-import { RootState } from "../../store/store";
-import { removeBookmark } from "../../store/bookmarkSlice";
-
+import { Link } from "react-router-dom";
 
 interface Task {
     _id: string;
@@ -13,29 +10,74 @@ interface Task {
     category: string;
     timeline: string;
     timeLeft?: string;
-    bids?: number;
 }
 
-const Bookmarks: React.FC = () => {
-  const bookmarks = useSelector((state: RootState) => state.bookmarks.bookmarks);
-  const [tasks, setTasks] = useState<Task[]>([]);
+const TaskBookmarks: React.FC = () => {
+  const [bookmarks, setBookmarks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    // Fetch all tasks
-    axiosConfig.get("/freelancers/tasks-list").then((response) => {
-      setTasks(response.data.data);
-    });
+    const getBookmarksAndTasks = async () => {
+      try {
+        const bookmarkResponse = await axiosConfig.get("/users/bookmarks");
+        const bookmarksData = bookmarkResponse.data.bookmark.items;
+  
+        const taskBookmarks = bookmarksData.filter((bookmark:{type:string}) => bookmark.type === "task");
+  
+        const taskResponse = await axiosConfig.get("/freelancers/tasks-list");
+        const tasks = taskResponse.data.data; 
+        
+        const matchedTasks = tasks.filter((task:any) =>
+          taskBookmarks.some((bookmark:{itemId:string}) => bookmark.itemId === task._id)
+        ) .map((task: Task) => ({
+          ...task,
+          timeLeft: calculateTimeLeft(task.timeline),
+        }));
+  
+        setBookmarks(matchedTasks);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching bookmarks or tasks", err);
+        setError("Failed to fetch bookmarks or tasks");
+        setLoading(false);
+      }
+    };
+  
+    getBookmarksAndTasks();
   }, []);
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBookmarks((prevTasks) =>
+        prevTasks.map((task) => ({
+          ...task,
+          timeLeft: calculateTimeLeft(task.timeline),
+        }))
+      );
+    }, 60000); 
 
-  const handleRemove = (id: string) => {
-    dispatch(removeBookmark(id));
+    return () => clearInterval(timer); 
+  }, [bookmarks]);
+
+
+  const handleRemove = async (id: string) => {
+    const userId = localStorage.getItem('userId')
+    
+    const confirmed = window.confirm("Are you sure you want to remove this bookmark?");
+    if(confirmed){
+      try {
+        await axiosConfig.delete("/users/bookmarks", {
+          data: {userId, itemId: id, type: "task" }, 
+        });
+    
+        setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== id));
+    
+      } catch (err) {
+        console.error("Error removing bookmark:", err);
+      }
+    }
   };
-
-
-  const bookmarkedTasks = tasks.filter((task) => bookmarks.includes(task._id));
 
   const calculateTimeLeft = (timeline: string): string => {
     const deadline = new Date(timeline);
@@ -53,20 +95,6 @@ const Bookmarks: React.FC = () => {
     return `${days} days, ${hours} hours left`;
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => ({
-          ...task,
-          timeLeft: calculateTimeLeft(task.timeline),
-        }))
-      );
-    }, 60000); 
-
-    return () => clearInterval(timer); 
-  }, [tasks]);
-
-
   if (loading) {
     return <div>Loading tasks...</div>;
   }
@@ -82,7 +110,8 @@ const Bookmarks: React.FC = () => {
           <FaUsers className="mr-2" /> Bookmarked Tasks
         </div>
         <ul>
-          {bookmarkedTasks.map((task, index) => (
+          {bookmarks.map((task, index) => (
+                <Link to={`/freelancer/task-detail/${task._id}`}>
             <li
               key={index}
               className="flex justify-between items-center border-b last:border-b-0 py-4"
@@ -90,6 +119,7 @@ const Bookmarks: React.FC = () => {
               <div className="w-3/4">
                 <div className="flex items-center space-x-2">
                   <h2 className="text-lg font-medium">{task.projectName}</h2>
+                  
                   {/* {task.isExpiring && (
                     <span className="bg-yellow-100 text-yellow-600 text-xs font-semibold px-2 py-1 rounded">
                       Expiring
@@ -112,6 +142,8 @@ const Bookmarks: React.FC = () => {
                   </button>
                 </div>
             </li>
+            </Link>
+
           ))}
         </ul>
       </div>
@@ -119,4 +151,4 @@ const Bookmarks: React.FC = () => {
   );
 };
 
-export default Bookmarks;
+export default TaskBookmarks;

@@ -8,7 +8,8 @@ const FreelancerList: React.FC = () => {
   const [freelancers, setFreelancers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [bookmarkedFreelancers, setBookmarkedFreelancers] = useState<Set<string>>(new Set());
+  const [bookmarks, setBookmarks] =  useState<{ itemId: string; type: string }[]>([]);
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     axiosConfig
@@ -24,15 +25,36 @@ const FreelancerList: React.FC = () => {
       });
   }, []);
 
-  const toggleBookmark = (id: string) => {
-    const updatedBookmarks = new Set(bookmarkedFreelancers);
-    if (updatedBookmarks.has(id)) {
-      updatedBookmarks.delete(id); // Remove if already bookmarked
-    } else {
-      updatedBookmarks.add(id); // Add if not bookmarked
+  const handleBookmark = async (itemId: string) => {
+    const type = 'freelancer'
+    if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
+      try {
+        await axiosConfig.delete('/users/bookmarks',{
+          data: {userId, itemId, type}
+        });
+        setBookmarks(bookmarks.filter((bookmark) => bookmark.itemId !== itemId));
+      } catch (error) {
+        console.error('Error removing bookmark:',error);
+      }
+    }else {
+      try {
+        await axiosConfig.post('/users/bookmarks', {userId,itemId, type});
+        setBookmarks([...bookmarks,{itemId,type}]);
+      } catch (error) {
+        console.error('Error adding bookmark:',error);
+      }
     }
-    setBookmarkedFreelancers(updatedBookmarks);
   };
+  
+  useEffect(()=>{
+    const getBookmark = async() => {
+      const response = await axiosConfig.get(`/users/bookmarks`);
+      if(response){
+        setBookmarks(response.data.bookmark.items)
+      }
+    }
+    getBookmark()
+  },[])
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -60,25 +82,20 @@ const FreelancerList: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {freelancers.map((freelancer, index) => (
-              <Link to={`/client/freelancer-detail/${freelancer._id}`}>
               <div
                 key={index}
                 className="relative bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
               >
                 {/* Bookmark Icon */}
                 <button
-                  onClick={(e) => {
-                    e.preventDefault(); // Prevent default link behavior
-                    toggleBookmark(freelancer._id);
-                  }}
-                  className={`absolute top-2 right-4 p-2 rounded-full ${
-                    bookmarkedFreelancers.has(freelancer._id) ? "bg-orange-400" : "bg-gray-200"
-                  }`}
+                  onClick={() => handleBookmark(freelancer._id)}
+                  className={`absolute top-2 right-4 p-2 rounded-full ${bookmarks.some((bookmark) => bookmark.itemId === freelancer._id) ?"bg-orange-400":("bg-gray-200")}
+                `}
                 >
-                  {bookmarkedFreelancers.has(freelancer._id) ? (
-                    <FaStar className="text-white w-6 h-6" />
+                  {bookmarks.some((bookmark) => bookmark.itemId === freelancer._id) ? (
+                    <FaStar className="text-white w-6 h-6 rounded-full  " />
                   ) : (
-                    <FaRegStar className="text-gray-500 w-6 h-6" />
+                    <FaRegStar className="text-gray-500 w-6 h-6 rounded-full " />
                   )}
                 </button>
                 <img
@@ -114,9 +131,11 @@ const FreelancerList: React.FC = () => {
                     </svg>
                   ))}
                 </div>
-                
+                <Link to={`/client/freelancer-detail/${freelancer._id}`}>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition mt-2">View Detail</button>
+                </Link>
               </div>
-              </Link>
+              
             ))}
           </div>
           {/* Pagination  */}

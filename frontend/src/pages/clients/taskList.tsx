@@ -1,8 +1,5 @@
 import React ,{useState,useEffect}from "react";
 import axiosConfig from "../../service/axios";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { toggleBookmark } from "../../store/bookmarkSlice";
 import { Link } from "react-router-dom";
 import FilterSidebar from "../../components/shared/FilterSideBar";
 import {FaBookmark, FaRegBookmark} from "react-icons/fa";
@@ -11,7 +8,6 @@ const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");  
-  const dispatch = useDispatch();
   const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
   const userId = localStorage.getItem('userId')
 
