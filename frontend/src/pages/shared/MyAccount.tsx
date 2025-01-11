@@ -65,7 +65,7 @@ const MyAccount: React.FC = () => {
       try {
         const userId = localStorage.getItem("userId"); 
         if (userId) {
-          const response = await axiosConfig.get(`/users/account-detail/${userId}`);
+          const response = await axiosConfig.get(`/users/account-detail`);
           setUserDetail(response.data.userDetails);
 
           console.log('User details response:', response.data);
@@ -112,10 +112,8 @@ const MyAccount: React.FC = () => {
 
 
   const validateCurrentPassword = async () => {
-    const userId = localStorage.getItem("userId"); 
-    console.log(userId)
-    const response = await axiosConfig.post("/users/validate-password", {
-      userId,
+    const userId = localStorage.getItem("userId");
+    const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
       currentPassword: passwordData.currentPassword
     });
     console.log('reeeleldk',response)
@@ -155,7 +153,6 @@ const updateAccountType = async (newRole: string) => {
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('lksfjlkdjf')
     e.preventDefault();
     const isPasswordValid = await validateCurrentPassword();
     if (!isPasswordValid) {

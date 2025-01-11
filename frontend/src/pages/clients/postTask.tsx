@@ -13,9 +13,6 @@ const TaskSubmissionForm: React.FC = () => {
   const [skillInput, setSkillInput] = useState<string>("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [description, setDescription] = useState<string>("");
-  const [minRate, setMinRate] = useState<string>(""); 
-  const [maxRate, setMaxRate] = useState<string>("");
   const [categories, setCategories] = useState<Category[]>([]);
 
   const clientId = localStorage.getItem("userId")

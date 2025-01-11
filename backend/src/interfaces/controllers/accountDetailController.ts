@@ -30,9 +30,9 @@ export const AccountDetailController = {
         }
     },
 
-    getAccountDetail: async (req: Req, res: Res, next: Next) => {
+    getAccountDetail: async (req: CustomRequest, res: Res, next: Next) => {
         try {
-            const {id} = req.params;
+            const id = req.user?.userId || ""
             const result = await AccountDetailUseCase.getAccountDetail(id);
             res.status(200).json(result)
         } catch (error) {

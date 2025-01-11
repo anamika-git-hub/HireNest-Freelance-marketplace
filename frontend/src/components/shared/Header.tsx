@@ -29,7 +29,7 @@ const Header: React.FC = () => {
       try {
         const userId = localStorage.getItem("userId"); 
         if (userId) {
-          const response = await axiosConfig.get(`/users/account-detail/${userId}`);
+          const response = await axiosConfig.get(`/users/account-detail`);
           setUserDetail(response.data.userDetails);
           
         }

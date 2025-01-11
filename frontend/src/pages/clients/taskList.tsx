@@ -10,6 +10,13 @@ const TaskList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");  
   const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("Relevance");
+  const [filters, setFilters] = useState({
+    category: "",
+    skills: [],
+    priceRange: { min: 1000, max: 50000 },
+  });
   const userId = localStorage.getItem('userId')
 
   useEffect(() => {
@@ -17,7 +24,7 @@ const TaskList: React.FC = () => {
       .get("/freelancers/tasks-list") 
       .then((response) => {
         setTasks(response.data.data);
-        console.log(response.data.data)
+        console.log('hello',response.data.data)
         setLoading(false);
       })
       .catch((err) => {
@@ -28,12 +35,12 @@ const TaskList: React.FC = () => {
 
   const handleBookmark = async (itemId: string) => {
     const type = 'task';
-
+    console.log('ehlo')
     if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
       
         try {
-            await axiosConfig.delete('/users/bookmarks', {
-                data: { userId, itemId, type }
+            await axiosConfig.delete(`/users/bookmarks/${itemId}`, {
+                data: { userId, type }
             });
             setBookmarks(bookmarks.filter((bookmark) => bookmark.itemId !== itemId)); 
         } catch (err) {
@@ -51,14 +58,56 @@ const TaskList: React.FC = () => {
 
   useEffect(()=>{
     const getBookmark = async() => {
-      const response = await axiosConfig.get(`/users/bookmarks`);
-      if(response){
+      const response = await axiosConfig.get(`/users/task-bookmarks`);
+      console.log('respo',response)
+      if(response.data.bookmark){
         setBookmarks(response.data.bookmark.items)
       }
     }
     getBookmark()
   },[])
+
+  const sortTasks = (tasks: any[]) => {
+    let sortedTasks = [...tasks];
+    switch (sortOption) {
+      case "Price: Low to High":
+        sortedTasks.sort((a, b) => a.minRate - b.minRate);
+        break;
+      case "Price: High to Low":
+        sortedTasks.sort((a, b) => b.maxRate - a.maxRate);
+        break;
+      case "Newest":
+        sortedTasks.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      default:
+        break; 
+    }
+    return sortedTasks;
+  };
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
  
+  // const filteredTasks = sortTasks(
+  //   tasks.filter((task) => {
+  //     return (
+  //       (filters.category ? task.category === filters.category : true) &&
+  //       (filters.skills.length > 0 ? filters.skills.every((skill) => task.skills.includes(skill)) : true) &&
+  //       task.minRate >= filters.priceRange.min &&
+  //       task.maxRate <= filters.priceRange.max
+  //     );
+  //   })
+  // );
+
+  const filteredTasks = sortTasks(
+    tasks.filter((task) =>
+      task.projectName.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
 
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
@@ -66,25 +115,30 @@ const TaskList: React.FC = () => {
   return (
     <div className="flex pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       {/* Sidebar */}
-      <FilterSidebar/>
-
+      <FilterSidebar onFilterChange={handleFilterChange} />
       {/* Main Content */}
       <div className="pt-14 flex-grow p-4">
-      <h2 className="pb-5 text-2xl font-semibold">Tasks</h2>
+      <h2 className="pb-5 text-2xl font-semibold select-none">Tasks</h2>
         {/* Search Alerts */}
-        <div className="flex items-center justify-between mb-5 ">
+        <div className="flex items-center justify-between mb-5 select-none">
 
           {/* Search bar on the left */}
           <input
             type="text"
             placeholder="Search"
-            className="p-2 border border-gray-300 bg-gray-100 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e)=> setSearchTerm(e.target.value)}
+            className="p-2 border border-gray-300 bg-white rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           {/* Sort By text and select dropdown on the right */}
-          <div className="flex items-center">
-            <span className="mr-2 text-gray-600">Sort By:</span>
-            <select className="p-2  rounded">
+          <div className="flex items-center select-none">
+            <span className="mr-2 text-gray-600 select-none">Sort By:</span>
+            <select 
+            className="p-2  rounded "
+            value={sortOption}
+            onChange={(e)=> setSortOption(e.target.value)}
+            >
               <option>Relevance</option>
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
@@ -96,7 +150,7 @@ const TaskList: React.FC = () => {
 
         {/* Job Listings */}
         <div className="grid grid-cols-2 gap-5">
-  {tasks.map((task, index) => (
+  {filteredTasks.map((task, index) => (
     <div
       key={index}
       className="border border-gray-300 p-5 rounded-lg shadow-md bg-white"
@@ -104,7 +158,7 @@ const TaskList: React.FC = () => {
       <div className="flex">
        
       {/* Top Section: Project Name */}
-      <h3 className="text-lg font-semibold mb-2">{task.projectName}</h3>
+      <h3 className="text-lg font-semibold mb-2 select-auto">{task.projectName}</h3>
        {/* Bookmark Button */}
        <button
     onClick={() => handleBookmark(task._id)}
@@ -136,7 +190,7 @@ const TaskList: React.FC = () => {
           <p className="text-sm text-gray-500">{task.rateType}</p>
         </div>
         <Link to={`/freelancer/task-detail/${task._id}`}>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition select-none">
             Bid Now
           </button>
         </Link>

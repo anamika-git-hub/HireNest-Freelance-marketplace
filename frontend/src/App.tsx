@@ -73,7 +73,7 @@ const App: React.FC = () => {
         <Route path="/messages" element={<UserPrivateRoute><UserSidebar><Chat/></UserSidebar></UserPrivateRoute>} />
 
          {/* ---------freelancer--------------- */}
-        <Route path="/freelancer/freelancer-profile" element={<UserPrivateRoute><LayoutWrapper><FreelancerProfile /></LayoutWrapper></UserPrivateRoute>} />
+        <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
         <Route path="/client/freelancer-list" element={<UserPrivateRoute><LayoutWrapper><FreelancerList/></LayoutWrapper></UserPrivateRoute>} />
         <Route path="/client/freelancer-detail/:id" element={<UserPrivateRoute><LayoutWrapper><FreelancerDetail/></LayoutWrapper></UserPrivateRoute>} />
         <Route path="/freelancer/dashboard" element={<UserPrivateRoute><UserSidebar><DashboardFreelancer/></UserSidebar></UserPrivateRoute>} />

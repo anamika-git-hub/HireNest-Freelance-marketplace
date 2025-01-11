@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
 
 const OTPVerification: React.FC = () => {
   const [otp, setOtp] = useState(Array(6).fill("")); 
@@ -10,6 +11,9 @@ const OTPVerification: React.FC = () => {
   const [isExpired, setIsExpired] = useState(false); 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const { email, role } = location.state || {}; 
+  console.log('role',role)
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -74,7 +78,7 @@ const OTPVerification: React.FC = () => {
       if (response.status === 200) {
         toast.success("OTP verified successfully.");
         dispatch({ type: "VERIFY_OTP", payload: response.data });
-        navigate("/account-setup"); 
+        navigate("/account-setup",{state:{role}}); 
       }
     } catch (error) {
       console.error("Error during OTP verification:", error);

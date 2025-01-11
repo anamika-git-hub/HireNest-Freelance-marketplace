@@ -10,6 +10,13 @@ const FreelancerList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [bookmarks, setBookmarks] =  useState<{ itemId: string; type: string }[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [sortOption, setSortOption] = useState<string>("Relevance");
+   const [filters, setFilters] = useState({
+      category: "",
+      skills: [],
+      priceRange: { min: 1000, max: 50000 },
+    });
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -30,8 +37,8 @@ const FreelancerList: React.FC = () => {
     const type = 'freelancer'
     if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
       try {
-        await axiosConfig.delete('/users/bookmarks',{
-          data: {userId, itemId, type}
+        await axiosConfig.delete(`/users/bookmarks/${itemId}`,{
+          data: {userId, type}
         });
         setBookmarks(bookmarks.filter((bookmark) => bookmark.itemId !== itemId));
       } catch (error) {
@@ -50,12 +57,43 @@ const FreelancerList: React.FC = () => {
   useEffect(()=>{
     const getBookmark = async() => {
       const response = await axiosConfig.get(`/users/bookmarks`);
-      if(response){
+      console.log('reees',response)
+      if(response.data.bookmark){
         setBookmarks(response.data.bookmark.items)
       }
     }
     getBookmark()
   },[])
+
+  const sortFreelancers = (freelancers: any[]) => {
+    let sortedFreelancers = [...freelancers];
+    switch (sortOption) {
+      case "Price: Low to High":
+        sortedFreelancers.sort((a, b) => a.hourlyRate - b.hourlyRate);
+        break;
+      case "Price: High to Low":
+        sortedFreelancers.sort((a, b) => b.hourlyRate - a.hourlyRate);
+        break;
+      case "Newest":
+        sortedFreelancers.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      default:
+        break; 
+    }
+    return sortedFreelancers;
+  };
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const filteredTasks = sortFreelancers(
+    freelancers.filter((freelancer) =>
+      freelancer.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
@@ -65,7 +103,7 @@ const FreelancerList: React.FC = () => {
     <div className="hero section pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Search Filter Section */}
-        <FilterSidebar/>
+        <FilterSidebar onFilterChange={handleFilterChange} />
 
         {/* Freelancer List Section */}
         <div className="pt-14 flex-grow">
@@ -75,14 +113,27 @@ const FreelancerList: React.FC = () => {
             <input
             type="text"
             placeholder="Search"
+            value={searchTerm}
+            onChange={(e)=> setSearchTerm(e.target.value)}
             className="p-2 border border-gray-300 bg-gray-100 rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-            <select className="p-2 border rounded-md text-sm">
-              <option>Sort by: Relevance</option>
+          {/* Sort By text and select dropdown on the right */}
+          <div className="flex items-center select-none">
+            <span className="mr-2 text-gray-600 select-none">Sort By:</span>
+            <select 
+            className="p-2  rounded "
+            value={sortOption}
+            onChange={(e)=> setSortOption(e.target.value)}
+            >
+              <option>Relevance</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Newest</option>
             </select>
           </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {freelancers.map((freelancer, index) => (
+            {filteredTasks.map((freelancer, index) => (
               <div
                 key={index}
                 className="relative bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"

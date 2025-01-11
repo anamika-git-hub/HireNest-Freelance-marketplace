@@ -50,8 +50,8 @@ const FreelancerBookmarks: React.FC = () => {
     const confirmed = window.confirm("Are you sure you want to remove this bookmark?");
     if(confirmed){
       try {
-        await axiosConfig.delete("/users/bookmarks", {
-          data: {userId, itemId: id, type: "freelancer" }, 
+        await axiosConfig.delete(`/users/bookmarks/${id}`, {
+          data: {userId, type: "freelancer" }, 
         });
     
         setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== id));

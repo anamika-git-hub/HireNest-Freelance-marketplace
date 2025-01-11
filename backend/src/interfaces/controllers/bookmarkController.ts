@@ -28,9 +28,10 @@ export const BookMarkController = {
     },
     deleteBookmarks: async (req: Req, res: Res, next: Next) => {
         try {
-            const { itemId, type, userId } = req.body;
+            const {id} = req.params
+            const { type, userId } = req.body;
             
-            const result = await BookMarkUseCase.deleteBookmark(userId, itemId, type);
+            const result = await BookMarkUseCase.deleteBookmark(userId,id, type);
     
             if (result) {
                 res.status(200).json({ message: "Bookmark removed successfully" });

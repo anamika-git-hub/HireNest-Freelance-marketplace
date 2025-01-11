@@ -240,7 +240,8 @@ attachments.forEach((attachment, index) => {
               max="100"
               step="1"
               defaultValue={35}
-              
+              value={hourlyRate}
+              onChange={handleChange} 
             />
           </div>
         </div>

@@ -8,6 +8,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { AccountSetupValidationSchema } from "../../components/Schemas/accountSetupValidation";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { useLocation } from "react-router-dom";
 
 const AccountSetup: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -21,6 +22,9 @@ const AccountSetup: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const { role } = location.state || {}; 
+  console.log('acc',role)
 
   const currentUserId = useSelector((state: RootState) => state.user.userId);
   const currentRole = useSelector((state:RootState)=> state.user.userRole);
@@ -95,8 +99,7 @@ const AccountSetup: React.FC = () => {
       const response = await axiosConfig.post("/users/setup-account",formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const role = localStorage.getItem('role')
-      console.log(role)
+      
       if (response.status === 201) {
         alert("Profile setup completed successfully!");
         const formDataToStore = {
@@ -112,11 +115,13 @@ const AccountSetup: React.FC = () => {
           idBackImage: imageBackPreview,
         };
         dispatch(setAccountData(formDataToStore));
-        if(currentRole === 'freelancer'){
+        console.log('fkfkfkfk',role)
+        if (role === "freelancer") {
+          console.log('haii')
           navigate("/freelancer/freelancer-profile"); 
-        }else{
-          navigate("/login")
-        }
+      } else if (role === "client") {
+          navigate("/login");
+      }
        
 
       }

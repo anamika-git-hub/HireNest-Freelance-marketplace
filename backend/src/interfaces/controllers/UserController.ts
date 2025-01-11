@@ -65,10 +65,11 @@ export const UserController = {
     },
     validatePassword: async (req: Req, res: Res, next: Next) => {
         try {
-            const { userId, currentPassword } = req.body;
-            console.log('userId, currentPassword:', userId, currentPassword);
+            const {id} = req.params;
+            const {currentPassword } = req.body;
+            console.log('userId, currentPassword:', id, currentPassword);
             
-            const result = await userUseCase.validatePassword(userId, currentPassword);
+            const result = await userUseCase.validatePassword(id, currentPassword);
             console.log('Password validation result:', result);
     
             if (!result) {

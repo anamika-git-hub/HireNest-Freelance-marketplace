@@ -28,16 +28,18 @@ const TaskBookmarks: React.FC = () => {
   
         const taskResponse = await axiosConfig.get("/freelancers/tasks-list");
         const tasks = taskResponse.data.data; 
+        if(taskResponse){
+          const matchedTasks = tasks.filter((task:any) =>
+            taskBookmarks.some((bookmark:{itemId:string}) => bookmark.itemId === task._id)
+          ) .map((task: Task) => ({
+            ...task,
+            timeLeft: calculateTimeLeft(task.timeline),
+          }));
+    
+          setBookmarks(matchedTasks);
+          setLoading(false);
+        }
         
-        const matchedTasks = tasks.filter((task:any) =>
-          taskBookmarks.some((bookmark:{itemId:string}) => bookmark.itemId === task._id)
-        ) .map((task: Task) => ({
-          ...task,
-          timeLeft: calculateTimeLeft(task.timeline),
-        }));
-  
-        setBookmarks(matchedTasks);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching bookmarks or tasks", err);
         setError("Failed to fetch bookmarks or tasks");
@@ -68,8 +70,8 @@ const TaskBookmarks: React.FC = () => {
     const confirmed = window.confirm("Are you sure you want to remove this bookmark?");
     if(confirmed){
       try {
-        await axiosConfig.delete("/users/bookmarks", {
-          data: {userId, itemId: id, type: "task" }, 
+        await axiosConfig.delete(`/users/bookmarks/${id}`, {
+          data: {userId, type: "task" }, 
         });
     
         setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== id));

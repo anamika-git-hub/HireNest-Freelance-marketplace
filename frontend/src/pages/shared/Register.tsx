@@ -52,6 +52,7 @@ const Signup: React.FC = () => {
     const { email, password, role } = values;
 
     const newUser = { email, password, role };
+    console.log('registerrole',role)
 
     try {
       const response = await axios.post(
@@ -60,10 +61,9 @@ const Signup: React.FC = () => {
       );
 
       if (response.status === 201) {
-        console.log('rrrrrrrrrrrrrrrrr',response.data)
         dispatch(registerUser({...response.data.user, id: response.data.user._id,role:response.data.user.role}));
         toast.success("User registered successfully. Redirecting to OTP page...");
-        navigate("/otp", { state: { email } });
+        navigate("/otp", { state: { email ,role} });
         localStorage.setItem("email", email);
       }
     } catch (error) {
