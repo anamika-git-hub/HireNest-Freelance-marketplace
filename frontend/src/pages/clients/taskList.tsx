@@ -103,10 +103,14 @@ const TaskList: React.FC = () => {
   // );
 
   const filteredTasks = sortTasks(
-    tasks.filter((task) =>
-      task.projectName.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    tasks.filter((task) => {
+      const taskDeadline = new Date(task.timeline);  
+      const currentDate = new Date();
+      return taskDeadline >= currentDate &&
+        task.projectName.toLowerCase().includes(searchTerm.toLowerCase());
+    })
   );
+  
 
 
   if (loading)  return <Loader visible={loading} />;

@@ -57,8 +57,6 @@ const MyAccount: React.FC = () => {
     }));
   };
   
-
-
   // Fetch user details on component mount
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -67,8 +65,6 @@ const MyAccount: React.FC = () => {
         if (userId) {
           const response = await axiosConfig.get(`/users/account-detail`);
           setUserDetail(response.data.userDetails);
-
-          console.log('User details response:', response.data);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -109,8 +105,6 @@ const MyAccount: React.FC = () => {
     }
   };
 
-
-
   const validateCurrentPassword = async () => {
     const userId = localStorage.getItem("userId");
     const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
@@ -137,8 +131,6 @@ const updateAccountType = async (newRole: string) => {
       localStorage.setItem('role', newRole);
       setUserRole(newRole)
       console.log('Account type updated successfully');
-      
-   
       window.location.reload();
 
     } else {
