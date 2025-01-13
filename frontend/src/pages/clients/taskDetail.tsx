@@ -17,6 +17,7 @@ interface TaskDetails {
 }
 
 interface BidFormData {
+  taskId?: { _id: string };
   rate: number;
   deliveryTime: number;
   timeUnit: string;
@@ -95,8 +96,21 @@ const TaskDetail: React.FC = () => {
     }));
   };
 
+  const isBidExist = async() => {
+    const response =await axiosConfig.get(`/freelancers/bid/${userId}`)
+
+    const bidExists = response.data.bid.some((bid:BidFormData) => bid.taskId?._id === id); 
+    console.log(bidExists)
+    return bidExists
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const bidExist = await isBidExist()
+    if(bidExist){
+      alert('This task is already bidded');
+      return;
+    }
     try {
       const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
       alert("Bid placed successfully!");
