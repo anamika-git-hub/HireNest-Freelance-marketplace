@@ -29,11 +29,11 @@ const TaskSubmissionSchema = new Schema<ITaskSubmissionForm>({
         required: true
     },
     minRate: {
-        type: Schema.Types.Mixed, 
+        type: Number, 
         required: true
     },
     maxRate: {
-        type: Schema.Types.Mixed, 
+        type:Number, 
         required: true
     },
     description: {

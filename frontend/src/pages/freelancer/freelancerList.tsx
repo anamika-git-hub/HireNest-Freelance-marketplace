@@ -12,26 +12,38 @@ const FreelancerList: React.FC = () => {
   const [bookmarks, setBookmarks] =  useState<{ itemId: string; type: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
-   const [filters, setFilters] = useState({
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [filters, setFilters] = useState({
       category: "",
       skills: [],
       priceRange: { min: 1000, max: 50000 },
     });
   const userId = localStorage.getItem('userId');
+  const ITEMS_PER_PAGE = 6;
+
+  const fetchFreelancers = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosConfig.get("/client/freelancer-list", {
+        params: {
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          sortOption,
+        },
+      });
+      setFreelancers(response.data.data);
+      setTotalPages(response.data.totalPages); 
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to load freelancers.");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    axiosConfig
-      .get("/client/freelancer-list")
-      .then((response) => {
-        setFreelancers(response.data.data); 
-        console.log(response.data.data)
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError("Failed to load freelancers.");
-        setLoading(false);
-      });
-  }, []);
+    fetchFreelancers();
+  }, [sortOption, currentPage]);
 
   const handleBookmark = async (itemId: string) => {
     const type = 'freelancer'
@@ -65,39 +77,18 @@ const FreelancerList: React.FC = () => {
     getBookmark()
   },[])
 
-  const sortFreelancers = (freelancers: any[]) => {
-    let sortedFreelancers = [...freelancers];
-    switch (sortOption) {
-      case "Price: Low to High":
-        sortedFreelancers.sort((a, b) => a.hourlyRate - b.hourlyRate);
-        break;
-      case "Price: High to Low":
-        sortedFreelancers.sort((a, b) => b.hourlyRate - a.hourlyRate);
-        break;
-      case "Newest":
-        sortedFreelancers.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        break;
-      default:
-        break; 
-    }
-    return sortedFreelancers;
-  };
-
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
   };
-
-  const filteredTasks = sortFreelancers(
-    freelancers.filter((freelancer) =>
-      freelancer.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  const filteredTasks = freelancers.filter((freelancer) =>
+      freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  
 
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
-  const categories = ["All Categories", "Web Development", "Graphic Design"];
 
   return (
     <div className="hero section pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
@@ -192,11 +183,12 @@ const FreelancerList: React.FC = () => {
           </div>
           {/* Pagination  */}
           <div className="flex justify-center items-center mt-6 space-x-2">
-            {[1, 2, 3, 4].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
+                onClick={() => handlePageChange(page)}
                 className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                  page === 2
+                  page === currentPage
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100 text-gray-700"
                 }`}

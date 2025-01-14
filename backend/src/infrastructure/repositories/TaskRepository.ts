@@ -38,8 +38,22 @@ export const TaskRepository = {
         }
     },
 
-    getTasks: async () => {return await TaskSubmissionModel.find() },
-
+    getTasks: async (sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
+        const currentDate = new Date().toISOString(); 
+        return await TaskSubmissionModel.find({
+            timeline: { $gt: currentDate }, 
+        }).sort(sortCriteria).skip(skip).limit(limit);
+     },
+    getTaskCount: async() => {
+        try {
+            const currentDate = new Date().toISOString(); 
+            return await TaskSubmissionModel.countDocuments({
+                timeline: { $gt: currentDate }, 
+            });
+        } catch (error:any) {
+            throw new Error(`Failed to count tasks: ${error.message}`);
+        }
+    } ,
     getTaskById: async (id: string) => {
         try {
             const task = await TaskSubmissionModel.findById(id);

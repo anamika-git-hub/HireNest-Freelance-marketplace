@@ -12,30 +12,40 @@ const TaskList: React.FC = () => {
   const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [filters, setFilters] = useState({
     category: "",
     skills: [],
     priceRange: { min: 1000, max: 50000 },
   });
   const userId = localStorage.getItem('userId')
+  const ITEMS_PER_PAGE = 4;
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosConfig.get("/freelancers/tasks-list", {
+        params: {
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+          sortOption,
+        },
+      });
+      setTasks(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to load Tasks");
+    }
+  };
 
   useEffect(() => {
-    axiosConfig
-      .get("/freelancers/tasks-list") 
-      .then((response) => {
-        setTasks(response.data.data);
-        console.log('hello',response.data.data)
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError("Failed to load tasks.");
-        setLoading(false);
-      });
-  }, []);
+    fetchTasks();
+  }, [sortOption,currentPage]);
 
   const handleBookmark = async (itemId: string) => {
     const type = 'task';
-    console.log('ehlo')
     if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
       
         try {
@@ -65,27 +75,7 @@ const TaskList: React.FC = () => {
       }
     }
     getBookmark()
-  },[])
-
-  const sortTasks = (tasks: any[]) => {
-    let sortedTasks = [...tasks];
-    switch (sortOption) {
-      case "Price: Low to High":
-        sortedTasks.sort((a, b) => a.minRate - b.minRate);
-        break;
-      case "Price: High to Low":
-        sortedTasks.sort((a, b) => b.maxRate - a.maxRate);
-        break;
-      case "Newest":
-        sortedTasks.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        break;
-      default:
-        break; 
-    }
-    return sortedTasks;
-  };
+  },[]);
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
@@ -102,16 +92,13 @@ const TaskList: React.FC = () => {
   //   })
   // );
 
-  const filteredTasks = sortTasks(
-    tasks.filter((task) => {
-      const taskDeadline = new Date(task.timeline);  
-      const currentDate = new Date();
-      return taskDeadline >= currentDate &&
-        task.projectName.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-  );
-  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
+  const filteredTasks =  tasks.filter((task) => {
+      return task.projectName.toLowerCase().includes(searchTerm.toLowerCase());
+    })
 
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
@@ -206,11 +193,12 @@ const TaskList: React.FC = () => {
 
     {/* Pagination  */}
     <div className="flex justify-center items-center mt-6 space-x-2">
-            {[1, 2, 3, 4].map((page) => (
+           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
+                onClick={() => handlePageChange(page)}
                 className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                  page === 1
+                  page === currentPage
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100 text-gray-700"
                 }`}

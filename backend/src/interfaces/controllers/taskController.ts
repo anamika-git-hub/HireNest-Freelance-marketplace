@@ -46,10 +46,23 @@ export const TaskController = {
     },
     getTasks: async (req: Req, res: Res, next: Next) => {
         try {
-            const tasks = await TaskUseCase.getTasks();
-            res.status(200).json({data: tasks, message: 'Tasks got successfully'})
+            const page = parseInt(req.query.page as string, 10) || 1;
+            const limit = parseInt(req.query.limit as string, 10) || 10;
+            const sortOption = req.query.sortOption as string || "Relevance";
+
+            const skip = (page - 1) * limit;
+
+            let sortCriteria: { [key: string]: 1 | -1 } = {};
+            if (sortOption === "Price: Low to High") sortCriteria.minRate = 1;
+            if (sortOption === "Price: High to Low") sortCriteria.maxRate = -1;
+            if (sortOption === "Newest") sortCriteria.createdAt = -1;
+
+            const tasks = await TaskUseCase.getTasks({sortCriteria,skip,limit});
+            const totalTasks = await TaskUseCase.getTasksCount();
+            const totalPages = Math.ceil(totalTasks/limit);
+            res.status(200).json({data: tasks,totalPages, message: 'Tasks got successfully'})
         } catch (error) {
-            
+            next(error)
         }
     },
 

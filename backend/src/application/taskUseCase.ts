@@ -77,12 +77,19 @@ export const TaskUseCase = {
         }
     },
 
-    getTasks: async () => {
+    getTasks: async ({sortCriteria,skip,limit}:{
+        sortCriteria: { [key: string]: 1 | -1 };
+        skip: number;
+        limit: number;
+}) => {
         try {
-            return await TaskRepository.getTasks();
+            return await TaskRepository.getTasks(sortCriteria,skip,limit);
         } catch (error) {
             throw new Error ('Failed to get tasks')
         }
+    },
+    getTasksCount: async () => {
+        return await TaskRepository.getTaskCount();
     },
 
     getTaskById: async (id: string) => {

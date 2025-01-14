@@ -26,7 +26,7 @@ export const FreelancerProfileUseCase = {
             );
 
             const profileData = {
-                ...data,
+                ...data, 
                 profileImage: profileImageUrl,
                 attachments,
             };
@@ -80,14 +80,20 @@ export const FreelancerProfileUseCase = {
         }
     },
 
-    getFreelancers: async()=>{
+    getFreelancers: async({sortCriteria,skip,limit}:{
+        sortCriteria: { [key: string]: 1 | -1 };
+        skip: number;
+        limit: number;
+})=>{
         try {
-            return await FreelancerProfileRepository.getFreelancers();
+            return await FreelancerProfileRepository.getFreelancers(sortCriteria,skip,limit);
         } catch (error:any) {
             throw new Error(`Failed to get freelancers: ${error.message}`);
         }
     },
-
+    getFreelancersCount: async() => {
+        return await FreelancerProfileRepository.getFreelancerCount();
+    },
      getFreelancerByUserId: async (id: string) => {
             try {
                 return await FreelancerProfileRepository.getFreelancerByUserId(id);

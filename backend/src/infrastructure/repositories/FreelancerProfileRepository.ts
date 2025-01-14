@@ -9,13 +9,16 @@ export const FreelancerProfileRepository = {
         FreelancerProfileModel.findOneAndUpdate({userId:id}, updates, {upsert:true,new: true}),
 
     
-    getFreelancers: async () => {
+    getFreelancers: async (sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
         try{
-            const freelancers = await FreelancerProfileModel.find();
+            const freelancers = await FreelancerProfileModel.find().sort(sortCriteria).skip(skip).limit(limit);
             return freelancers
         }catch(error: any){
             throw new Error ('Error get freelancers:' + error.message)
         }
+    },
+    getFreelancerCount : async () => {
+        return await FreelancerProfileModel.countDocuments();
     },
      getFreelancerByUserId: async (id: string) => {
             try {
