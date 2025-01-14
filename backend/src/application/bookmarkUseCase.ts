@@ -5,7 +5,7 @@ export const BookMarkUseCase = {
          try {
                     return await BookmarkRepository.createBookmarks(id, itemId,type);
                 } catch (error: any) {
-                    throw new Error(`Failed to create bid: ${error.message}`);
+                    throw new Error(`Failed to create bookmark: ${error.message}`);
                 }
     },
     getBookmarks : async(userId: string) => {

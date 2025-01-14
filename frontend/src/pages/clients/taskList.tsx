@@ -1,4 +1,4 @@
-import React ,{useState,useEffect}from "react";
+import React ,{useState,useEffect, useRef}from "react";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import FilterSidebar from "../../components/shared/FilterSideBar";
@@ -11,6 +11,7 @@ const TaskList: React.FC = () => {
   const [error, setError] = useState<string>("");  
   const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -21,6 +22,18 @@ const TaskList: React.FC = () => {
   });
   const userId = localStorage.getItem('userId')
   const ITEMS_PER_PAGE = 4;
+  
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+      useEffect(() => {
+        const handler = setTimeout(() => {
+          setDebouncedSearchTerm(searchTerm); 
+        }, 600); 
+    
+        return () => {
+          clearTimeout(handler); 
+        };
+      }, [searchTerm]);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -30,6 +43,7 @@ const TaskList: React.FC = () => {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
+          searchTerm:debouncedSearchTerm
         },
       });
       setTasks(response.data.data);
@@ -42,7 +56,14 @@ const TaskList: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [sortOption,currentPage]);
+  }, [sortOption,currentPage,debouncedSearchTerm]);
+
+    useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [fetchTasks]);
+
 
   const handleBookmark = async (itemId: string) => {
     const type = 'task';
@@ -115,6 +136,7 @@ const TaskList: React.FC = () => {
 
           {/* Search bar on the left */}
           <input
+            ref = {inputRef}
             type="text"
             placeholder="Search"
             value={searchTerm}

@@ -42,6 +42,7 @@ export const FreelancerProfileController = {
             const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
+            const searchTerm = req.query.searchTerm as string || ""; 
             const skip = (page - 1) * limit;
 
             let sortCriteria: { [key: string]: 1 | -1 } = {};
@@ -49,9 +50,9 @@ export const FreelancerProfileController = {
             if (sortOption === "Price: High to Low") sortCriteria.hourlyRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
 
-            const freelancers = await FreelancerProfileUseCase.getFreelancers({sortCriteria,skip,limit});
+            const freelancers = await FreelancerProfileUseCase.getFreelancers({sortCriteria,skip,limit,searchTerm});
 
-            const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount();
+            const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(searchTerm);
             const totalPages = Math.ceil(totalFreelancers/limit)
             res.status(200).json({data:freelancers,totalPages,message: 'Listed freelancers successfully'})
         } catch (error) {

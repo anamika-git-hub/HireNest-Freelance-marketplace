@@ -115,15 +115,12 @@ const AccountSetup: React.FC = () => {
           idBackImage: imageBackPreview,
         };
         dispatch(setAccountData(formDataToStore));
-        console.log('fkfkfkfk',role)
+        
         if (role === "freelancer") {
-          console.log('haii')
           navigate("/freelancer/freelancer-profile"); 
       } else if (role === "client") {
           navigate("/login");
       }
-       
-
       }
     } catch (error) {
       console.error("Failed to submit form data:", error);

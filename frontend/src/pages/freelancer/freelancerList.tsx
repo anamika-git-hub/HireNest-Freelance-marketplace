@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import FilterSidebar from "../../components/shared/FilterSideBar";
 import { Link } from "react-router-dom";
@@ -11,6 +11,7 @@ const FreelancerList: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [bookmarks, setBookmarks] =  useState<{ itemId: string; type: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -22,6 +23,20 @@ const FreelancerList: React.FC = () => {
   const userId = localStorage.getItem('userId');
   const ITEMS_PER_PAGE = 6;
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm); 
+    }, 600); 
+
+    return () => {
+      clearTimeout(handler); 
+    };
+  }, [searchTerm]);
+
   const fetchFreelancers = async () => {
     setLoading(true);
     try {
@@ -30,6 +45,7 @@ const FreelancerList: React.FC = () => {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
+          searchTerm:debouncedSearchTerm
         },
       });
       setFreelancers(response.data.data);
@@ -43,8 +59,16 @@ const FreelancerList: React.FC = () => {
 
   useEffect(() => {
     fetchFreelancers();
-  }, [sortOption, currentPage]);
+  }, [sortOption, currentPage, debouncedSearchTerm]);
 
+
+  
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [debouncedSearchTerm]);
+  
   const handleBookmark = async (itemId: string) => {
     const type = 'freelancer'
     if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
@@ -83,8 +107,8 @@ const FreelancerList: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  const filteredTasks = freelancers.filter((freelancer) =>
-      freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  // const filteredTasks = freelancers.filter((freelancer) =>
+  //     freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()))
   
 
   if (loading)  return <Loader visible={loading} />;
@@ -102,6 +126,7 @@ const FreelancerList: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
            
             <input
+            ref={inputRef}
             type="text"
             placeholder="Search"
             value={searchTerm}
@@ -124,7 +149,7 @@ const FreelancerList: React.FC = () => {
           </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTasks.map((freelancer, index) => (
+            {freelancers.map((freelancer, index) => (
               <div
                 key={index}
                 className="relative bg-gray-100 p-6 rounded-lg shadow-md flex flex-col items-center"
