@@ -8,7 +8,7 @@ interface Message {
 }
 
 interface Freelancer {
-  name: string;
+  firstname: string;
   profileImage: string;
   tagline: string;
   userId: string;
@@ -23,6 +23,7 @@ interface ChatAreaProps {
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socket }) => {
+  console.log('message',messages)
   const [newMessage, setNewMessage] = React.useState('');
 
   const sendMessage = () => {
@@ -40,7 +41,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
   return (
     <div className="w-2/3 h-full bg-white flex flex-col">
       <div className="flex justify-between items-center p-6 border-b">
-        <h2 className="text-lg font-medium">{freelancer.name}</h2>
+        <h2 className="text-lg font-medium">{freelancer.firstname}</h2>
         <button className="text-sm text-gray-500 hover:text-red-500">Delete Conversation</button>
       </div>
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
@@ -56,6 +57,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
           </div>
         ))}
       </div>
+
       <div className="p-4 border-t">
         <input
           type="text"

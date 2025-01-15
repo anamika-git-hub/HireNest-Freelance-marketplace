@@ -7,13 +7,16 @@ import axiosConfig from '../../service/axios';
 const socket = io('http://localhost:5000');
 
 interface Freelancer {
-  name: string;
+  name:string;
+  firstname: string;
+  lastname:string;
   profileImage: string;
   tagline: string;
   userId: string;
 }
 
 interface Message {
+  senderId?: string;
   type: 'sent' | 'received';
   text: string;
   time: string;
@@ -24,14 +27,25 @@ const Chat: React.FC = () => {
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const userId = localStorage.getItem('userId') || '';
+  const role = localStorage.getItem('role') || '';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosConfig.get(`/client/client-request`);
+        const response = await axiosConfig.get(`/users/get-receivers`,{
+          params:{
+            role:role,
+            userId:userId
+          }
+        });
         console.log('Fetched Requests:', response.data);
 
-        const freelancerList = response.data.requests.map((req: any) => req.freelancerId);
+        const freelancerList: Freelancer[] = response.data.map((receiver: any) => ({
+          firstname: receiver.firstname,
+          name:receiver.name,
+          profileImage: receiver.profileImage,
+          userId: receiver._id, 
+        }));
         setFreelancers(freelancerList);
 
         if (freelancerList.length > 0) {
@@ -45,13 +59,20 @@ const Chat: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [role,userId]);
 
   const initializeChat = (freelancerId: string) => {
     socket.emit('get_messages', { senderId: userId, receiverId: freelancerId });
 
-    socket.on('message_history', (history: Message[]) => {
-      console.log(history);
+    socket.on('message_history', (history: any[]) => {
+      console.log('history',history);
+
+      const updatedHistory = history.map((msg) => ({
+        type: msg.senderId === userId ? 'sent' : 'received', 
+        text: msg.text,
+        time:  msg.time ? new Date(msg.time).toLocaleString() : 'Unknown Time',
+      })) as Message[];
+      console.log('updatedHistory',updatedHistory)
       
       setMessages([
         {
@@ -59,12 +80,19 @@ const Chat: React.FC = () => {
           text: 'Hello, I’m reaching out about your request.',
           time: new Date().toLocaleString(),
         },
-        ...history,
+        ...updatedHistory,
       ]);
     });
 
-    socket.on('receive_message', (data: Message) => {
-      setMessages((prevMessages) => [...prevMessages, data]);
+    socket.on('receive_message', (data: any) => {
+      console.log('receive_message',data)
+      const formattedMessage: Message = {
+        type: data.senderId === userId ? 'sent' : 'received',
+        text: data.text,
+        time:  data.time ? new Date(data.time).toLocaleString() : 'Unknown Time',
+      };
+      console.log('formattedMesssage',formattedMessage)
+      setMessages((prevMessages) => [...prevMessages, formattedMessage]);
     });
 
     return () => {

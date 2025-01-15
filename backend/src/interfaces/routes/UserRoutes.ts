@@ -4,6 +4,7 @@ import { UserController } from '../controllers/UserController';
 import { AccountDetailController } from '../controllers/accountDetailController';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { BookMarkController } from '../controllers/bookmarkController';
+import { MessageController } from '../controllers/messageController';
 import { uploadProfileImages } from '../middlewares/uploadFileImages';
 import { isUser } from '../middlewares/auth';
 
@@ -29,6 +30,8 @@ router.get('/bookmarks',isUser,BookMarkController.getBookmarks);
 
 router.get('/task-bookmarks',isUser,BookMarkController.getBookmarks);
 router.delete('/bookmarks/:id',isUser,BookMarkController.deleteBookmarks);
+
+router.get('/get-receivers',isUser,MessageController.getReceiver);
 
 
 export default router;

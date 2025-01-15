@@ -40,8 +40,6 @@ app.use('/api/client/',clientRouter);
 app.use(catchError);
 
 io.on('connection',(socket) => {
-    console.log('A user connected:', socket.id);
-
     socket.on('get_messages', async ({ senderId, receiverId }) => {
         try {
           const messages = await MessageModel.find({
@@ -57,12 +55,12 @@ io.on('connection',(socket) => {
       });
 
       socket.on('send_message', async (data) => {
-        console.log('dddddddddddddddddddddddd',data);
         
         try {
           const message = new MessageModel(data);
           await message.save();
-          io.emit('receive_message', message);
+          io.to(data.senderId).emit('receive_message', message); 
+          io.to(data.receiverId).emit('receive_message', message);
         } catch (error) {
           console.error('Error saving message:', error);
         }

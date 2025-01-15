@@ -1,7 +1,9 @@
 import React from 'react';
 
 interface Freelancer {
-  name: string;
+  name:string;
+  firstname: string;
+  lastname:string;
   profileImage: string;
   tagline: string;
   userId: string;
@@ -35,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ freelancers, onSelectFreelancer }) =>
               </div>
             </div>
             <div className="ml-4 flex-1">
-              <h4 className="font-medium text-gray-800">{freelancer.name}</h4>
+              <h4 className="font-medium text-gray-800">{freelancer.firstname} {freelancer.lastname} {freelancer.name}</h4>
               <p className="text-sm text-gray-500 truncate">{freelancer.tagline}</p>
             </div>
           </li>
