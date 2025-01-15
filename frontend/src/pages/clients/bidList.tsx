@@ -1,8 +1,10 @@
 import React,{useState,useEffect} from "react";
 import { FaUser,FaTrash } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
+import { io } from 'socket.io-client';
+const socket = io('http://localhost:5000');
 
 interface Bid {
  rate:string;
@@ -15,15 +17,23 @@ interface BidderProfile {
     profileImage: string | null;
     tagline:string;
 }
+interface Message {
+  type: string;
+  text: string;
+  time: string;
+}
 
 
 const BiddersList: React.FC = () => {
 
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [bids, setBids] = useState<Bid[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [freelancerProfiles, setFreelancerProfiles] = useState<BidderProfile[]>([]);
+    const [messageText, setMessageText] = React.useState("");
+    const userId = localStorage.getItem('userId')
 
     useEffect(() => {
         const fetchBids = async () => {
@@ -54,6 +64,17 @@ const BiddersList: React.FC = () => {
           fetchBids();
         }
       }, [id]);
+
+
+
+      const sendMessage = (bidderId: string) => {
+  socket.emit("create_chat_room", {
+    senderId: userId,
+    receiverId: bidderId,
+  });
+  navigate(`/messages/${bidderId}`);
+};
+
     
       if (loading) {
           return <Loader visible={loading} />;
@@ -74,7 +95,7 @@ const BiddersList: React.FC = () => {
       <ul>
           {bids.map((bid, index) => {
             const freelancerProfile = freelancerProfiles[index];
-            if (!freelancerProfile) return null; // Skip if no profile is available for this bid
+            if (!freelancerProfile) return null; 
 
             return (
               <li
@@ -98,7 +119,9 @@ const BiddersList: React.FC = () => {
                       <button className="px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                         Accept Offer
                       </button>
-                      <button className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900">
+                      <button
+                       onClick={() => sendMessage(bid.bidderId)} 
+                       className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900">
                         Send Message
                       </button>
                       <button className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">

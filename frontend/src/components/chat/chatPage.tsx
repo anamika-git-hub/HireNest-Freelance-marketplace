@@ -29,6 +29,8 @@ const Chat: React.FC = () => {
   const userId = localStorage.getItem('userId') || '';
   const role = localStorage.getItem('role') || '';
 
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,7 +46,7 @@ const Chat: React.FC = () => {
           firstname: receiver.firstname,
           name:receiver.name,
           profileImage: receiver.profileImage,
-          userId: receiver._id, 
+          userId: receiver.userId, 
         }));
         setFreelancers(freelancerList);
 
@@ -62,6 +64,7 @@ const Chat: React.FC = () => {
   }, [role,userId]);
 
   const initializeChat = (freelancerId: string) => {
+    console.log('fffrr',freelancerId)
     socket.emit('get_messages', { senderId: userId, receiverId: freelancerId });
 
     socket.on('message_history', (history: any[]) => {
@@ -74,14 +77,7 @@ const Chat: React.FC = () => {
       })) as Message[];
       console.log('updatedHistory',updatedHistory)
       
-      setMessages([
-        {
-          type: 'sent',
-          text: 'Hello, I’m reaching out about your request.',
-          time: new Date().toLocaleString(),
-        },
-        ...updatedHistory,
-      ]);
+      setMessages(updatedHistory);
     });
 
     socket.on('receive_message', (data: any) => {

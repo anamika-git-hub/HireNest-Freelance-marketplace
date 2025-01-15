@@ -10,6 +10,8 @@ import clientRouter from './interfaces/routes/clientRouter';
 import { Server } from 'socket.io';
 import http from 'http';
 import { MessageModel } from './infrastructure/models/MessageModel';
+import { ChatModel } from './infrastructure/models/ChatModel';
+import { IMessage } from './entities/Message';
 
 const port = Config.PORT ;
 const app = express();
@@ -42,12 +44,30 @@ app.use(catchError);
 io.on('connection',(socket) => {
     socket.on('get_messages', async ({ senderId, receiverId }) => {
         try {
-          const messages = await MessageModel.find({
-            $or: [
-              { senderId, receiverId },
-              { senderId: senderId, receiverId: receiverId },
-            ],
-          }).sort({ createdAt: 1 });
+          const chat = await ChatModel.findOne({
+            participants: { $all: [senderId, receiverId] },
+          }).populate({
+            path: 'messages',
+            model: 'Message',
+            populate: {
+              path: 'senderId receiverId',
+              model: 'User',
+            },
+          });
+    
+          if (!chat) {
+            socket.emit('message_history', []);
+            return;
+          }
+    
+          const messages =  (chat.messages as unknown as IMessage[]).map((msg)  => ({
+            senderId: msg.senderId._id,
+            receiverId: msg.receiverId._id,
+            text: msg.text,
+            type: msg.type,
+            time: msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown Time',
+          }));
+    
           socket.emit('message_history', messages);
         } catch (error) {
           console.error('Error fetching messages:', error);
@@ -55,16 +75,66 @@ io.on('connection',(socket) => {
       });
 
       socket.on('send_message', async (data) => {
-        
         try {
-          const message = new MessageModel(data);
+          const { senderId, receiverId, text, type, time } = data;
+    
+          let chat = await ChatModel.findOne({
+            participants: { $all: [senderId, receiverId] },
+          });
+    
+          if (!chat) {
+            chat = new ChatModel({
+              participants: [senderId, receiverId],
+              messages: [],
+            });
+            await chat.save();
+          }
+    
+          const message = new MessageModel({
+            senderId,
+            receiverId,
+            text,
+            type,
+            time,
+            isRead: false, 
+          });
+    
           await message.save();
-          io.to(data.senderId).emit('receive_message', message); 
-          io.to(data.receiverId).emit('receive_message', message);
+    
+          chat.messages.push(message._id);
+          await chat.save();
+    
+          io.to(senderId).emit('receive_message', message);
+          io.to(receiverId).emit('receive_message', message);
+    
         } catch (error) {
-          console.error('Error saving message:', error);
+          console.error('Error sending message:', error);
         }
       });
+
+      socket.on('create_chat_room', async (data) => {
+        try {
+          const { senderId, receiverId } = data;
+          let chat = await ChatModel.findOne({
+            participants: { $all: [senderId, receiverId] },
+          });
+      
+          if (!chat) {
+            chat = new ChatModel({
+              participants: [senderId, receiverId],
+              messages: [], 
+            });
+            await chat.save();
+          }
+          
+          io.to(senderId).emit('chat_created', chat);
+          io.to(receiverId).emit('chat_created', chat);
+      
+        } catch (err) {
+          console.error("Error creating chat room: ", err);
+        }
+      });
+      
 
     socket.on('disconnect',() => {
         console.log('A user disconnected:', socket.id);        
