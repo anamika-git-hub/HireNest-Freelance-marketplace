@@ -13,7 +13,7 @@ export const isUser = (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string };
-          console.log('uuuuuuuuuuserdata',userData)
+
           if (userData) {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);
@@ -25,22 +25,19 @@ export const isUser = (req: CustomRequest, res: Res, next: Next) => {
               const refreshToken = refreshHeader.split(' ')[1];
               try {
                   // Verify refresh token
-                  const refreshData = JwtService.verifyRefreshToken(refreshToken) as { _id: string };
+                  const refreshData = JwtService.verifyRefreshToken(refreshToken) as { id: string };
                   if (refreshData) {
-                      req.user = { userId: refreshData._id };
+                      req.user = { userId: refreshData.id };
                       return checkTokenBlacklist(req, res, next);
                   }
               } catch (refreshError) {
                 throw new Error('Refresh token expired. Please log in again.' )
-                  // return res.status(401).json({ message: 'Refresh token expired. Please log in again.' });
               }
           } else {
             throw new Error( 'Invalid token. Please log in again.' )
-              // return res.status(401).json({ message: 'Invalid token. Please log in again.' });
           }
       }
   } catch (error) {
     throw new Error( 'Internal Server Errorsss')
-      // return res.status(500).json({ message: 'Internal Server Error', error });
   }
 };
