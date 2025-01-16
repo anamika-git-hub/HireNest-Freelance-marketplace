@@ -17,7 +17,6 @@ export const UserController = {
     googleSignUp: async (req: Req, res: Res, next: Next) => {
         try {
             const {email} = req.body
-            console.log('eeeee',typeof(email))
             const result = await userUseCase.googleSignUp(email);
             
             res.status(201).json(result)
@@ -67,10 +66,8 @@ export const UserController = {
         try {
             const {id} = req.params;
             const {currentPassword } = req.body;
-            console.log('userId, currentPassword:', id, currentPassword);
             
             const result = await userUseCase.validatePassword(id, currentPassword);
-            console.log('Password validation result:', result);
     
             if (!result) {
                 res.json(result);

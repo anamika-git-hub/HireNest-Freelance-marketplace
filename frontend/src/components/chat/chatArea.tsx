@@ -23,7 +23,7 @@ interface ChatAreaProps {
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socket }) => {
-  console.log('message',messages)
+ 
   const [newMessage, setNewMessage] = React.useState('');
 
   const sendMessage = () => {

@@ -36,7 +36,6 @@ const ManageUsers: React.FC = () => {
     );
     
     if (confirmed) {
-      console.log('userId:',userId, 'isblocked:', typeof(isBlocked))
       try {
         const response = await axiosConfig.put(`/admin/${userId}/${isBlocked}`);
         

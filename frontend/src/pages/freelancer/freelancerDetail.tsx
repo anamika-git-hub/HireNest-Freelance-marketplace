@@ -40,7 +40,7 @@ const FreelancerDetail: React.FC = () => {
   const getFreelancerDetail = async () => {
     try {
       const response = await axiosConfig.get(`client/freelancer/${id}`);
-      console.log(response.data);
+      
       setFreelancerDetail(response.data.freelancer);
     } catch (error) {
       setError("Failed to load freelancer details");

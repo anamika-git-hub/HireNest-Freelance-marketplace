@@ -42,7 +42,6 @@ const TaskDetail: React.FC = () => {
       try {
         const response = await axiosConfig.get(`freelancers/tasks/${id}`);
         setTaskDetails(response.data.task);
-        console.log(response.data.task);
       } catch (error) {
         setError("Failed to load task details.");
       } finally {
@@ -100,7 +99,7 @@ const TaskDetail: React.FC = () => {
     const response =await axiosConfig.get(`/freelancers/bid/${userId}`)
 
     const bidExists = response.data.bid.some((bid:BidFormData) => bid.taskId?._id === id); 
-    console.log(bidExists)
+    
     return bidExists
   }
 
@@ -114,7 +113,7 @@ const TaskDetail: React.FC = () => {
     try {
       const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
       alert("Bid placed successfully!");
-      console.log(response.data);
+      
     } catch (error) {
       console.error("Error placing bid:", error);
       alert("Failed to place bid. Please try again.");

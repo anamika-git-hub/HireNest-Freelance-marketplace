@@ -13,7 +13,7 @@ const OTPVerification: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { email, role } = location.state || {}; 
-  console.log('role',role)
+  
 
   useEffect(() => {
     const intervalId = setInterval(() => {

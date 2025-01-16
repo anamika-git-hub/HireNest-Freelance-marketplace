@@ -108,7 +108,6 @@ export const userUseCase = {
         const resetLink = `http://localhost:3000/reset-password/${token}`
        await forgotPassword(email,resetLink)
        
-       console.log('token',token)
     },
 
     resetPassword: async (password:string, id: string) => {
@@ -123,7 +122,6 @@ export const userUseCase = {
     },
     getNotification: async(userId:string, type:string) => {
         const result = await NotificationRepository.getNotification(userId,type);
-        console.log('rrrrreeeeee',result);
         return result
     }
 

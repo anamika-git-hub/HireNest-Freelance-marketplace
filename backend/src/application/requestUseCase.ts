@@ -8,7 +8,6 @@ export const RequestUseCase = {
     createRequest: async (data: IRequest) => {
         try {
             const {freelancerId,requesterId} = data
-            console.log('ff',freelancerId,requesterId)
             const user = await FreelancerProfileRepository.getFreelancerById(freelancerId.toString());
             const sender = await AccountDetailRepository.findUserDetailsById(requesterId.toString());
             const notification = {

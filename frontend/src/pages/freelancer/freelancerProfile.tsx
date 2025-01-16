@@ -105,14 +105,12 @@ attachments.forEach((attachment, index) => {
   formData.append(`attachments[${index}].description`, attachment.description);
 });
 
- console.log('aaaattt',attachments)
 
     try {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log("Form submitted successfully:", response.data);
       alert("Profile submitted successfully!");
       navigate('/login')
       

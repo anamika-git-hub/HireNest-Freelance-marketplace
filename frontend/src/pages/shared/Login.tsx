@@ -16,7 +16,7 @@ const Login: React.FC = () => {
 
   const googleSubmit  = async(googleData:any)=>{
     const decodeResponse:any= jwtDecode(googleData.credential)
-    console.log(decodeResponse)
+    
      const {email} = decodeResponse
      const user = {email}
      try {
@@ -52,7 +52,6 @@ const Login: React.FC = () => {
         if (response.status === 200) {
           const user = response.data.user;
           const userDetail = response.data.userDetails
-          console.log('refreshtoken',response.data.refreshToken)
 
           localStorage.setItem("accessToken", response.data.token);
           localStorage.setItem("refreshToken",response.data.refreshToken);

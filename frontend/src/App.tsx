@@ -31,7 +31,6 @@ import MyAccount from './pages/shared/MyAccount';
 import FreelancerList from './pages/freelancer/freelancerList';
 import FreelancerProfile from './pages/freelancer/freelancerProfile';
 import FreelancerDetail from './pages/freelancer/freelancerDetail';
-import DashboardFreelancer from './pages/freelancer/dashboardFreelancer';
 import ActiveBids from './pages/freelancer/Mybids';
 import MyProfile from './pages/freelancer/MyProfile';
 import TaskBookmarks from './pages/freelancer/taskBookmarks';
@@ -78,7 +77,6 @@ const App: React.FC = () => {
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />
         <Route path="/client/freelancer-list" element={<UserPrivateRoute><LayoutWrapper><FreelancerList/></LayoutWrapper></UserPrivateRoute>} />
         <Route path="/client/freelancer-detail/:id" element={<UserPrivateRoute><LayoutWrapper><FreelancerDetail/></LayoutWrapper></UserPrivateRoute>} />
-        <Route path="/freelancer/dashboard" element={<UserPrivateRoute><UserSidebar><DashboardFreelancer/></UserSidebar></UserPrivateRoute>} />
         <Route path="/freelancer/bids" element={<UserPrivateRoute><UserSidebar><ActiveBids/></UserSidebar></UserPrivateRoute>} />
         <Route path="/freelancer/my-profile" element={<UserPrivateRoute><UserSidebar><MyProfile/></UserSidebar></UserPrivateRoute>} />
         <Route path="/task-bookmarks" element={<UserPrivateRoute><UserSidebar><TaskBookmarks/></UserSidebar></UserPrivateRoute>} />

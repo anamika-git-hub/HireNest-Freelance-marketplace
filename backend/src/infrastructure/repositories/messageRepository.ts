@@ -8,7 +8,6 @@ export const MessageRepository = {
         const contacts = await ChatModel.find({
            participants:userId
         });
-      console.log('contact',role)
         const contactIds = new Set<string>();
         contacts.forEach((chat: any) => {
             chat.participants.forEach((participant: mongoose.Types.ObjectId) => {
@@ -19,7 +18,6 @@ export const MessageRepository = {
         });
     
         const idsArray = Array.from(contactIds);
-        console.log('idsArray',idsArray)
         if (role === 'freelancer') {
             const receiverDetails = await UserDetailModel.find(
                 { userId: { $in: idsArray } },
@@ -31,7 +29,6 @@ export const MessageRepository = {
                 { userId: { $in: idsArray } },
                 "name profileImage userId"
             );
-            console.log('chatterDetails',chatterDetails)
             return chatterDetails;
         }
         return []; 

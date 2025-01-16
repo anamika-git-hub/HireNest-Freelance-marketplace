@@ -23,7 +23,6 @@ const CategoryForm: React.FC = () => {
     },
     validationSchema: categoryValidationSchema,
     onSubmit: async (values) => {
-      console.log("Formik values:", values);
       try {
         setApiError(null); // Reset error
         const formData = new FormData();

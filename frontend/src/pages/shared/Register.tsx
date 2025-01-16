@@ -52,7 +52,7 @@ const Signup: React.FC = () => {
     const { email, password, role } = values;
 
     const newUser = { email, password, role };
-    console.log('registerrole',role)
+   
 
     try {
       const response = await axios.post(

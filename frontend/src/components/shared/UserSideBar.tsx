@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   FaEnvelope,
   FaBookmark,
-  FaStar,
+  FaBell,
   FaSuitcase,
   FaTasks,
   FaCog,
@@ -91,7 +91,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <aside className="w-64 pt-20 bg-white text-gray-800 shadow-md">
           <nav className="mt-4">
             <NavLink
-              to="/freelancer/dashboard"
+              to="/dashboard"
               className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
             >
               <MdDashboard className="mr-3" /> Dashboard
@@ -110,7 +110,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               to="/notification"
               className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
             >
-              <FaStar className="mr-3" /> Notifications
+              <FaBell  className="mr-3" /> Notifications
             </NavLink>
             <div className="px-4 py-2 mt-4 text-gray-500 uppercase text-sm">
               Organize and Manage

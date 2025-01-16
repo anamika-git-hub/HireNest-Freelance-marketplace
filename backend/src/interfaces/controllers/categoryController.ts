@@ -8,13 +8,9 @@ export const CategoryController = {
             const data = req.body;
             const file = req.file; 
     
-            console.log('data:', data);
-            console.log('file:', file);
-    
             const result = await CategoryUseCase.createCategory(data, file);
             res.status(201).json({ message: 'Category created successfully', category: result });
         } catch (error) {
-            console.log('err:', error);
             next(error);
         }
     },
@@ -42,8 +38,6 @@ export const CategoryController = {
           const { id } = req.params;
           const updates = req.body;
           const file = req.file;
-          console.log('updates:', updates);
-          console.log('file:', file);
     
           const updateCategory = await CategoryUseCase.updateCategory(id, updates, file);
           res.status(200).json(updateCategory);

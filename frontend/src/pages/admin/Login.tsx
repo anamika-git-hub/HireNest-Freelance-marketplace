@@ -21,7 +21,6 @@ const AdminLogin: React.FC = () => {
       try {
         const response = await axiosConfig.post("admin/login", values);
         if (response.status === 200) {
-          console.log(response)
           // const  userData = {user:response.data.admin}
           dispatch(loginUser(response.data.admin));
           navigate('/admin/dashboard');
@@ -31,7 +30,6 @@ const AdminLogin: React.FC = () => {
           localStorage.setItem('email', response.data.admin.email);
         }
       } catch (error: any) {
-        console.log(error);
         if (error.response) {
           const errorMessage = error.response.data.error || 'An error occurred during login';
           toast.error(errorMessage);

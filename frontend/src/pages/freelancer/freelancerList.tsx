@@ -93,7 +93,7 @@ const FreelancerList: React.FC = () => {
   useEffect(()=>{
     const getBookmark = async() => {
       const response = await axiosConfig.get(`/users/bookmarks`);
-      console.log('reees',response)
+      
       if(response.data.bookmark){
         setBookmarks(response.data.bookmark.items)
       }

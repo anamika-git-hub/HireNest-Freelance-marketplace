@@ -110,7 +110,6 @@ const MyAccount: React.FC = () => {
     const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
       currentPassword: passwordData.currentPassword
     });
-    console.log('reeeleldk',response)
    
     if (response.status === 200) {
       return true; 

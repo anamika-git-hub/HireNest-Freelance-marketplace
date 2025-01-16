@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import store from "../store/store";
 import { logoutUser } from "../store/userSlice";
 import toast from "react-hot-toast";
-console.log('aaaaaaaa', process.env.BASE_URL)
 
 const axiosConfig  = axios.create({
     baseURL: process.env.BASE_URL ||"http://localhost:5000/api/",

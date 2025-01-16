@@ -8,7 +8,7 @@ const ForgotPassword: React.FC = () => {
         e.preventDefault();
         try {
             const response = await axiosConfig.post("/users/forgot-password", { email });
-            console.log("Response:", response.data);
+            
             alert("If this email is registered, a password reset link has been sent.");
         } catch (error: any) {
             console.error("Error:", error.response?.data || error.message);

@@ -24,7 +24,7 @@ const AccountSetup: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { role } = location.state || {}; 
-  console.log('acc',role)
+ 
 
   const currentUserId = useSelector((state: RootState) => state.user.userId);
   const currentRole = useSelector((state:RootState)=> state.user.userRole);

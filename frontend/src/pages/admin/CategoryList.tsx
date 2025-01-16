@@ -40,8 +40,6 @@ const ManageCategories: React.FC = () => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  console.log('filtered categories:', filteredCategories)
-
   return (
     <div className="p-6 bg-gray-100">
       <div className="flex items-center justify-between mb-4">

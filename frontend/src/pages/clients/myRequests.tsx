@@ -36,7 +36,7 @@ const RequestList: React.FC = () => {
         const fetchRequests = async () => {
           try {
             const response = await axiosConfig.get(`/client/client-request`);
-            console.log('response',response.data.requests)
+            
             const fetchedFreelancers = response.data.requests; 
             const fetchedProfiles = await Promise.all(
               fetchedFreelancers.map(async (request:Request) => {

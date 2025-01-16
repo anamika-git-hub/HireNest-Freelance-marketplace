@@ -36,7 +36,7 @@ useEffect(() => {
     const fetchTaskDetail = async () => {
       try {
         const response = await axiosConfig.get(`/freelancers/tasks/${id}`);
-        console.log('resssss',response.data)
+      
         if (response.data) {
            const task = response.data.task;
           setTaskDetail(response.data.task);

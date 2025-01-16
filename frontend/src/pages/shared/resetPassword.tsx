@@ -6,12 +6,12 @@ import { useParams } from "react-router-dom";
 const ResetPassword: React.FC = () => {
     const [password, setPassword] = useState<string>("");
       const { id } = useParams<{ id: string }>();
-    console.log(id)
+    
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const response = await axiosConfig.post("/users/reset-password", { password ,id});
-            console.log("Response:", response.data);
+            
             alert("Password has been reset successfully");
         } catch (error: any) {
             console.error("Error:", error.response?.data || error.message);

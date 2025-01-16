@@ -52,7 +52,7 @@ const MyProfile: React.FC = () => {
         const userId = localStorage.getItem("userId");
         if (userId) {
           const response = await axiosConfig.get(`/freelancers/freelancer-profile/${userId}`);
-          console.log('rrrrrrrrrrrrrr',response.data)
+         
           setFreelancerProfile(response.data);
         }
       } catch (error) {

@@ -20,7 +20,6 @@ const TaskList: React.FC = () => {
     skills: [],
     priceRange: { min: 10, max: 1000 },
   });
-  console.log('fill',filters)
   const userId = localStorage.getItem('userId')
   const ITEMS_PER_PAGE = 4;
   
@@ -94,7 +93,7 @@ const TaskList: React.FC = () => {
   useEffect(()=>{
     const getBookmark = async() => {
       const response = await axiosConfig.get(`/users/task-bookmarks`);
-      console.log('respo',response)
+     
       if(response.data.bookmark){
         setBookmarks(response.data.bookmark.items)
       }
@@ -103,7 +102,7 @@ const TaskList: React.FC = () => {
   },[]);
 
   const handleFilterChange = (newFilters: any) => {
-    console.log('newfilter',newFilters)
+   
     setFilters(newFilters);
   };
 

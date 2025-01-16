@@ -12,7 +12,6 @@ export const MessageController = {
             const userId = req.query.userId as string ;
             const role = req.query.role as string ;
             const result = await MessageUseCase.getReceivers(userId,role);
-            console.log('result', result);
             res.status(200).json(result);
         } catch (error) {
             next(error)
