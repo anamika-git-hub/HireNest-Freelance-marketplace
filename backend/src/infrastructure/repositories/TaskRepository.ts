@@ -38,16 +38,19 @@ export const TaskRepository = {
         }
     },
 
-    getTasks: async (sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
+    getTasks: async (filters:any,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
         const currentDate = new Date().toISOString(); 
-        return await TaskSubmissionModel.find({
+        const result = await TaskSubmissionModel.find({
+            ...filters,
             timeline: { $gt: currentDate }, 
         }).sort(sortCriteria).skip(skip).limit(limit);
+        return result
      },
-    getTaskCount: async() => {
+    getTaskCount: async(filters:any) => {
         try {
             const currentDate = new Date().toISOString(); 
             return await TaskSubmissionModel.countDocuments({
+                ...filters,
                 timeline: { $gt: currentDate }, 
             });
         } catch (error:any) {

@@ -49,22 +49,44 @@ export const TaskController = {
             const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
-
+    
+            const category = req.query.category as string | undefined;
+            const skills = req.query.skills as string[] | undefined; // Assuming it's an array
+            const priceRange = req.query.priceRange as { min: string; max: string } | undefined; // E.g., "100-500"
+            
+    
             const skip = (page - 1) * limit;
-
+    
+            // Sort criteria based on sortOption
             let sortCriteria: { [key: string]: 1 | -1 } = {};
             if (sortOption === "Price: Low to High") sortCriteria.minRate = 1;
             if (sortOption === "Price: High to Low") sortCriteria.maxRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
-
-            const tasks = await TaskUseCase.getTasks({sortCriteria,skip,limit});
-            const totalTasks = await TaskUseCase.getTasksCount();
-            const totalPages = Math.ceil(totalTasks/limit);
-            res.status(200).json({data: tasks,totalPages, message: 'Tasks got successfully'})
+    
+            // Filters for query
+            const filters: any = {};
+            if (category) filters.category = category;
+            if (skills) filters.skills = { $all: skills }; // Match all skills in the array
+    
+            // Handle price range filter
+            if (priceRange) {
+                const minRate = parseFloat(priceRange.min);
+                const maxRate = parseFloat(priceRange.max);
+                if (!isNaN(minRate)) filters.minRate = { $gte: minRate };
+                if (!isNaN(maxRate)) filters.maxRate = { $lte: maxRate };
+            }
+    
+            // Fetch tasks and count
+            const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
+            const totalTasks = await TaskUseCase.getTasksCount(filters);
+            const totalPages = Math.ceil(totalTasks / limit);
+    
+            res.status(200).json({ data: tasks, totalPages, message: 'Tasks retrieved successfully' });
         } catch (error) {
-            next(error)
+            next(error);
         }
     },
+    
 
     getTaskById: async (req: Req, res: Res, next: Next) => {
         try {

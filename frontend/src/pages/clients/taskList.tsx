@@ -11,15 +11,16 @@ const TaskList: React.FC = () => {
   const [error, setError] = useState<string>("");  
   const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [filters, setFilters] = useState({
     category: "",
     skills: [],
-    priceRange: { min: 1000, max: 50000 },
+    priceRange: { min: 10, max: 1000 },
   });
+  console.log('fill',filters)
   const userId = localStorage.getItem('userId')
   const ITEMS_PER_PAGE = 4;
   
@@ -43,7 +44,10 @@ const TaskList: React.FC = () => {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
-          searchTerm:debouncedSearchTerm
+          searchTerm:debouncedSearchTerm,
+          category:filters.category,
+          skills:filters.skills,
+          priceRange:filters.priceRange
         },
       });
       setTasks(response.data.data);
@@ -56,7 +60,7 @@ const TaskList: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [sortOption,currentPage,debouncedSearchTerm]);
+  }, [sortOption,currentPage,debouncedSearchTerm,filters]);
 
     useEffect(() => {
       if (inputRef.current) {
@@ -99,19 +103,9 @@ const TaskList: React.FC = () => {
   },[]);
 
   const handleFilterChange = (newFilters: any) => {
+    console.log('newfilter',newFilters)
     setFilters(newFilters);
   };
- 
-  // const filteredTasks = sortTasks(
-  //   tasks.filter((task) => {
-  //     return (
-  //       (filters.category ? task.category === filters.category : true) &&
-  //       (filters.skills.length > 0 ? filters.skills.every((skill) => task.skills.includes(skill)) : true) &&
-  //       task.minRate >= filters.priceRange.min &&
-  //       task.maxRate <= filters.priceRange.max
-  //     );
-  //   })
-  // );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

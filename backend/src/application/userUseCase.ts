@@ -6,6 +6,7 @@ import { hashPassword, comparePassword } from '../infrastructure/services/HashPa
 import { OtpService } from '../infrastructure/services/OtpService';
 import { encrypt ,decrypt} from '../utils/hashHelper';
 import { forgotPassword } from '../infrastructure/services/EmailService';
+import { NotificationRepository } from '../infrastructure/repositories/notificationRepository';
 
 
 export const userUseCase = {
@@ -113,13 +114,17 @@ export const userUseCase = {
     resetPassword: async (password:string, id: string) => {
       
        const userId = await decrypt(id);
-       console.log('ppppp',password)
        const newPassword = await hashPassword(password);
         const updatedUser = await UserRepository.updatePassword(userId,newPassword);
         if (!updatedUser) {
             throw {statusCode:404, message:'User not found'};
           }
           return {updatedUser}
+    },
+    getNotification: async(userId:string, type:string) => {
+        const result = await NotificationRepository.getNotification(userId,type);
+        console.log('rrrrreeeeee',result);
+        return result
     }
 
    

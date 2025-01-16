@@ -14,6 +14,7 @@ import AccountSetup from './pages/shared/accountSetup';
 import Dashboard from './pages/shared/Dashboard';
 import About from './pages/shared/about';
 import Contact from './pages/shared/contact';
+import Notifications from './pages/shared/notification';
 
 import Chat from './components/chat/chatPage';
 
@@ -71,6 +72,7 @@ const App: React.FC = () => {
         <Route path="/about" element={<LayoutWrapper><About/></LayoutWrapper>} />
         <Route path="/contact" element={<LayoutWrapper><Contact/></LayoutWrapper>} />
         <Route path="/messages" element={<UserPrivateRoute><UserSidebar><Chat/></UserSidebar></UserPrivateRoute>} />
+        <Route path="/notification" element={<UserPrivateRoute><UserSidebar><Notifications/></UserSidebar></UserPrivateRoute>} />
 
          {/* ---------freelancer--------------- */}
         <Route path="/freelancer/freelancer-profile" element={<LayoutWrapper><FreelancerProfile /></LayoutWrapper>} />

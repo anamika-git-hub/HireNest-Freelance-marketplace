@@ -18,7 +18,7 @@ const FreelancerList: React.FC = () => {
   const [filters, setFilters] = useState({
       category: "",
       skills: [],
-      priceRange: { min: 1000, max: 50000 },
+      priceRange: { min: 10, max: 1000 },
     });
   const userId = localStorage.getItem('userId');
   const ITEMS_PER_PAGE = 6;

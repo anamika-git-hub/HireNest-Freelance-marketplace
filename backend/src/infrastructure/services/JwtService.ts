@@ -6,7 +6,7 @@ const refreshSecretKey = Config.REFRESH_SECRET as string
 
 export const JwtService = {
     generateToken: (payload: object) => jwt.sign(payload, secretKey, {expiresIn: '1h'}),
-    generateRefreshToken: (payload: object) => jwt.sign(payload,refreshSecretKey,{expiresIn:'2h'}),
+    generateRefreshToken: (payload: object) => jwt.sign(payload,refreshSecretKey,{expiresIn:'3d'}),
     verifyToken: (token: string) => jwt.verify(token, secretKey),
     verifyRefreshToken:(token:string) => jwt.verify(token,refreshSecretKey),
 

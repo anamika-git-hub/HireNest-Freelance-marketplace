@@ -100,6 +100,17 @@ export const UserController = {
         } catch (error) {
             next(error)
         }
+    },
+    getNotification:async (req: CustomRequest, res: Res, next: Next) => {
+        try {
+            
+            const userId = req.user?.userId || '';
+            const {type} = req.params;
+            const result = await userUseCase.getNotification(userId,type)
+            res.status(200).json(result)
+        } catch (error) {
+          next(error)
+        }
     }
    
 }

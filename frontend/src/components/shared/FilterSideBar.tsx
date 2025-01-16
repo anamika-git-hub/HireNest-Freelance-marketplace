@@ -16,7 +16,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
     const [skillInput, setSkillInput] = useState<string>("");
     const [categories, setCategories] = useState<Category[]>([]);
     const [category, setCategory] = useState<string>("");
-    const [priceRange, setPriceRange] = useState<{ min: number, max: number }>({ min: 1000, max: 50000 });
+    const [priceRange, setPriceRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
     
       useEffect(() => {
         const fetchCategories = async () => {
@@ -48,11 +48,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
 
       const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setCategory(e.target.value);
-        onFilterChange({
-          category: e.target.value,
-          skills,
-          priceRange
-        });
+        // onFilterChange({
+        //   category: e.target.value,
+        //   skills,
+        //   priceRange
+        // });
       };
     
       const handleSkillInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,12 +62,20 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
       const handlePriceRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newRange = { ...priceRange, [e.target.name]: parseInt(e.target.value) };
         setPriceRange(newRange);
+        // onFilterChange({
+        //   category,
+        //   skills,
+        //   priceRange: newRange
+        // });
+      };
+
+      const handleSubmit = () => {
         onFilterChange({
           category,
           skills,
-          priceRange: newRange
-        });
-      };
+          priceRange
+        })
+      }
 
   return (
     <aside className="bg-blue-50 p-6 mt-14 rounded-lg shadow-md w-full md:w-1/4">
@@ -123,7 +131,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
             </span>
                ))}
           </div>
-        {/* Fixed Price Range */}
+        {/* Fixed Price Range
         <label className="block mb-2 font-medium text-sm">Fixed Price Range</label>
         <input
           type="range"
@@ -137,10 +145,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
         <div className="flex justify-between text-sm mt-1">
         <span>${priceRange.min}</span>
         <span>${priceRange.max}</span>
-        </div>
+        </div> */}
 
         {/* Hourly Rate Range */}
         <label className="block mb-2 font-medium text-sm">Hourly Rate Range</label>
+        <span>${priceRange.max}</span>
         <input
           type="range"
           className="w-full"
@@ -151,12 +160,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
           onChange={handlePriceRangeChange}
         />
         <div className="flex justify-between text-sm mt-1">
-        <span>${priceRange.min}</span>
-        <span>${priceRange.max}</span>
+        <span>$0</span>
+        <span>$1000</span>
         </div>
 
         {/* Search Button */}
-        <button className="bg-blue-500 text-white w-full p-2 rounded-md">
+        <button 
+        onClick={handleSubmit}
+        className="bg-blue-500 text-white w-full p-2 rounded-md">
           Search
         </button>
       </div>

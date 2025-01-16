@@ -5,7 +5,7 @@ import { IoIosArrowForward,IoMdTime } from "react-icons/io";
 
 const Dashboard: React.FC = () => {
   return (
-    <section className="bg-blue-100 w-full">
+    <section className="bg-gray-100 w-full">
       <div className="p-6 pt-36 space-y-6 mx-">
         {/* Stats Section */}
         <div className="grid grid-cols-4 gap-6">

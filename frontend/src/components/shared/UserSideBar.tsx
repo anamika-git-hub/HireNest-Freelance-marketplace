@@ -107,10 +107,10 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {renderBookmarksLink()}
             
             <NavLink
-              to="/user/reviews"
+              to="/notification"
               className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
             >
-              <FaStar className="mr-3" /> Reviews
+              <FaStar className="mr-3" /> Notifications
             </NavLink>
             <div className="px-4 py-2 mt-4 text-gray-500 uppercase text-sm">
               Organize and Manage

@@ -33,5 +33,7 @@ router.delete('/bookmarks/:id',isUser,BookMarkController.deleteBookmarks);
 
 router.get('/get-receivers',isUser,MessageController.getReceiver);
 
+router.get('/notifications/:type',isUser,UserController.getNotification);
+
 
 export default router;
