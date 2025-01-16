@@ -4,7 +4,12 @@ import ChatArea from './chatArea';
 import { io } from 'socket.io-client';
 import axiosConfig from '../../service/axios';
 
-const socket = io('http://localhost:5000');
+
+const userId = localStorage.getItem('userId') || '';
+
+const socket = io('http://localhost:5000', {
+  query: { userId }
+});
 
 interface Freelancer {
   name:string;
@@ -26,7 +31,6 @@ const Chat: React.FC = () => {
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const userId = localStorage.getItem('userId') || '';
   const role = localStorage.getItem('role') || '';
 
   
@@ -40,7 +44,6 @@ const Chat: React.FC = () => {
             userId:userId
           }
         });
-        console.log('Fetched Requests:', response.data);
 
         const freelancerList: Freelancer[] = response.data.map((receiver: any) => ({
           firstname: receiver.firstname,
@@ -64,30 +67,25 @@ const Chat: React.FC = () => {
   }, [role,userId]);
 
   const initializeChat = (freelancerId: string) => {
-    console.log('fffrr',freelancerId)
     socket.emit('get_messages', { senderId: userId, receiverId: freelancerId });
 
     socket.on('message_history', (history: any[]) => {
-      console.log('history',history);
 
       const updatedHistory = history.map((msg) => ({
         type: msg.senderId === userId ? 'sent' : 'received', 
         text: msg.text,
         time:  msg.time ? new Date(msg.time).toLocaleString() : 'Unknown Time',
       })) as Message[];
-      console.log('updatedHistory',updatedHistory)
       
       setMessages(updatedHistory);
     });
 
     socket.on('receive_message', (data: any) => {
-      console.log('receive_message',data)
       const formattedMessage: Message = {
         type: data.senderId === userId ? 'sent' : 'received',
         text: data.text,
         time:  data.time ? new Date(data.time).toLocaleString() : 'Unknown Time',
       };
-      console.log('formattedMesssage',formattedMessage)
       setMessages((prevMessages) => [...prevMessages, formattedMessage]);
     });
 

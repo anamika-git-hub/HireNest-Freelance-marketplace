@@ -40,8 +40,13 @@ app.use('/api/freelancers',freelancerRouter);
 app.use('/api/client/',clientRouter);
 
 app.use(catchError);
+const socketConnection = new Map<any, string>();
+
 
 io.on('connection',(socket) => {
+  const userId = socket.handshake.query.userId;
+    console.log(`User connected with ID: ${userId}`);
+  socketConnection.set(userId, socket.id);
     socket.on('get_messages', async ({ senderId, receiverId }) => {
         try {
           const chat = await ChatModel.findOne({
@@ -77,7 +82,18 @@ io.on('connection',(socket) => {
       socket.on('send_message', async (data) => {
         try {
           const { senderId, receiverId, text, type, time } = data;
-    
+          let socketId 
+          if (socketConnection.has(receiverId)) {
+             socketId = socketConnection.get(receiverId) as string
+        } else {
+            return null; // Or any suitable fallback logic
+        }
+        let receiveId 
+        if(socketConnection.has(senderId)){
+          receiveId = socketConnection.get(senderId) as string
+        }else {
+           return null
+        }
           let chat = await ChatModel.findOne({
             participants: { $all: [senderId, receiverId] },
           });
@@ -89,7 +105,7 @@ io.on('connection',(socket) => {
             });
             await chat.save();
           }
-    
+     
           const message = new MessageModel({
             senderId,
             receiverId,
@@ -104,8 +120,8 @@ io.on('connection',(socket) => {
           chat.messages.push(message._id);
           await chat.save();
     
-          io.to(senderId).emit('receive_message', message);
-          io.to(receiverId).emit('receive_message', message);
+          io.to(socketId).emit('receive_message', message);
+          io.to(receiveId).emit('receive_message', message);
     
         } catch (error) {
           console.error('Error sending message:', error);
