@@ -10,14 +10,18 @@ export const BidUseCase = {
         try {
             const {taskId,bidderId} = data
              const user = await TaskRepository.getTaskById(taskId.toString());
-                    const sender = await FreelancerProfileRepository.getFreelancerByUserId(bidderId.toString());
+             const sender = await FreelancerProfileRepository.getFreelancerByUserId(bidderId.toString());
                     const notification = {
                             senderId:bidderId,
                             userId: user.clientId, 
+                            senderName: sender.name, 
+                            projectName: user.projectName,
                             text: `${sender.name} placed a bid on your ${user.projectName} project`,
                             isRead: false,
                             createdAt: new Date(),
-                            types:'bid'
+                            types:'bid',
+                            bidderProfileUrl:`/client/freelancer-detail/${sender._id}`,
+                            projectUrl:`/client/bidders-list/${taskId}`
                         }
              await NotificationRepository.createNotification(notification);
             return await BidRepository.createBid(data);

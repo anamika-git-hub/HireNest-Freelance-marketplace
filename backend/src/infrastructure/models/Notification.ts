@@ -12,6 +12,12 @@ export const NotificationSchema = new Schema<INotification>(
             type:mongoose.Schema.Types.ObjectId,
             ref:'User'
         },
+        senderName: {
+            type:String,
+        },
+        projectName: {
+            type:String
+        },
         text: {
             type: String,
             required:true
@@ -29,6 +35,12 @@ export const NotificationSchema = new Schema<INotification>(
         createdAt: { 
             type: Date, 
             default: Date.now 
+        },
+        bidderProfileUrl: {
+            type: String,
+        },
+        projectUrl: {
+            type : String
         }
     },
     { timestamps: true}

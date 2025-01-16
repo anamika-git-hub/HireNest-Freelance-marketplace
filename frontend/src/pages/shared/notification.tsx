@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { FaBell, FaClock, FaUsers, FaUserCircle } from "react-icons/fa";
+import { FaBell, FaUserCircle } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
 import { Link } from "react-router-dom";
 
 interface Notification {
   text: string
+  bidderProfileUrl:string
+  projectUrl:string
+  types: string
+  senderName:string
+  projectName: string
 }
 
 const Notifications: React.FC = () => {
@@ -24,7 +29,7 @@ const Notifications: React.FC = () => {
     const fetchNotifications = async() => {
         if(userId){
             const response = await axiosConfig.get(`/users/notifications/${type}`)
-            console.log('response',response)
+            
             setNotifications(response.data);
             setLoading(false)
         }else{
@@ -44,6 +49,66 @@ const Notifications: React.FC = () => {
       return <div>{error}</div>;
     }
 
+    const notificationText = () => {
+      if(type === 'bid' ){
+        return (
+          <>
+          {notifications.map((notification,index)=>(
+                    <li
+                    key={index}
+                     className="flex items-start py-2">
+                    <FaUserCircle className="w-6 h-6 text-gray-300" />
+                    <p className="ml-3 text-sm text-gray-700">
+                <a
+                    href={notification.bidderProfileUrl}
+                    className="text-blue-500 hover:underline"
+                >
+                    {notification.senderName}
+                </a>{' '}
+                placed a bid on your{' '}
+                <a
+                    href={notification.projectUrl}
+                    className="text-blue-500 hover:underline"
+                >
+                    {notification.projectName}
+                </a>{' '}
+                project.
+            </p>
+                    </li>
+                  ))}
+          </>
+        )
+      }else if (type === 'request'){
+        return (
+          <>
+          {notifications.map((notification,index)=>(
+                    <li
+                    key={index}
+                     className="flex items-start py-2">
+                    <FaUserCircle className="w-6 h-6 text-gray-300" />
+                    <p className="ml-3 text-sm text-gray-700">
+                <a
+                    href={notification.bidderProfileUrl}
+                    className="text-blue-500 hover:underline"
+                >
+                    {notification.senderName}
+                </a>{' '}
+                placed a bid on your{' '}
+                <a
+                    href={notification.projectUrl}
+                    className="text-blue-500 hover:underline"
+                >
+                    {notification.projectName}
+                </a>{' '}
+                project.
+            </p>
+                    </li>
+                  ))}
+          </>
+        )
+      }
+    }
+
  return(
     <div className="bg-white shadow-md rounded-lg p-4 pt-24">
                 <div className="flex justify-between items-center">
@@ -53,17 +118,7 @@ const Notifications: React.FC = () => {
                   </button>
                 </div>
                 <ul className="mt-4 divide-y divide-gray-200">
-                  {notifications.map((notification,index)=>(
-                    <li
-                    key={index}
-                     className="flex items-start py-2">
-                    <FaUserCircle className="w-6 h-6 text-gray-300" />
-                    
-                    <p className="ml-3 text-sm text-gray-700">
-                      {notification.text}
-                    </p>
-                    </li>
-                  ))}
+                  {notificationText()}
                 </ul>
               </div>
  )
