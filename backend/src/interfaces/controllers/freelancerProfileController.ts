@@ -36,6 +36,10 @@ export const FreelancerProfileController = {
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
             const searchTerm = req.query.searchTerm as string || ""; 
+            
+            const category = req.query.category as string | undefined;
+            const skills = req.query.skills as string[] | undefined; // Assuming it's an array
+            const priceRange = req.query.priceRange as { min: string; max: string } | undefined;
             const skip = (page - 1) * limit;
 
             let sortCriteria: { [key: string]: 1 | -1 } = {};
@@ -43,9 +47,25 @@ export const FreelancerProfileController = {
             if (sortOption === "Price: High to Low") sortCriteria.hourlyRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
 
-            const freelancers = await FreelancerProfileUseCase.getFreelancers({sortCriteria,skip,limit,searchTerm});
+            const filters: any = {};
 
-            const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(searchTerm);
+            if (searchTerm) {
+                filters.name = { $regex: searchTerm, $options: "i" }; // Case-insensitive search
+            }
+            
+            if (skills) filters.skills = { $all: skills };
+            
+            if (priceRange) {
+                const minRate = parseFloat(priceRange.min);
+                const maxRate = parseFloat(priceRange.max);
+                if (!isNaN(minRate)) filters.hourlyRate = {$gte: minRate};
+                if (!isNaN(maxRate)) filters.hourlyRate = {$lte: maxRate};
+            }
+            
+
+            const freelancers = await FreelancerProfileUseCase.getFreelancers({filters,sortCriteria,skip,limit});
+
+            const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(filters);
             const totalPages = Math.ceil(totalFreelancers/limit)
             res.status(200).json({data:freelancers,totalPages,message: 'Listed freelancers successfully'})
         } catch (error) {

@@ -38,14 +38,17 @@ const FreelancerList: React.FC = () => {
   }, [searchTerm]);
 
   const fetchFreelancers = async () => {
-    setLoading(true);
+    
     try {
       const response = await axiosConfig.get("/client/freelancer-list", {
         params: {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
-          searchTerm:debouncedSearchTerm
+          searchTerm:debouncedSearchTerm,
+          category:filters.category,
+          skills:filters.skills,
+          priceRange:filters.priceRange
         },
       });
       setFreelancers(response.data.data);
@@ -54,12 +57,14 @@ const FreelancerList: React.FC = () => {
     } catch (err) {
       setError("Failed to load freelancers.");
       setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchFreelancers();
-  }, [sortOption, currentPage, debouncedSearchTerm]);
+  }, [sortOption, currentPage, debouncedSearchTerm,filters]);
 
 
   
@@ -157,7 +162,7 @@ const FreelancerList: React.FC = () => {
                 {/* Bookmark Icon */}
                 <button
                   onClick={() => handleBookmark(freelancer._id)}
-                  className={`absolute top-2 right-4 p-2 rounded-full ${bookmarks.some((bookmark) => bookmark.itemId === freelancer._id) ?"bg-orange-400":("bg-gray-200")}
+                  className={`absolute top-2 right-4 p-2 rounded-full ${bookmarks.some((bookmark) => bookmark.itemId === freelancer._id) ?"bg-blue-600":("bg-gray-200")}
                 `}
                 >
                   {bookmarks.some((bookmark) => bookmark.itemId === freelancer._id) ? (

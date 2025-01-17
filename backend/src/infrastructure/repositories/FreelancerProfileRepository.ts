@@ -9,36 +9,17 @@ export const FreelancerProfileRepository = {
         FreelancerProfileModel.findOneAndUpdate({userId:id}, updates, {upsert:true,new: true}),
 
     
-    getFreelancers: async (sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number,searchTerm:string) => {
+    getFreelancers: async (filters:any,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
         try{
-            const query: any = {};
-
-            // Add search logic
-            if (searchTerm) {
-              query.$or = [
-                { name: { $regex: searchTerm, $options: 'i' } },
-                // { skills: { $regex: searchTerm, $options: 'i' } },
-                // { description: { $regex: searchTerm, $options: 'i' } },
-              ];
-            }
-            const freelancers = await FreelancerProfileModel.find(query).sort(sortCriteria).skip(skip).limit(limit);
+            const freelancers = await FreelancerProfileModel.find({...filters}).sort(sortCriteria).skip(skip).limit(limit);
             return freelancers
         }catch(error: any){
             throw new Error ('Error get freelancers:' + error.message)
         }
     },
-    getFreelancerCount : async (searchTerm:string) => {
-        const query: any = {};
-
-  // Add search logic
-  if (searchTerm) {
-    query.$or = [
-      { name: { $regex: searchTerm, $options: 'i' } },
-    //   { skills: { $regex: searchTerm, $options: 'i' } },
-    //   { description: { $regex: searchTerm, $options: 'i' } },
-    ];
-  }
-        return await FreelancerProfileModel.countDocuments(query);
+    getFreelancerCount : async (filters:any) => {
+  
+        return await FreelancerProfileModel.countDocuments({...filters});
     },
      getFreelancerByUserId: async (id: string) => {
             try {
