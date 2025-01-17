@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { FaEdit } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 interface FreelancerProfile {
   name: string;
@@ -152,10 +153,11 @@ const MyProfile: React.FC = () => {
         });
         console.log("freelancer profile updated:", response.data);
         if(response.status === 200){
-          alert('freelancer profile updated successfully')
+          toast.error('freelancer profile updated successfully')
         }
       
     } catch (error) {
+      toast.error('Error updating user details')
       console.error("Error updating user details:", error);
     }
   };

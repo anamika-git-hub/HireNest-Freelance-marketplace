@@ -2,6 +2,7 @@ import React , {useState}from "react";
 import { Link } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const ResetPassword: React.FC = () => {
     const [password, setPassword] = useState<string>("");
@@ -12,10 +13,10 @@ const ResetPassword: React.FC = () => {
         try {
             const response = await axiosConfig.post("/users/reset-password", { password ,id});
             
-            alert("Password has been reset successfully");
+            toast.success("Password has been reset successfully");
         } catch (error: any) {
             console.error("Error:", error.response?.data || error.message);
-            alert("Something went wrong. Please try again.");
+            toast.error("Something went wrong. Please try again.");
         }
     };
 

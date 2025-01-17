@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { FaEdit, FaEye, FaEyeSlash} from "react-icons/fa";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface UserDetail {
   profileImage: string;
@@ -114,7 +115,7 @@ const MyAccount: React.FC = () => {
     if (response.status === 200) {
       return true; 
     } else {
-      alert("Incorrect current password.");
+      toast.error("Incorrect current password.");
       return false;
     }
   };
@@ -147,7 +148,7 @@ const updateAccountType = async (newRole: string) => {
     e.preventDefault();
     const isPasswordValid = await validateCurrentPassword();
     if (!isPasswordValid) {
-      alert("Incorrect current password.");
+      toast.error("Incorrect current password.");
       return;
     }
   
@@ -173,7 +174,7 @@ const updateAccountType = async (newRole: string) => {
         });
         console.log("User details updated:", response.data);
         if(response.status === 200){
-          alert("user details updated")
+          toast.success("user details updated")
         }
         
       

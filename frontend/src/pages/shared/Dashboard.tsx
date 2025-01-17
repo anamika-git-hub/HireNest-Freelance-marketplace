@@ -4,6 +4,7 @@ import { MdOutlineManageAccounts } from "react-icons/md";
 import axiosConfig from "../../service/axios";
 import { IoIosArrowForward,IoMdTime } from "react-icons/io";
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 interface Notification {
   text: string
@@ -218,7 +219,22 @@ const Dashboard: React.FC = () => {
                   <button
                     disabled={isDeadlineReached}
                     className={`flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 ${isDeadlineReached ? 'cursor-not-allowed opacity-50' : ''}`}
-                    onClick={() => isDeadlineReached && alert("You can't access it because the deadline of your task is reached")}
+                    onClick={() => isDeadlineReached && toast(
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span role="img" aria-label="warning" style={{ marginRight: '10px' }}>
+                          ⚠️
+                        </span>
+                        You can't access it because the deadline of your task is reached
+                      </div>,
+                      {
+                        style: {
+                          background: '#FFEB3B', 
+                          color: '#000',
+                          display: 'flex', 
+                          alignItems: 'center', 
+                        },
+                      }
+                    )}
                   >
                   <FaUsers className="mr-1" /> Manage Bidders
                     <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">

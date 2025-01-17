@@ -4,6 +4,7 @@ import { FaUsers, FaEdit, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface Task {
   _id: string;
@@ -83,10 +84,10 @@ const MyTaskList: React.FC = () => {
       try {
         await axiosConfig.delete(`/client/delete-task/${taskId}`);
         setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
-        alert("Task deleted successfully.");
+        toast.success("Task deleted successfully.");
       } catch (err) {
         console.error("Error deleting task:", err);
-        alert("Failed to delete task. Please try again.");
+        toast.error("Failed to delete task. Please try again.");
       }
     }
   };
@@ -144,7 +145,7 @@ const MyTaskList: React.FC = () => {
                       <button
                         disabled={isDeadlineReached}
                         className={`flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 ${isDeadlineReached ? 'cursor-not-allowed opacity-50' : ''}`}
-                        onClick={() => isDeadlineReached && alert("You can't access it because the deadline of your task is reached")}
+                        onClick={() => isDeadlineReached && toast.error("You can't access it because the deadline of your task is reached")}
                       >
                         <FaUsers className="mr-1" /> Manage Bidders
                         <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">

@@ -3,6 +3,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface Bid {
   _id: string;
@@ -52,11 +53,11 @@ const ActiveBids: React.FC = () => {
         const response = await axiosConfig.delete(`/freelancers/delete-bid/${bidId}`);
         if (response.status === 200) {
           setBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
-          alert("Bid deleted successfully");
+          toast.success("Bid deleted successfully");
         }
       } catch (err) {
         console.error("Error deleting bid:", err);
-        alert("Failed to delete bid. Please try again.");
+        toast.error("Failed to delete bid. Please try again.");
       }
     }
   };
@@ -96,7 +97,7 @@ const ActiveBids: React.FC = () => {
         );
 
         if (response.status === 200) {
-          alert("Bid updated successfully!");
+          toast.success("Bid updated successfully!");
 
           setBids((prevBids) =>
             prevBids.map((bid) =>
@@ -106,7 +107,7 @@ const ActiveBids: React.FC = () => {
           setShowModal(false);
         }
       } catch {
-        alert("Failed to update bid. Please try again.");
+        toast.error("Failed to update bid. Please try again.");
       }
     }
   };

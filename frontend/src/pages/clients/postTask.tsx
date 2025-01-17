@@ -2,6 +2,7 @@ import React, { useState,useEffect } from "react";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { TaskFormValidation } from "../../components/Schemas/taskFormValidation";
+import toast from "react-hot-toast";
 
 interface Category {
   _id: string;
@@ -39,7 +40,7 @@ const TaskSubmissionForm: React.FC = () => {
         }
       } catch (error) {
         console.error("Error fetching categories", error);
-        alert("Failed to load categories.");
+        toast.error("Failed to load categories.");
       }
     };
 
@@ -95,14 +96,14 @@ const TaskSubmissionForm: React.FC = () => {
       });
 
       if (response.status === 201) {
-        alert("Task submitted successfully!");
+        toast.success("Task submitted successfully!");
         
       } else {
-        alert(`Error: ${response.data.message || "Failed to submit task"}`);
+        toast.error(`Error: ${response.data.message || "Failed to submit task"}`);
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      alert(error.response?.data?.message || "An error occurred while submitting the task.");
+      toast.error(error.response?.data?.message || "An error occurred while submitting the task.");
     } finally {
       setLoading(false);
     }

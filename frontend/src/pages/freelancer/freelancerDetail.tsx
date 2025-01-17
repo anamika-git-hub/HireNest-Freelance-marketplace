@@ -1,6 +1,7 @@
 import React, {useEffect, useState, ChangeEvent, FormEvent} from "react";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 interface FreelancerDetail {
   name: string; 
@@ -66,11 +67,11 @@ const handleSubmit = async (e: FormEvent) => {
   e.preventDefault();
   try {
     const response = await axiosConfig.post(`client/create-request`, {...formData,freelancerId:id,requesterId:userId});
-    alert("Request placed successfully!");
+    toast.success("Request placed successfully!");
     console.log(response.data);
   } catch (error) {
     console.error("Error placing request:", error);
-    alert("Failed to place request. Please try again.");
+    toast.error("Failed to place request. Please try again.");
   }
 };
 

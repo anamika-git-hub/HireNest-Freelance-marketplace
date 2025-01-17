@@ -1,5 +1,6 @@
 import React , {useState,useEffect} from "react";
 import axiosConfig from "../../service/axios";
+import toast from "react-hot-toast";
 
 interface Category {
   id: string;
@@ -27,7 +28,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
             }
           } catch (error) {
             console.error("Error fetching categories", error);
-            alert("Failed to load categories.");
+            toast.error("Failed to load categories.");
           }
         };
     

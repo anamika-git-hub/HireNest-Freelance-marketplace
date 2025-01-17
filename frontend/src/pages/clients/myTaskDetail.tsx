@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom"; 
+import toast from "react-hot-toast";
 
 interface TaskDetail {
     projectName: string;
@@ -128,14 +129,14 @@ useEffect(() => {
           });
     
           if (response.status === 200) {
-            alert("Task updated successfully!");
+            toast.success("Task updated successfully!");
             
           } else {
-            alert(`Error: ${response.data.message || "Failed to submit task"}`);
+            toast.error(`Error: ${response.data.message || "Failed to submit task"}`);
           }
         } catch (error: any) {
           console.error("Submission error:", error);
-          alert(error.response?.data?.message || "An error occurred while submitting the task.");
+          toast.error(error.response?.data?.message || "An error occurred while submitting the task.");
         } 
       };
       return (

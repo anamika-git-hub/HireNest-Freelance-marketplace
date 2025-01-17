@@ -1,6 +1,7 @@
 import React , {useState}from "react";
 import { Link } from "react-router-dom";
 import axiosConfig from "../../service/axios";
+import toast from "react-hot-toast";
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState<string>("");
@@ -8,11 +9,15 @@ const ForgotPassword: React.FC = () => {
         e.preventDefault();
         try {
             const response = await axiosConfig.post("/users/forgot-password", { email });
-            
-            alert("If this email is registered, a password reset link has been sent.");
+            toast("If this email is registered, a password reset link has been sent.", {
+                style: {
+                  background: '#2196F3', 
+                  color: '#fff', 
+                },
+              });
         } catch (error: any) {
             console.error("Error:", error.response?.data || error.message);
-            alert("Something went wrong. Please try again.");
+            toast.error("Something went wrong. Please try again.");
         }
     };
 

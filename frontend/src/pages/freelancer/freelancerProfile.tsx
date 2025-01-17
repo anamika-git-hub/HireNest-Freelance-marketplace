@@ -4,6 +4,7 @@ import axiosConfig from "../../service/axios";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import toast from "react-hot-toast";
 
 const FreelancerProfile: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -111,12 +112,12 @@ attachments.forEach((attachment, index) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Profile submitted successfully!");
+      toast("Profile submitted successfully!");
       navigate('/login')
       
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit the profile. Please try again.");
+      toast.error("Failed to submit the profile. Please try again.");
     }
   };
 

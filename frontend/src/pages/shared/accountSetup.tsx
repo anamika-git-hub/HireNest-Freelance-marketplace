@@ -9,6 +9,7 @@ import { AccountSetupValidationSchema } from "../../components/Schemas/accountSe
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const AccountSetup: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -101,7 +102,7 @@ const AccountSetup: React.FC = () => {
       });
       
       if (response.status === 201) {
-        alert("Profile setup completed successfully!");
+        toast("Profile setup completed successfully!");
         const formDataToStore = {
 
           firstName: values.firstName,
@@ -124,7 +125,7 @@ const AccountSetup: React.FC = () => {
       }
     } catch (error) {
       console.error("Failed to submit form data:", error);
-      alert("There was an error submitting your profile.");
+      toast("There was an error submitting your profile.");
     }
   };
 

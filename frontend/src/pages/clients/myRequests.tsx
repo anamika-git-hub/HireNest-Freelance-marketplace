@@ -3,6 +3,7 @@ import { FaUser,FaTrash } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface FreelancerProfile {
     _id:string;
@@ -104,7 +105,7 @@ const RequestList: React.FC = () => {
               );
       
               if (response.status === 200) {
-                alert("Request updated successfully!");
+                toast.success("Request updated successfully!");
       
                 setRequest((prevRequests) =>
                   prevRequests.map((request) =>
@@ -114,7 +115,7 @@ const RequestList: React.FC = () => {
                 setShowModal(false);
               }
             } catch {
-              alert("Failed to update bid. Please try again.");
+              toast.error("Failed to update bid. Please try again.");
             }
           }
         };

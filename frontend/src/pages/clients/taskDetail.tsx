@@ -3,6 +3,7 @@ import { FaRegBookmark, FaCopy, FaShareAlt } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface TaskDetails {
   projectName: string;
@@ -107,26 +108,31 @@ const TaskDetail: React.FC = () => {
     e.preventDefault();
     const bidExist = await isBidExist()
     if(bidExist){
-      alert('This task is already bidded');
+      toast.error('This task is already bidded');
       return;
     }
     try {
       const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
-      alert("Bid placed successfully!");
+      toast.success("Bid placed successfully!");
       
     } catch (error) {
       console.error("Error placing bid:", error);
-      alert("Failed to place bid. Please try again.");
+      toast.error("Failed to place bid. Please try again.");
     }
   };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("Link copied to clipboard!");
+    toast.success("Link copied to clipboard!");
   };
 
   const handleShare = () => {
-    alert("Sharing functionality coming soon!");
+    toast('Sharing functionality coming soon!', {
+      style: {
+        background: '#2196F3', 
+        color: '#fff', 
+      },
+    });
   };
   
 
@@ -260,7 +266,7 @@ const TaskDetail: React.FC = () => {
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-md mt-6">
             <button
               className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-              onClick={() => alert("Task bookmarked!")}
+              onClick={() => toast.success("Task bookmarked!")}
             >
               <FaRegBookmark className="text-lg" />
               <span>Bookmark</span>

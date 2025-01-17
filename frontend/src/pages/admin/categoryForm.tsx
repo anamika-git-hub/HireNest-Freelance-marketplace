@@ -4,6 +4,7 @@ import axiosConfig from "../../service/axios";
 import { useFormik } from "formik";
 import { categoryValidationSchema } from "../../components/Schemas/categoryValidationSchema";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 const CategoryForm: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const CategoryForm: React.FC = () => {
       
 
         if (response.status === 200 || response.status === 201) {
-          alert(`Category ${isEditMode ? "updated" : "created"} successfully!`);
+          toast.success(`Category ${isEditMode ? "updated" : "created"} successfully!`);
           navigate("/admin/categories");
         }
       } catch (err) {
