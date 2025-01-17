@@ -8,7 +8,7 @@ const ForgotPassword: React.FC = () => {
     const handleForgotPassword = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await axiosConfig.post("/users/forgot-password", { email });
+            await axiosConfig.post("/users/forgot-password", { email });
             toast("If this email is registered, a password reset link has been sent.", {
                 style: {
                   background: '#2196F3', 

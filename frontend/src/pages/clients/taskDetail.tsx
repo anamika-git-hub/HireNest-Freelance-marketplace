@@ -112,7 +112,7 @@ const TaskDetail: React.FC = () => {
       return;
     }
     try {
-      const response = await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
+       await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
       toast.success("Bid placed successfully!");
       
     } catch (error) {

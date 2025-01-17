@@ -144,6 +144,7 @@ const updateAccountType = async (newRole: string) => {
 };
 
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isPasswordValid = await validateCurrentPassword();

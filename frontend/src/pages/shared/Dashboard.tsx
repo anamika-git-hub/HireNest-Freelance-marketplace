@@ -1,10 +1,10 @@
 import React,{useState,useEffect} from 'react';
-import { FaBell, FaEllipsisH, FaClock, FaUsers, FaUserCircle,  FaEdit, FaTrash  } from "react-icons/fa";
-import { MdOutlineManageAccounts } from "react-icons/md";
+import { FaBell, FaEllipsisH, FaUsers, FaUserCircle,  FaEdit, FaTrash  } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
-import { IoIosArrowForward,IoMdTime } from "react-icons/io";
+import {IoMdTime } from "react-icons/io";
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Loader from '../../components/shared/Loader';
 
 interface Notification {
   text: string
@@ -148,6 +148,9 @@ const Dashboard: React.FC = () => {
     
         return () => clearInterval(timer);
       }, [tasks]);
+
+      if (loading)  return <Loader visible={loading} />;
+  if (error) return <div>{error}</div>;
 
     const getTasks = () => {
       if(role === 'freelancer'){

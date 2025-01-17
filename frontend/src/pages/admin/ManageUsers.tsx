@@ -37,7 +37,7 @@ const ManageUsers: React.FC = () => {
     
     if (confirmed) {
       try {
-        const response = await axiosConfig.put(`/admin/${userId}/${isBlocked}`);
+        await axiosConfig.put(`/admin/${userId}/${isBlocked}`);
         
         fetchUsers(); 
       } catch (error) {
