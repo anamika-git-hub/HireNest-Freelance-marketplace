@@ -66,9 +66,8 @@ const ManageCategories: React.FC = () => {
         <thead>
           <tr className="bg-gray-800 text-white text-left text-sm">
             <th className="p-4">Image</th>
-            <th className="p-4">Description</th>
             <th className="p-4">Category Name</th>
-            <th className="p-4">Status</th>
+            <th className="p-4">Description</th>
             <th className="p-4">Actions</th>
           </tr>
         </thead>
@@ -92,13 +91,6 @@ const ManageCategories: React.FC = () => {
               <td className="p-4">{category.name}</td>
               <td className="p-4">{category.description}</td>
               
-              <td
-                className={`p-4 font-semibold ${
-                  category.state === "active" ? "text-green-600" : "text-orange-600"
-                }`}
-              >
-                {category.state}
-              </td>
               <td className="p-4">
                 <button
                   className="text-blue-500 hover:underline"

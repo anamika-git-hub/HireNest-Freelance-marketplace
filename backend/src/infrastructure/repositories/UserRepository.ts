@@ -5,7 +5,7 @@ export const UserRepository = {
 
     findUserByEmail: async (email: string) => UserModel.findOne({ email }),
     findUserById: async (id: string) => UserModel.findById(id),
-    findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}).populate('userId'),
+    findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}),
     
     createUser: async (userData: any) => new UserModel(userData).save(),
     updateUser: async (id: string, updates: any) => UserModel.findByIdAndUpdate(id, updates, {new: true}),

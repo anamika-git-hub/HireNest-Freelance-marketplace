@@ -9,7 +9,7 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   // const currentUser = useSelector((state: RootState) => state.user.currentUser);
-const currentUser = localStorage.getItem('accessToken')
+const currentUser = localStorage.getItem('adminRole')
 
   if (!currentUser) {
     return <Navigate to="/admin/login" replace />;
