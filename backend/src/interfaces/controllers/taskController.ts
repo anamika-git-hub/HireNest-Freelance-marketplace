@@ -47,10 +47,11 @@ export const TaskController = {
             const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
+            const searchTerm = req.query.searchTerm as string || ""; 
     
             const category = req.query.category as string | undefined;
-            const skills = req.query.skills as string[] | undefined; // Assuming it's an array
-            const priceRange = req.query.priceRange as { min: string; max: string } | undefined; // E.g., "100-500"
+            const skills = req.query.skills as string[] | undefined; 
+            const priceRange = req.query.priceRange as { min: string; max: string } | undefined; 
             
     
             const skip = (page - 1) * limit;
@@ -64,7 +65,7 @@ export const TaskController = {
             // Filters for query
             const filters: any = {};
             if (category) filters.category = category;
-            if (skills) filters.skills = { $all: skills }; // Match all skills in the array
+            if (skills) filters.skills = { $all: skills }; 
     
             // Handle price range filter
             if (priceRange) {
@@ -73,7 +74,12 @@ export const TaskController = {
                 if (!isNaN(minRate)) filters.minRate = { $gte: minRate };
                 if (!isNaN(maxRate)) filters.maxRate = { $lte: maxRate };
             }
-    
+
+            if (searchTerm) {
+                filters.$or = [
+                    { projectName: { $regex: searchTerm, $options: "i" } }, 
+                ];
+            }
             // Fetch tasks and count
             const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
             const totalTasks = await TaskUseCase.getTasksCount(filters);

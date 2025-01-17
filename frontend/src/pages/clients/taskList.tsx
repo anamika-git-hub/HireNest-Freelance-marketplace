@@ -36,7 +36,7 @@ const TaskList: React.FC = () => {
       }, [searchTerm]);
 
   const fetchTasks = async () => {
-    setLoading(true);
+    
     try {
       const response = await axiosConfig.get("/freelancers/tasks-list", {
         params: {
@@ -54,6 +54,8 @@ const TaskList: React.FC = () => {
       setLoading(false);
     } catch (error) {
       setError("Failed to load Tasks");
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -65,7 +67,7 @@ const TaskList: React.FC = () => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
-    }, [fetchTasks]);
+    }, [debouncedSearchTerm]);
 
 
   const handleBookmark = async (itemId: string) => {
