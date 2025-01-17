@@ -32,5 +32,19 @@ export const MessageRepository = {
             return chatterDetails;
         }
         return []; 
-    }  
+    }  ,
+
+    setContacts: async (userId: string, receiverId: string)=> {
+        let chat = await ChatModel.findOne({
+            participants: { $all: [userId, receiverId] },
+          });
+      
+          if (!chat) {
+            chat = new ChatModel({
+              participants: [userId, receiverId],
+              messages: [], 
+            });
+            await chat.save();
+          }
+    }
 }

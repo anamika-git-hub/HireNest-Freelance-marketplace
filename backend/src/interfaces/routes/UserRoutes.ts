@@ -32,6 +32,7 @@ router.get('/task-bookmarks',isUser,BookMarkController.getBookmarks);
 router.delete('/bookmarks/:id',isUser,BookMarkController.deleteBookmarks);
 
 router.get('/get-receivers',isUser,MessageController.getReceiver);
+router.post('/set-contacts',isUser,MessageController.setContacts);
 
 router.get('/notifications/:type',isUser,UserController.getNotification);
 

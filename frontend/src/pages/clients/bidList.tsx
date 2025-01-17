@@ -67,12 +67,9 @@ const BiddersList: React.FC = () => {
 
 
 
-      const sendMessage = (bidderId: string) => {
-  socket.emit("create_chat_room", {
-    senderId: userId,
-    receiverId: bidderId,
-  });
-  navigate(`/messages/${bidderId}`);
+      const sendMessage = async(bidderId: string) => {
+       await axiosConfig.post('/users/set-contacts',{userId,receiverId:bidderId})
+      navigate(`/messages`);
 };
 
     

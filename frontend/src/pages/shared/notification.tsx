@@ -87,22 +87,17 @@ const Notifications: React.FC = () => {
                      className="flex items-start py-2">
                     <FaUserCircle className="w-6 h-6 text-gray-300" />
                     <p className="ml-3 text-sm text-gray-700">
+               You have received a request from {' '}
                 <a
-                    href={notification.bidderProfileUrl}
                     className="text-blue-500 hover:underline"
                 >
                     {notification.senderName}
                 </a>{' '}
-                placed a bid on your{' '}
-                <a
-                    href={notification.projectUrl}
-                    className="text-blue-500 hover:underline"
-                >
-                    {notification.projectName}
-                </a>{' '}
-                project.
+                .
             </p>
+            
                     </li>
+                    
                   ))}
           </>
         )

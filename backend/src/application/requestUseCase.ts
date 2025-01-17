@@ -13,6 +13,7 @@ export const RequestUseCase = {
             const notification = {
                 senderId:requesterId,
                 userId: user.userId, 
+                senderName: `${sender?.firstname} ${sender?.lastname}`,
                 text: `You have received a new request from ${sender?.firstname} ${sender?.lastname}.`,
                 isRead: false,
                 createdAt: new Date(),

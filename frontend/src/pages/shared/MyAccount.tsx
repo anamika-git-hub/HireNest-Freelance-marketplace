@@ -123,7 +123,7 @@ const MyAccount: React.FC = () => {
 // Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
   const userId = localStorage.getItem('userId')
-  setIsLoading(true);
+  
   try {
     const response = await axiosConfig.post('/users/update-role', { role: newRole,userId:userId });
     if (response.status === 200) {
