@@ -2,8 +2,8 @@ import { FaUsers, FaClipboardList, FaUserTie, FaCheckCircle } from "react-icons/
 
 const HeroSection = () => {
   return (
-<section id="hero" className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden select-none">
-      <div className="container mx-20 px-6">
+    <section id="hero" className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden select-none">
+      <div className="container mx-auto px-6">
         <div className="flex flex-col lg:flex-row items-center">
           {/* Left Content */}
           <div className="lg:w-1/2">
@@ -18,12 +18,12 @@ const HeroSection = () => {
                 <span className="text-blue-600">Tech Industry</span>
               </h1>
               <p className="text-gray-600 mb-6">
-              Huge community of designers, developers, and creatives ready for your project.
+                Huge community of designers, developers, and creatives ready for your project.
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col lg:flex-row items-center gap-4">
                 <a
                   href=""
-                  className="bg-blue-600 text-white py-3 px-8 rounded-full hover:bg-blue-700 transition"
+                  className="bg-blue-600 text-white py-3 px-8 rounded-full hover:bg-blue-700 transition mb-4 lg:mb-0"
                 >
                   Find Talent
                 </a>
@@ -52,9 +52,9 @@ const HeroSection = () => {
         {/* Stats Section */}
         <div className="flex flex-wrap items-center justify-between mt-16 bg-gray-50 shadow-md rounded-lg p-6">
           {/* Stat Item 1 */}
-          <div className="flex items-center gap-4 w-full md:w-1/4">
+          <div className="flex items-center gap-4 w-full sm:w-1/2 md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-            <FaUsers className="text-blue-600 text-2xl" />
+              <FaUsers className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,303</h4>
@@ -63,9 +63,9 @@ const HeroSection = () => {
           </div>
 
           {/* Stat Item 2 */}
-          <div className="flex items-center gap-4 w-full md:w-1/4">
+          <div className="flex items-center gap-4 w-full sm:w-1/2 md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
-            <FaClipboardList className="text-blue-600 text-2xl" />
+              <FaClipboardList className="text-blue-600 text-2xl" />
             </div>
             <div>
               <h4 className="text-lg font-semibold">2,393</h4>
@@ -74,7 +74,7 @@ const HeroSection = () => {
           </div>
 
           {/* Stat Item 3 */}
-          <div className="flex items-center gap-4 w-full md:w-1/4">
+          <div className="flex items-center gap-4 w-full sm:w-1/2 md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
               <FaUserTie className="text-blue-600 text-2xl" />
             </div>
@@ -85,7 +85,7 @@ const HeroSection = () => {
           </div>
 
           {/* Stat Item 4 */}
-          <div className="flex items-center gap-4 w-full md:w-1/4">
+          <div className="flex items-center gap-4 w-full sm:w-1/2 md:w-1/4">
             <div className="w-14 h-14 flex items-center justify-center bg-blue-100 rounded-full">
               <FaCheckCircle className="text-blue-600 text-2xl" />
             </div>

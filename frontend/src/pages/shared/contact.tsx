@@ -3,7 +3,7 @@ import { FaLocationArrow, FaPhoneAlt, FaEnvelope } from "react-icons/fa";
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center space-x-8">
+    <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row items-center justify-center lg:space-x-8 space-y-8 lg:space-y-0 px-4">
       {/* Contact Info Box */}
       <div className="bg-blue-500 rounded-lg p-8 text-white max-w-md w-full flex-grow">
         {/* Header */}
@@ -63,7 +63,7 @@ const ContactPage: React.FC = () => {
         </p>
 
         <form className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <input
                 type="text"

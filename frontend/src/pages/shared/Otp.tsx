@@ -13,7 +13,6 @@ const OTPVerification: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { email, role } = location.state || {}; 
-  
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -60,8 +59,6 @@ const OTPVerification: React.FC = () => {
     }
   };
 
-  
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const enteredOtp = otp.join("");
@@ -86,18 +83,16 @@ const OTPVerification: React.FC = () => {
     }
   };
 
-
   return (
-    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center h-screen flex items-center justify-center">
-      <div className="flex items-stretch max-w-4xl w-full bg-white rounded-lg shadow-lg mt-16">
-        
+    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center h-screen flex items-center justify-center p-4">
+      <div className="flex flex-col md:flex-row items-stretch max-w-4xl w-full bg-white rounded-lg shadow-lg">
         {/* Form Div */}
-        <div className=" p-8 flex flex-col" style={{flexGrow: 1}}>
+        <div className="p-6 md:p-8 flex flex-col flex-grow">
           <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">OTP Verification</h2>
           <p className="text-sm text-blue-600 text-center mb-6">
             Enter OTP code sent to <span className="font-semibold">***@gmail.com</span>
           </p>
-  
+
           <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             {/* OTP Input Boxes */}
             <div className="flex justify-center gap-2">
@@ -109,11 +104,11 @@ const OTPVerification: React.FC = () => {
                   maxLength={1}
                   value={digit}
                   onChange={(e) => handleChange(e.target.value, index)}
-                  className="w-12 h-12 text-center text-lg border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-10 h-10 md:w-12 md:h-12 text-center text-lg border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               ))}
             </div>
-  
+
             {/* Resend Code and Timer */}
             <div className="flex justify-between items-center text-blue-600 mt-6">
               <span>Time remaining: {timer}s</span>
@@ -127,7 +122,7 @@ const OTPVerification: React.FC = () => {
                 </button>
               ) : null}
             </div>
-  
+
             {/* Verify Button */}
             <button
               type="submit"
@@ -137,9 +132,9 @@ const OTPVerification: React.FC = () => {
             </button>
           </form>
         </div>
-  
+
         {/* Image Div */}
-        <div className="w-1/4 flex items-center justify-center" style={{flexGrow: 1}}>
+        <div className="hidden md:flex w-full md:w-1/3 lg:w-1/2 items-center justify-center">
           <img
             src="/assets/otp.avif"
             alt="OTP Image"
@@ -149,7 +144,6 @@ const OTPVerification: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default OTPVerification;

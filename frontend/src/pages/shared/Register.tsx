@@ -72,12 +72,10 @@ const Signup: React.FC = () => {
     }
   };
   return (
-    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center min-h-screen flex items-center justify-center">
-      
-      <div className="flex items-stretch max-w-4xl w-full bg-white rounded-lg shadow-lg mt-28 mb-4">
-        
+    <div className="bg-cover bg-gradient-to-r from-blue-100 to-white bg-center min-h-screen flex items-center justify-center p-4">
+      <div className="flex flex-col md:flex-row items-stretch max-w-4xl w-full bg-white rounded-lg shadow-lg mt-28 mb-4">
         {/* Form Div */}
-        <div className="w-1/2 p-8 flex flex-col" style={{ flexGrow: 1 }}>
+        <div className="w-full md:w-1/2 p-8 flex flex-col" style={{ flexGrow: 1 }}>
           <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">Signup</h2>
           <p className="text-sm text-blue-600 text-center mt-4">
             Already have an account?{" "}
@@ -193,7 +191,7 @@ const Signup: React.FC = () => {
         </div>
   
         {/* Image Div */}
-        <div className="w-1/2 flex items-center justify-center" style={{ flexGrow: 1 }}>
+        <div className="w-full md:w-1/2 flex items-center justify-center" style={{ flexGrow: 1 }}>
           <img
             src="/assets/login.png" 
             alt="Your Image"
@@ -203,7 +201,6 @@ const Signup: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Signup;

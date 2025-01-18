@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logoutUser } from '../../store/userSlice';
 import axiosConfig from '../../service/axios';
-import {
-  FaSignOutAlt,
-  FaCog,
-} from "react-icons/fa";
+import {FaSignOutAlt,FaCog} from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+
 interface UserDetail {
   profileImage: string;
   firstname: string;
@@ -31,13 +29,11 @@ const Header: React.FC = () => {
         if (userId) {
           const response = await axiosConfig.get(`/users/account-detail`);
           setUserDetail(response.data.userDetails);
-          
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
     };
-
     fetchUserDetails();
   }, []);
 
@@ -111,7 +107,7 @@ const Header: React.FC = () => {
 
         {/* Auth Buttons for Guest */}
         {userRole === "guest" ? (
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate("/login")}
               className="hover:text-blue-200 px-4 py-2 bg-blue-600 rounded-full"
@@ -126,7 +122,9 @@ const Header: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="hidden lg:flex items-center space-x-4">
+          
+          <div className="flex items-center space-x-4">
+            
             <button className="relative hover:text-blue-200">🔔</button>
             <button className="relative hover:text-blue-200">✉️</button>
             <div className="relative" ref={profileMenuRef}>
