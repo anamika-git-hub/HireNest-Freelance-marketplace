@@ -3,7 +3,7 @@ import { FaUsers, FaClipboardList, FaUserTie, FaCheckCircle } from "react-icons/
 const HeroSection = () => {
   return (
     <section id="hero" className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden select-none">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-20">
         <div className="flex flex-col lg:flex-row items-center">
           {/* Left Content */}
           <div className="lg:w-1/2">

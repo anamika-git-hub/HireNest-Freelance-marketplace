@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axiosConfig from "../../service/axios";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { TaskFormValidation } from "../../components/Schemas/taskFormValidation";
@@ -16,7 +16,7 @@ const TaskSubmissionForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  const clientId = localStorage.getItem("userId")
+  const clientId = localStorage.getItem("userId");
 
   const initialValues = {
     projectName: "",
@@ -34,9 +34,9 @@ const TaskSubmissionForm: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosConfig.get("/admin/categories"); 
+        const response = await axiosConfig.get("/admin/categories");
         if (response.status === 200) {
-        setCategories(response.data);
+          setCategories(response.data);
         }
       } catch (error) {
         console.error("Error fetching categories", error);
@@ -62,7 +62,7 @@ const TaskSubmissionForm: React.FC = () => {
     const files = e.target.files;
     if (files) {
       const newFiles = Array.from(files).filter(
-        (file) => file.size <= 5 * 1024 * 1024 
+        (file) => file.size <= 5 * 1024 * 1024
       );
       setAttachments((prevFiles) => [...prevFiles, ...newFiles]);
     }
@@ -75,7 +75,7 @@ const TaskSubmissionForm: React.FC = () => {
   const handleSubmit = async (values: typeof initialValues) => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("clientId", clientId || "")
+    formData.append("clientId", clientId || "");
     formData.append("projectName", values.projectName);
     formData.append("category", values.category);
     formData.append("timeline", values.timeline);
@@ -97,13 +97,17 @@ const TaskSubmissionForm: React.FC = () => {
 
       if (response.status === 201) {
         toast.success("Task submitted successfully!");
-        
       } else {
-        toast.error(`Error: ${response.data.message || "Failed to submit task"}`);
+        toast.error(
+          `Error: ${response.data.message || "Failed to submit task"}`
+        );
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      toast.error(error.response?.data?.message || "An error occurred while submitting the task.");
+      toast.error(
+        error.response?.data?.message ||
+          "An error occurred while submitting the task."
+      );
     } finally {
       setLoading(false);
     }
@@ -114,8 +118,8 @@ const TaskSubmissionForm: React.FC = () => {
       id="hero"
       className="hero section pt-20 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden"
     >
-      <div className="container mx-auto px-6">
-        <h1 className="text-3xl md:text-4xl font-bold leading-tight text-center mx-auto mb-4 mt-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight text-center mx-auto mb-4 mt-6">
           Post a Task <br />
         </h1>
         <p className="text-gray-600 mb-6 text-center">
@@ -128,11 +132,13 @@ const TaskSubmissionForm: React.FC = () => {
             onSubmit={handleSubmit}
           >
             {({ setFieldValue, values }) => (
-              <Form className="w-full max-w-7xl space-y-8">
-                {/* Project Name and Category */}
-                <div className="flex space-x-4">
-                  <div className="w-full">
-                    <label className="block text-sm text-gray-700 mb-2">Project Name</label>
+              <Form className="w-full max-w-7xl space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Project Name */}
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">
+                      Project Name
+                    </label>
                     <Field
                       type="text"
                       name="projectName"
@@ -145,8 +151,11 @@ const TaskSubmissionForm: React.FC = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-                  <div className="w-full">
-                    <label className="block text-sm text-gray-700 mb-2">Category</label>
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">
+                      Category
+                    </label>
                     <Field
                       as="select"
                       name="category"
@@ -168,8 +177,8 @@ const TaskSubmissionForm: React.FC = () => {
                 </div>
 
                 {/* Timeline, Rate Type, Min/Max Rate */}
-                <div className="flex space-x-4">
-                  <div className="w-1/3">
+                <div className="flex flex-wrap space-x-4">
+                  <div className="w-full sm:w-full lg:w-1/3">
                     <label className="block text-sm text-gray-700 mb-2">Timeline / Deadline</label>
                     <Field
                       type="date"
@@ -183,8 +192,8 @@ const TaskSubmissionForm: React.FC = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                   </div>
-                  <div className="flex items-center space-x-4 w-1/2">
-                    <div className="flex items-center w-1/4">
+                  <div className="flex space-x-4 w-full sm:w-full  lg:w-1/2">
+                    <div className="flex items-center w-full lg:w-1/4">
                     <Field
                       type="radio"
                       id="hourly"
@@ -196,7 +205,7 @@ const TaskSubmissionForm: React.FC = () => {
                         Hourly Rate
                       </label>
                     </div>
-                    <div className="flex items-center w-1/4">
+                    <div className="flex items-center w-full  lg:w-1/4">
                     <Field
                       type="radio"
                       id="fixed"
@@ -209,7 +218,7 @@ const TaskSubmissionForm: React.FC = () => {
                       </label>
                     </div>
 
-                    <div className="w-1/4">
+                    <div className="w-full lg:w-1/4">
                       <label className="block text-sm text-gray-700 mb-2">Minimum Rate</label>
                       <Field
                       type="number"
@@ -223,7 +232,7 @@ const TaskSubmissionForm: React.FC = () => {
                       className="text-red-500 text-sm mt-1"
                     />
                     </div>
-                    <div className="w-1/4">
+                    <div className="w-full lg:w-1/4">
                       <label className="block text-sm text-gray-700 mb-2">Maximum Rate</label>
                       <Field
                       type="number"
@@ -241,9 +250,9 @@ const TaskSubmissionForm: React.FC = () => {
                 </div>
 
                 {/* Skills and Attachments */}
-                <div className="flex space-x-4">
+                <div className="flex sm:flex-col lg:flex-row lg:space-x-4">
                   {/* Required Skills */}
-                  <div className="w-1/2">
+                  <div className="w-full sm:w-full lg:w-1/2">
                     <label className="block text-sm text-gray-700 mb-2">Required Skills</label>
                     <div className="flex space-x-2 mt-2">
                       <input
@@ -286,7 +295,7 @@ const TaskSubmissionForm: React.FC = () => {
                   </div>
 
                   {/* File Attachments */}
-                  <div className="w-1/2">
+                  <div className="w-full sm:w-full lg:w-1/2">
                     <label className="block text-sm text-gray-700 mb-2">Attachments (max 5MB each)</label>
                     <input
                       type="file"

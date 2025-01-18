@@ -1,15 +1,17 @@
-import React ,{useState,useEffect, useRef}from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import FilterSidebar from "../../components/shared/FilterSideBar";
-import {FaBookmark, FaRegBookmark} from "react-icons/fa";
+import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import Loader from "../../components/shared/Loader";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");  
-  const [bookmarks,setBookmarks] = useState<{ itemId: string; type: string }[]>([]);
+  const [error, setError] = useState<string>("");
+  const [bookmarks, setBookmarks] = useState<{ itemId: string; type: string }[]>(
+    []
+  );
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [sortOption, setSortOption] = useState<string>("Relevance");
@@ -20,33 +22,33 @@ const TaskList: React.FC = () => {
     skills: [],
     priceRange: { min: 10, max: 1000 },
   });
-  const userId = localStorage.getItem('userId')
-  const ITEMS_PER_PAGE = 4;
-  
-    const inputRef = useRef<HTMLInputElement | null>(null);
 
-      useEffect(() => {
-        const handler = setTimeout(() => {
-          setDebouncedSearchTerm(searchTerm); 
-        }, 600); 
-    
-        return () => {
-          clearTimeout(handler); 
-        };
-      }, [searchTerm]);
+  const userId = localStorage.getItem("userId");
+  const ITEMS_PER_PAGE = 4;
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 600);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   const fetchTasks = async () => {
-    
     try {
       const response = await axiosConfig.get("/freelancers/tasks-list", {
         params: {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
-          searchTerm:debouncedSearchTerm,
-          category:filters.category,
-          skills:filters.skills,
-          priceRange:filters.priceRange
+          searchTerm: debouncedSearchTerm,
+          category: filters.category,
+          skills: filters.skills,
+          priceRange: filters.priceRange,
         },
       });
       setTasks(response.data.data);
@@ -55,56 +57,55 @@ const TaskList: React.FC = () => {
     } catch (error) {
       setError("Failed to load Tasks");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchTasks();
-  }, [sortOption,currentPage,debouncedSearchTerm,filters]);
+  }, [sortOption, currentPage, debouncedSearchTerm, filters]);
 
-    useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, [debouncedSearchTerm]);
-
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [debouncedSearchTerm]);
 
   const handleBookmark = async (itemId: string) => {
-    const type = 'task';
+    const type = "task";
     if (bookmarks.some((bookmark) => bookmark.itemId === itemId)) {
-      
-        try {
-            await axiosConfig.delete(`/users/bookmarks/${itemId}`, {
-                data: { userId, type }
-            });
-            setBookmarks(bookmarks.filter((bookmark) => bookmark.itemId !== itemId)); 
-        } catch (err) {
-            console.error('Error removing bookmark:', err);
-        }
+      try {
+        await axiosConfig.delete(`/users/bookmarks/${itemId}`, {
+          data: { userId, type },
+        });
+        setBookmarks(
+          bookmarks.filter((bookmark) => bookmark.itemId !== itemId)
+        );
+      } catch (err) {
+        console.error("Error removing bookmark:", err);
+      }
     } else {
-        try {
-            await axiosConfig.post('/users/bookmarks', { userId, itemId, type });
-            setBookmarks([...bookmarks, { itemId, type }]); 
-        } catch (err) {
-            console.error('Error adding bookmark:', err);
-        }
-    }
-};
-
-  useEffect(()=>{
-    const getBookmark = async() => {
-      const response = await axiosConfig.get(`/users/task-bookmarks`);
-     
-      if(response.data.bookmark){
-        setBookmarks(response.data.bookmark.items)
+      try {
+        await axiosConfig.post("/users/bookmarks", { userId, itemId, type });
+        setBookmarks([...bookmarks, { itemId, type }]);
+      } catch (err) {
+        console.error("Error adding bookmark:", err);
       }
     }
-    getBookmark()
-  },[]);
+  };
+
+  useEffect(() => {
+    const getBookmark = async () => {
+      const response = await axiosConfig.get(`/users/task-bookmarks`);
+
+      if (response.data.bookmark) {
+        setBookmarks(response.data.bookmark.items);
+      }
+    };
+    getBookmark();
+  }, []);
 
   const handleFilterChange = (newFilters: any) => {
-   
     setFilters(newFilters);
   };
 
@@ -112,40 +113,39 @@ const TaskList: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const filteredTasks =  tasks.filter((task) => {
-      return task.projectName.toLowerCase().includes(searchTerm.toLowerCase());
-    })
+  const filteredTasks = tasks.filter((task) => {
+    return task.projectName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
-  if (loading)  return <Loader visible={loading} />;
+  if (loading) return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
-  
-  return (
-    <div className="flex pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
-      {/* Sidebar */}
-      <FilterSidebar onFilterChange={handleFilterChange} />
-      {/* Main Content */}
-      <div className="pt-14 flex-grow p-4">
-      <h2 className="pb-5 text-2xl font-semibold select-none">Tasks</h2>
-        {/* Search Alerts */}
-        <div className="flex items-center justify-between mb-5 select-none">
 
-          {/* Search bar on the left */}
+  return (
+    <div className="hero section pt-14 px-4 pb-16 bg-gradient-to-r from-blue-100 to-white w-full overflow-hidden">
+      {/* Sidebar */}
+      <div className="flex flex-col md:flex-row gap-6">
+        <FilterSidebar onFilterChange={handleFilterChange} />
+      
+
+      {/* Main Content */}
+      <div className="flex-grow pt-14 p-4">
+        <h2 className="pb-5 text-2xl font-semibold select-none">Tasks</h2>
+        {/* Search and Sort */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 select-none gap-4">
           <input
-            ref = {inputRef}
+            ref={inputRef}
             type="text"
             placeholder="Search"
             value={searchTerm}
-            onChange={(e)=> setSearchTerm(e.target.value)}
-            className="p-2 border border-gray-300 bg-white rounded w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="p-2 border border-gray-300 bg-white rounded w-full sm:w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
-          {/* Sort By text and select dropdown on the right */}
-          <div className="flex items-center select-none">
-            <span className="mr-2 text-gray-600 select-none">Sort By:</span>
-            <select 
-            className="p-2  rounded "
-            value={sortOption}
-            onChange={(e)=> setSortOption(e.target.value)}
+          <div className="flex items-center w-full sm:w-auto">
+            <span className="mr-2 text-gray-600">Sort By:</span>
+            <select
+              className="p-2 rounded"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
             >
               <option>Relevance</option>
               <option>Price: Low to High</option>
@@ -155,15 +155,15 @@ const TaskList: React.FC = () => {
           </div>
         </div>
 
-
         {/* Job Listings */}
-        <div className="grid grid-cols-2 gap-5">
-  {filteredTasks.map((task, index) => (
-    <div
-      key={index}
-      className="border border-gray-300 p-5 rounded-lg shadow-md bg-white"
-    >
-      <div className="flex">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {filteredTasks.map((task, index) => (
+            <div
+              key={index}
+              className="border border-gray-300 p-5 rounded-lg shadow-md bg-white"
+            >
+              {/* Task details */}      
+              <div className="flex">
        
       {/* Top Section: Project Name */}
       <h3 className="text-lg font-semibold mb-2 select-auto">{task.projectName}</h3>
@@ -203,27 +203,27 @@ const TaskList: React.FC = () => {
           </button>
         </Link>
       </div>
-    </div>
-  ))}
-</div>
+            </div>
+          ))}
+        </div>
 
-
-    {/* Pagination  */}
-    <div className="flex justify-center items-center mt-6 space-x-2">
-           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                  page === currentPage
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
+        {/* Pagination */}
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                page === currentPage
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      </div>
       </div>
     </div>
   );
