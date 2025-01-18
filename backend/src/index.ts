@@ -82,18 +82,9 @@ io.on('connection',(socket) => {
       socket.on('send_message', async (data) => {
         try {
           const { senderId, receiverId, text, type, time } = data;
-          let socketId 
-          if (socketConnection.has(receiverId)) {
-             socketId = socketConnection.get(receiverId) as string
-        } else {
-            return null; // Or any suitable fallback logic
-        }
-        let receiveId 
-        if(socketConnection.has(senderId)){
-          receiveId = socketConnection.get(senderId) as string
-        }else {
-           return null
-        }
+          let socketId = socketConnection.get(receiverId) as string
+       
+          let receiveId = socketConnection.get(senderId) as string
           let chat = await ChatModel.findOne({
             participants: { $all: [senderId, receiverId] },
           });
@@ -105,7 +96,6 @@ io.on('connection',(socket) => {
             });
             await chat.save();
           }
-     
           const message = new MessageModel({
             senderId,
             receiverId,
