@@ -20,8 +20,11 @@ export const AccountDetailController = {
         try {
              const userId = req.user?.userId || ""
             const updates = req.body;
+            console.log('updates',updates)
             const files = req.files as {[key:string]: Express.Multer.File[]};
-            await userUseCase.updatePassword(userId,updates.newPassword);
+            if(updates.newPassword){
+                await userUseCase.updatePassword(userId,updates.newPassword);
+            }
             const result = await AccountDetailUseCase.updateProfile(userId, updates,files);
             res.status(200).json({message: 'Profile updated Successfully', profile: result})
         } catch (error) {
