@@ -40,11 +40,11 @@ app.use('/api/freelancers',freelancerRouter);
 app.use('/api/client/',clientRouter);
 
 app.use(catchError);
-const socketConnection = new Map<any, string>();
+const socketConnection = new Map<string, string>();
 
 
 io.on('connection',(socket) => {
-  const userId = socket.handshake.query.userId;
+  const userId = socket.handshake.query.userId as string;
     console.log(`User connected with ID: ${userId}`);
   socketConnection.set(userId, socket.id);
     socket.on('get_messages', async ({ senderId, receiverId }) => {

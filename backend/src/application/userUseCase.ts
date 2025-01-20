@@ -26,6 +26,7 @@ export const userUseCase = {
         if(!user){
             user = await UserRepository.createUser({
                 email,
+                password:'default',
                 googleSignUp: true,
                 role: 'client'
             });
@@ -65,8 +66,8 @@ export const userUseCase = {
         const userDetails = await AccountDetailRepository.findUserDetailsById(user.id)
 
     if (!userDetails) throw { statusCode: 404, message: 'User account details not found' };
-        const token = JwtService.generateToken({id: user.id, email:user.email});
-        const refreshToken = JwtService.generateRefreshToken({id:user.id,email:user.email})
+        const token = JwtService.generateToken({id: user.id, email:user.email,role:user.role});
+        const refreshToken = JwtService.generateRefreshToken({id:user.id,email:user.email,role:user.role})
         return {token,refreshToken, user , userDetails};
         
     },

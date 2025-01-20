@@ -26,8 +26,13 @@ export const BidUseCase = {
              await NotificationRepository.createNotification(notification);
             return await BidRepository.createBid(data);
 
-        } catch (error: any) {
-            throw new Error(`Failed to create bid: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to create bid due to an unknown error`);
+            }
+            
         }
     },
 
@@ -37,8 +42,13 @@ export const BidUseCase = {
     ) => {
         try {
             return await BidRepository.updateBid(id, updates);
-        } catch (error: any) {
-            throw new Error(`Failed to update bid: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update bid due to an unknown error`);
+            }
+            
         }
     },
 

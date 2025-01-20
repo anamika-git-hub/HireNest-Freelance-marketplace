@@ -1,5 +1,5 @@
 import { UserModel } from "../models/UserModel";
-import { UserDetailModel } from "../models/UserDetailModel";
+import { Iuser } from "../../entities/User";
 
 export const UserRepository = {
 
@@ -7,8 +7,8 @@ export const UserRepository = {
     findUserById: async (id: string) => UserModel.findById(id),
     findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}),
     
-    createUser: async (userData: any) => new UserModel(userData).save(),
-    updateUser: async (id: string, updates: any) => UserModel.findByIdAndUpdate(id, updates, {new: true}),
+    createUser: async (userData: Iuser) => new UserModel(userData).save(),
+    updateUser: async (id: string, updates: Iuser) => UserModel.findByIdAndUpdate(id, updates, {new: true}),
     updateUserVerification: async (email: string, isVerified: boolean) => {
         return UserModel.findOneAndUpdate(
             {email},

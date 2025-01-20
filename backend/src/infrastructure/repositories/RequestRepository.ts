@@ -6,8 +6,12 @@ export const RequestRepository = {
         try {
             const request = new RequestModel(data);
             return await request.save();
-        } catch (error: any) {
-            throw new Error("Error creating request: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create request: ${error.message}`);
+            }else {
+                throw new Error(`Failed to create request due to an unknown error`);
+            } 
         }
     },
 
@@ -16,8 +20,12 @@ export const RequestRepository = {
             const updateRequest = await RequestModel.findByIdAndUpdate(id, updates, { new: true });
             if (!updateRequest) throw new Error("Request not found");
             return updateRequest;
-        } catch (error: any) {
-            throw new Error("Error updating request: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update request: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update request due to an unknown error`);
+            } 
         }
     },
 
@@ -26,8 +34,12 @@ export const RequestRepository = {
             const deleteRequest = await RequestModel.findByIdAndDelete(id);
             if (!deleteRequest) throw new Error("Request not found");
             return deleteRequest;
-        } catch (error: any) {
-            throw new Error("Error deleting request: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to delete request: ${error.message}`);
+            }else {
+                throw new Error(`Failed to delete request due to an unknown error`);
+            } 
         }
     },
 
@@ -36,16 +48,24 @@ export const RequestRepository = {
             const request = await RequestModel.find({requesterId:id}).populate("freelancerId");
             if (!request) throw new Error("Request not found");
             return request;
-        } catch (error: any) {
-            throw new Error("Error fetching request: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get request by userId: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get request by userId due to an unknown error`);
+            } 
         }
     },
     getRequestById: async (id: string) => {
         try {
             const request = await RequestModel.findById(id)
             return request
-        } catch (error: any) {
-            throw new Error("Error fetching request: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get request by Id: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get request by Id due to an unknown error`);
+            } 
         }
     }
 };

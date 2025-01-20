@@ -1,21 +1,24 @@
+import { Response } from 'express'; 
+import { Req, Next } from '../../infrastructure/types/serverPackageTypes';
 import { TokenBlacklist } from '../../infrastructure/models/TokenBockList';
-import { Req, Res, Next } from '../../infrastructure/types/serverPackageTypes';
-import { JwtService } from '../../infrastructure/services/JwtService';
-interface CustomRequest extends Req{
-    user?:{userId:string};
+
+interface CustomRequest extends Req {
+    user?: { userId: string };
 }
-const checkTokenBlacklist = async (req: CustomRequest, res: Res, next: Next): Promise<any> => {
+
+const checkTokenBlacklist = async (req: CustomRequest, res: Response, next: Next): Promise<void> => {
     try {
-        const id = req.user?.userId
-        const isBlacklisted = await TokenBlacklist.findOne({ _id:id,isBlocked:true});
-        
+        const id = req.user?.userId;
+        const isBlacklisted = await TokenBlacklist.findOne({ _id: id, isBlocked: true });
+
         if (isBlacklisted) {
-           return  res.status(403).json({ message: 'User is blocked. Please contact admin.' });
+            res.status(403).json({ message: 'User is blocked. Please contact admin.' });
+            return; 
         }
 
-        next(); // Token is valid and not blacklisted, proceed to next middleware or route
+        next(); 
     } catch (error) {
-         res.status(500).json({ message: 'Internal Server Error', error });
+        res.status(500).json({ message: 'Internal Server Error', error });
     }
 };
 

@@ -1,9 +1,10 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { FreelancerProfileUseCase } from '../../application/freelancerProfileUseCase';
+import { FilterCriteria } from '../../entities/filter';
 interface CustomRequest extends Req {
     user?: { userId: string }; 
   }
-
+  
 export const FreelancerProfileController = {
     createProfile : async (req: Req, res: Res, next: Next) => {
         try {
@@ -32,13 +33,14 @@ export const FreelancerProfileController = {
     getFreelancers: async (req: Req, res: Res, next: Next) => {
 
         try {
+            console.log('hhhii')
             const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
             const searchTerm = req.query.searchTerm as string || ""; 
             
-            const category = req.query.category as string | undefined;
-            const skills = req.query.skills as string[] | undefined; // Assuming it's an array
+            const experience = req.query.experience as string | undefined;
+            const skills = req.query.skills as string[] | undefined; 
             const priceRange = req.query.priceRange as { min: string; max: string } | undefined;
             const skip = (page - 1) * limit;
 
@@ -47,12 +49,28 @@ export const FreelancerProfileController = {
             if (sortOption === "Price: High to Low") sortCriteria.hourlyRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
 
-            const filters: any = {};
+            const filters: FilterCriteria = {};
 
-            if (searchTerm) {
-                filters.name = { $regex: searchTerm, $options: "i" }; // Case-insensitive search
+            if (searchTerm && searchTerm.trim()) {
+                filters.$or = [
+                    { name: { $regex: searchTerm, $options: "i" } }, 
+                    { tagline : { $regex: searchTerm, $options: "i"} },
+                ];
             }
             
+            console.log('experience',experience);
+             if (experience) {
+                const experienceMatch = experience.match(/^(\d+)(?:\+)?(?:-(\d+))?/);
+                if (experienceMatch) {
+                    const minExperience = parseInt(experienceMatch[1], 10); 
+                    const maxExperience = experienceMatch[2] ? parseInt(experienceMatch[2], 10) : undefined; 
+    
+                    filters.experience = {
+                        $gte: `${minExperience} months`,
+                        ...(maxExperience && { $lte: `${maxExperience} years` }), 
+                    };
+                }
+            }
             if (skills) filters.skills = { $all: skills };
             
             if (priceRange) {

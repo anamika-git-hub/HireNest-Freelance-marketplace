@@ -6,8 +6,12 @@ export const BidRepository = {
         try {
             const bid = new BidSubmissionModel(data);
             return await bid.save();
-        } catch (error: any) {
-            throw new Error("Error creating bid: " + error.message);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to create bid due to an unknown error`);
+            } 
         }
     },
 
@@ -16,8 +20,12 @@ export const BidRepository = {
             const updatedBid = await BidSubmissionModel.findByIdAndUpdate(id, updates, { new: true });
             if (!updatedBid) throw new Error("Bid not found");
             return updatedBid;
-        } catch (error: any) {
-            throw new Error("Error updating bid: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update bid due to an unknown error`);
+            } 
         }
     },
 
@@ -26,8 +34,12 @@ export const BidRepository = {
             const deletedBid = await BidSubmissionModel.findByIdAndDelete(id);
             if (!deletedBid) throw new Error("Bid not found");
             return deletedBid;
-        } catch (error: any) {
-            throw new Error("Error deleting bid: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to delete bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to delete bid due to an unknown error`);
+            } 
         }
     },
 
@@ -35,8 +47,12 @@ export const BidRepository = {
         try {
             const bids =  await BidSubmissionModel.find({ taskId })
             return bids
-        } catch (error: any) {
-            throw new Error("Error fetching bids: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get bids : ${error.message}`);
+            }else {
+                throw new Error(`Failed to get bids due to an unknown error`);
+            } 
         }
     },
 
@@ -45,8 +61,12 @@ export const BidRepository = {
             const bid = await BidSubmissionModel.find({bidderId:id}).populate("taskId");
             if (!bid) throw new Error("Bid not found");
             return bid;
-        } catch (error: any) {
-            throw new Error("Error fetching bid: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get bids by Id: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get bids by Id due to an unknown error`);
+            } 
         }
     },
 };

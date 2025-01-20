@@ -1,5 +1,6 @@
 import { FreelancerProfileModel } from "../models/freelancerProfile";
 import { IFreelancerProfile } from "../../entities/freelancerProfile";
+import { FilterCriteria } from "../../entities/filter";
 
 
 export const FreelancerProfileRepository = {
@@ -9,15 +10,19 @@ export const FreelancerProfileRepository = {
         FreelancerProfileModel.findOneAndUpdate({userId:id}, updates, {upsert:true,new: true}),
 
     
-    getFreelancers: async (filters:any,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
+    getFreelancers: async (filters:FilterCriteria,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
         try{
             const freelancers = await FreelancerProfileModel.find({...filters}).sort(sortCriteria).skip(skip).limit(limit);
             return freelancers
-        }catch(error: any){
-            throw new Error ('Error get freelancers:' + error.message)
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get freelancers: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get freelancers due to an unknown error`);
+            } 
         }
     },
-    getFreelancerCount : async (filters:any) => {
+    getFreelancerCount : async (filters:FilterCriteria) => {
   
         return await FreelancerProfileModel.countDocuments({...filters});
     },
@@ -30,8 +35,12 @@ export const FreelancerProfileRepository = {
                     throw new Error("freelancer not found");
                 }
                 return freelancer;
-            } catch (error: any) {
-                throw new Error("Error fetching freelancer: " + error.message);
+            }catch (error) {
+                if(error instanceof Error){
+                    throw new Error(`Failed to get freelancer by userId: ${error.message}`);
+                }else {
+                    throw new Error(`Failed to get freelancer by userId due to an unknown error`);
+                } 
             }
         },
 
@@ -42,8 +51,12 @@ export const FreelancerProfileRepository = {
                     throw new Error("freelancer not found");
                 }
                 return freelancer;
-            } catch (error: any) {
-                throw new Error("Error fetching freelancer: " + error.message);
+            } catch (error) {
+                if(error instanceof Error){
+                    throw new Error(`Failed to get freelancer by Id: ${error.message}`);
+                }else {
+                    throw new Error(`Failed to get freelancer by Id due to an unknown error`);
+                } 
             }
         }
     

@@ -21,8 +21,12 @@ export const RequestUseCase = {
             }
             await NotificationRepository.createNotification(notification);
             return await RequestRepository.createRequest(data);
-        } catch (error: any) {
-            throw new Error(`Failed to create request: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create request : ${error.message}`);
+            }else {
+                throw new Error(`Failed to create request due to an unknown error`);
+            } 
         }
     },
 
@@ -32,8 +36,12 @@ export const RequestUseCase = {
     ) => {
         try {
             return await RequestRepository.updateRequest(id, updates);
-        } catch (error: any) {
-            throw new Error(`Failed to update request: ${error.message}`);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update request : ${error.message}`);
+            }else {
+                throw new Error(`Failed to update request due to an unknown error`);
+            } 
         }
     },
 

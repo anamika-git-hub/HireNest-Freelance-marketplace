@@ -23,8 +23,13 @@ export const CategoryUseCase = {
             };
     
             return await CategoryRepository.createCategory(categoryData);
-        } catch (error: any) {
-            throw new Error(`Failed to create category: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create category: ${error.message}`);
+            }else {
+                throw new Error(`Failed to create category due to an unknown error`);
+            }
+            
         }
     },
     getAllCategories: async () => {
@@ -57,15 +62,20 @@ export const CategoryUseCase = {
             // Include the category image URL only if it's a new file or if the image needs to be updated
             const updatedCategoryData = {
                 ...updates,
+                name: updates.name || '',
                 image: categoryImageUrl || updates.image, // Retain the existing image if no new file is uploaded
             };
     
             return await CategoryRepository.updateCategory(id, updatedCategoryData);
-        } catch (error: any) {
-            throw new Error(`Failed to update category: ${error.message}`);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update category: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update category due to an unknown error`);
+            }
+            
         }
     },
-  
 
     deleteCategory: async (id: string) => {
         return await CategoryRepository.deleteCategory(id);

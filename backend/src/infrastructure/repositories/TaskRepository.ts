@@ -1,5 +1,6 @@
 import { TaskSubmissionModel } from "../models/TaskSubmissionModel";
 import { ITaskSubmissionForm } from "../../entities/Tasks";
+import { FilterCriteria } from "../../entities/filter";
 
 export const TaskRepository = {
     // Create a new task submission
@@ -7,8 +8,12 @@ export const TaskRepository = {
         try {
             const task = new TaskSubmissionModel(data);
             return await task.save();
-        } catch (error: any) {
-            throw new Error("Error creating task: " + error.message);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to create Task: ${error.message}`);
+            }else {
+                throw new Error(`Failed to create Task due to an unknown error`);
+            } 
         }
     },
 
@@ -20,8 +25,12 @@ export const TaskRepository = {
                 throw new Error("Task not found");
             }
             return updatedTask;
-        } catch (error: any) {
-            throw new Error("Error updating task: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update Task: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update Task due to an unknown error`);
+            } 
         }
     },
 
@@ -33,28 +42,38 @@ export const TaskRepository = {
                 throw new Error("Task not found");
             }
             return deletedTask;
-        } catch (error: any) {
-            throw new Error("Error deleting task: " + error.message);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to delete Task: ${error.message}`);
+            }else {
+                throw new Error(`Failed to delete Task due to an unknown error`);
+            } 
         }
     },
 
-    getTasks: async (filters:any,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
-        const currentDate = new Date().toISOString(); 
+    getTasks: async (filters:FilterCriteria,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
+        const currentDate = new Date().toISOString();
+        console.log('filters',filters) 
         const result = await TaskSubmissionModel.find({
             ...filters,
             timeline: { $gt: currentDate }, 
         }).sort(sortCriteria).skip(skip).limit(limit);
+        console.log('result',result)
         return result
      },
-    getTaskCount: async(filters:any) => {
+    getTaskCount: async(filters:FilterCriteria) => {
         try {
             const currentDate = new Date().toISOString(); 
             return await TaskSubmissionModel.countDocuments({
                 ...filters,
                 timeline: { $gt: currentDate }, 
             });
-        } catch (error:any) {
-            throw new Error(`Failed to count tasks: ${error.message}`);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to count Task : ${error.message}`);
+            }else {
+                throw new Error(`Failed to count Task due to an unknown error`);
+            } 
         }
     } ,
     getTaskById: async (id: string) => {
@@ -64,8 +83,12 @@ export const TaskRepository = {
                 throw new Error("Task not found");
             }
             return task;
-        } catch (error: any) {
-            throw new Error("Error fetching task: " + error.message);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get Task by Id: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get Task by Id due to an unknown error`);
+            } 
         }
     },
 
@@ -74,8 +97,12 @@ export const TaskRepository = {
             const task = await TaskSubmissionModel.find({clientId:id});
             if(!task) throw new Error("Task not found");
             return task;
-        } catch (error: any) {
-            throw new Error("Error fetching task:" + error.message)
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get Task by userId: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get Task by userId due to an unknown error`);
+            } 
         }
     }
 

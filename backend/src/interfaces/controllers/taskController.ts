@@ -1,5 +1,6 @@
 import { Req, Res, Next } from '../../infrastructure/types/serverPackageTypes';
 import { TaskUseCase } from '../../application/taskUseCase';
+import { FilterCriteria } from '../../entities/filter';
 
 interface CustomRequest extends Req {
     user?: { userId: string }; 
@@ -63,7 +64,7 @@ export const TaskController = {
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
     
             // Filters for query
-            const filters: any = {};
+            const filters: FilterCriteria = {};
             if (category) filters.category = category;
             if (skills) filters.skills = { $all: skills }; 
     
@@ -75,13 +76,12 @@ export const TaskController = {
                 if (!isNaN(maxRate)) filters.maxRate = { $lte: maxRate };
             }
 
-            if (searchTerm) {
-                filters.$or = [
-                    { projectName: { $regex: searchTerm, $options: "i" } }, 
-                ];
+            if (searchTerm && searchTerm.trim()) {
+                filters.projectName = { $regex: searchTerm, $options: "i" } 
             }
             // Fetch tasks and count
             const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
+            console.log('tass',tasks)
             const totalTasks = await TaskUseCase.getTasksCount(filters);
             const totalPages = Math.ceil(totalTasks / limit);
     

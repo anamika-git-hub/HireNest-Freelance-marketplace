@@ -1,6 +1,7 @@
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { IFreelancerProfile } from "../entities/freelancerProfile";
 import cloudinaryV2 from "../utils/cloudinary";
+import { FilterCriteria } from "../entities/filter";
 
 export const FreelancerProfileUseCase = {
     createProfile: async (data:IFreelancerProfile, files:{[key: string]: Express.Multer.File[]}) => {
@@ -31,8 +32,12 @@ export const FreelancerProfileUseCase = {
                 attachments,
             };
             return await FreelancerProfileRepository.createProfile(profileData)
-        } catch (error: any) {
-            throw new Error (`Failed to set up profile: ${error.message}`)
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to setup profile: ${error.message}`);
+            }else {
+                throw new Error(`Failed to setup profile due to an unknown error`);
+            }
         }
     },
 
@@ -75,38 +80,58 @@ export const FreelancerProfileUseCase = {
                 attachments,
             };
             return await FreelancerProfileRepository.updateProfile(id, updatedProfileData);
-        } catch (error: any) {
-            throw new Error (`Failed to update freelancer profile: ${error.message}`);
+        }catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update freelancer profile: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update freelancer profile due to an unknown error`);
+            }
+            
         }
     },
 
     getFreelancers: async({filters,sortCriteria,skip,limit}:{
-        filters:any;
+        filters:FilterCriteria;
         sortCriteria: { [key: string]: 1 | -1 };
         skip: number;
         limit: number;
 })=>{
         try {
             return await FreelancerProfileRepository.getFreelancers(filters,sortCriteria,skip,limit);
-        } catch (error:any) {
-            throw new Error(`Failed to get freelancers: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get freelancer: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get freelancer due to an unknown error`);
+            }
+            
         }
     },
-    getFreelancersCount: async(filters:any) => {
+    getFreelancersCount: async(filters:FilterCriteria) => {
         return await FreelancerProfileRepository.getFreelancerCount(filters);
     },
      getFreelancerByUserId: async (id: string) => {
             try {
                 return await FreelancerProfileRepository.getFreelancerByUserId(id);
-            } catch (error: any) {
-                throw new Error(`Failed to get freelancer by UserID: ${error.message}`);
+            } catch (error) {
+                if(error instanceof Error){
+                    throw new Error(`Failed to get freelancer by userId: ${error.message}`);
+                }else {
+                    throw new Error(`Failed to get  freelancer by userId due to an unknown error`);
+                }
+                
             }
         },
         getFreelancerById: async (id: string) => {
             try {
                 return await FreelancerProfileRepository.getFreelancerById(id);
-            } catch (error: any) {
-                throw new Error(`Failed to get freelancer by ID: ${error.message}`);
+            } catch (error) {
+                if(error instanceof Error){
+                    throw new Error(`Failed to get freelancer by Id: ${error.message}`);
+                }else {
+                    throw new Error(`Failed to get freelancer by Id due to an unknown error`);
+                }
+                
             }
         }
 }

@@ -1,5 +1,6 @@
 import { ChatModel } from "../models/ChatModel";
 import { UserDetailModel } from "../models/UserDetailModel";
+import { IChat } from "../../entities/Chat";
 import { FreelancerProfileModel } from "../models/freelancerProfile";
 import mongoose from "mongoose";
 
@@ -9,7 +10,7 @@ export const MessageRepository = {
            participants:userId
         });
         const contactIds = new Set<string>();
-        contacts.forEach((chat: any) => {
+        contacts.forEach((chat: IChat) => {
             chat.participants.forEach((participant: mongoose.Types.ObjectId) => {
                 if (participant.toString() !== userId) {
                     contactIds.add(participant.toString());  

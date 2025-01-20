@@ -26,8 +26,12 @@ export const AccountDetailUseCase = {
             };
             return await AccountDetailRepository.createProfile(profileData)
             
-        } catch (error: any) {
-            throw new Error (`Failed to set up profile: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error (`Failed to set up profile: ${error.message}`);
+            }else {
+                throw new Error (`Failed to set up profile due to an unknown error`);
+            }  
         }
     },
 
@@ -51,10 +55,13 @@ export const AccountDetailUseCase = {
 
             }
             return await AccountDetailRepository.updateProfile(userId, updatedProfileData);
-        } catch (error: any) {
-            throw new Error(`Failed to update profile: ${error.message}`)
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update profile: ${error.message}`)
+            }else {
+                throw new Error(`Failed to update profile due to an unknown error`)
+            }
         }
-        
     },
 
     getAccountDetail:async(id:string) => {

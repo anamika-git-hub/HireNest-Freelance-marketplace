@@ -4,16 +4,26 @@ export const BookMarkUseCase = {
     createBookmarks : async (id: string, itemId: string,type: string) => {
          try {
                     return await BookmarkRepository.createBookmarks(id, itemId,type);
-                } catch (error: any) {
-                    throw new Error(`Failed to create bookmark: ${error.message}`);
+                } catch (error) {
+                    if(error instanceof Error){
+                        throw new Error(`Failed to create bookmark: ${error.message}`);
+                    }else {
+                        throw new Error(`Failed to create bookmark due to an unknown error`);
+                    }
+                    
                 }
     },
     getBookmarks : async(userId: string) => {
         try {
             const bookmark = await BookmarkRepository.getBookmarks(userId);
             return bookmark
-        } catch (error: any) {
-            throw new Error(`Failed to get bookmark: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get bookmark: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get bookmark due to an unknown error`);
+            }
+            
         }
     },
     deleteBookmark: async (userId: string, itemId: string, type: string) => {
@@ -29,8 +39,13 @@ export const BookMarkUseCase = {
                 return true;
             }
             return false;
-        } catch (error: any) {
-            throw new Error(`Failed to remove bookmark: ${error.message}`);
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to remove bookmark: ${error.message}`);
+            }else {
+                throw new Error(`Failed to remove bookmark due to an unknown error`);
+            }
+            
         }
     },
     
