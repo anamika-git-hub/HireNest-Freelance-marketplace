@@ -13,8 +13,7 @@ const ResetPassword: React.FC = () => {
     try {
       const response = await axiosConfig.post("/users/reset-password", { password, id });
       toast.success("Password has been reset successfully");
-    } catch (error: any) {
-      console.error("Error:", error.response?.data || error.message);
+    } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   };

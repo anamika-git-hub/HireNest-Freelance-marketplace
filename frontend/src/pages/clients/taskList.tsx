@@ -5,8 +5,26 @@ import FilterSidebar from "../../components/shared/FilterSideBar";
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import Loader from "../../components/shared/Loader";
 
+interface Filters {
+  category: string;
+  skills: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+}
+
+interface Task {
+  _id:string;
+  projectName:string;
+  category:string;
+  rateType:string;
+  minRate:number;
+  maxRate:number;
+}
+
 const TaskList: React.FC = () => {
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [bookmarks, setBookmarks] = useState<{ itemId: string; type: string }[]>(
@@ -17,10 +35,10 @@ const TaskList: React.FC = () => {
   const [sortOption, setSortOption] = useState<string>("Relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     category: "",
     skills: [],
-    priceRange: { min: 10, max: 1000 },
+    priceRange: { min: 10, max: 500 },
   });
 
   const userId = localStorage.getItem("userId");
@@ -105,7 +123,7 @@ const TaskList: React.FC = () => {
     getBookmark();
   }, []);
 
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters);
   };
 

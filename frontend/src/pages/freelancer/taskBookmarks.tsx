@@ -29,7 +29,7 @@ const TaskBookmarks: React.FC = () => {
         const taskResponse = await axiosConfig.get("/freelancers/tasks-list");
         const tasks = taskResponse.data.data; 
         if(taskResponse){
-          const matchedTasks = tasks.filter((task:any) =>
+          const matchedTasks = tasks.filter((task:Task) =>
             taskBookmarks.some((bookmark:{itemId:string}) => bookmark.itemId === task._id)
           ) .map((task: Task) => ({
             ...task,

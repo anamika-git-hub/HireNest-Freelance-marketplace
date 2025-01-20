@@ -2,9 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axiosConfig from '../../service/axios'; 
 import HeroSection from '../../components/shared/hero';
 
+interface Category {
+    image: string;
+    name: string;
+  }
+
 const Home: React.FC = () => {
 
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {

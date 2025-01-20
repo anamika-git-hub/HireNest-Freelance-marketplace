@@ -5,8 +5,28 @@ import { Link } from "react-router-dom";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import Loader from "../../components/shared/Loader";
 
+interface Filters {
+  category: string;
+  skills: string[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+  experience: string;
+}
+
+interface Freelancer {
+  _id: string;
+  name:string;
+  profileImage:string;
+  rate: number;
+  tagline: string;
+  rating: number;
+}
+
+
 const FreelancerList: React.FC = () => {
-  const [freelancers, setFreelancers] = useState<any[]>([]);
+  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [bookmarks, setBookmarks] =  useState<{ itemId: string; type: string }[]>([]);
@@ -15,10 +35,11 @@ const FreelancerList: React.FC = () => {
   const [sortOption, setSortOption] = useState<string>("Relevance");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
       category: "",
       skills: [],
-      priceRange: { min: 10, max: 1000 },
+      priceRange: { min: 10, max: 500 },
+      experience: "",
     });
   const userId = localStorage.getItem('userId');
   const ITEMS_PER_PAGE = 6;
@@ -48,7 +69,8 @@ const FreelancerList: React.FC = () => {
           searchTerm:debouncedSearchTerm,
           category:filters.category,
           skills:filters.skills,
-          priceRange:filters.priceRange
+          priceRange:filters.priceRange,
+          experience: filters.experience
         },
       });
       setFreelancers(response.data.data);
@@ -106,7 +128,7 @@ const FreelancerList: React.FC = () => {
     getBookmark()
   },[])
 
-  const handleFilterChange = (newFilters: any) => {
+  const handleFilterChange = (newFilters:Filters) => {
     setFilters(newFilters);
   };
   const handlePageChange = (page: number) => {

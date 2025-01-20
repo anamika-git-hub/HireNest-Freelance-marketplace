@@ -4,9 +4,18 @@ import { useDispatch } from "react-redux";
 import { setUsersByType } from "../../store/userSlice";
 import axiosConfig from "../../service/axios";
 
+interface User {
+  name?:string;
+  createdAt: string;
+  email: string;
+  isBlocked: boolean;
+  isVerified: boolean;
+  _id: string;
+}
+
 const ManageUsers: React.FC = () => {
   const { type } = useParams<{ type: string }>();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const dispatch = useDispatch();
 
   const userType = type === "freelancer" || type === "client" ? type : "client"; 
@@ -66,7 +75,7 @@ const ManageUsers: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user: any, index) => (
+          {users.map((user: User, index) => (
             <tr
               key={index}
               className="border-b text-sm hover:bg-gray-100 transition-colors"

@@ -45,7 +45,7 @@ const Chat: React.FC = () => {
           }
         });
 
-        const freelancerList: Freelancer[] = response.data.map((receiver: any) => ({
+        const freelancerList: Freelancer[] = response.data.map((receiver: Freelancer) => ({
           firstname: receiver.firstname,
           name:receiver.name,
           profileImage: receiver.profileImage,
@@ -69,7 +69,7 @@ const Chat: React.FC = () => {
   const initializeChat = (freelancerId: string) => {
     socket.emit('get_messages', { senderId: userId, receiverId: freelancerId });
 
-    socket.on('message_history', (history: any[]) => {
+    socket.on('message_history', (history: Message[]) => {
 
       const updatedHistory = history.map((msg) => ({
         type: msg.senderId === userId ? 'sent' : 'received', 
@@ -80,7 +80,7 @@ const Chat: React.FC = () => {
       setMessages(updatedHistory);
     });
 
-    socket.on('receive_message', (data: any) => {
+    socket.on('receive_message', (data: Message) => {
       const formattedMessage: Message = {
         type: data.senderId === userId ? 'sent' : 'received',
         text: data.text,

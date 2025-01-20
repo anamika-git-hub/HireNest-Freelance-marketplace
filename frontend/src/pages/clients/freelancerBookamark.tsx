@@ -12,6 +12,13 @@ interface Task {
     profileImage: string;
 }
 
+interface Freelancer {
+  _id:string;
+  profileImage: string;
+  name: string;
+  tagline:string;
+}
+
 const FreelancerBookmarks: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,7 +35,7 @@ const FreelancerBookmarks: React.FC = () => {
         const freelancerResponse = await axiosConfig.get("/client/freelancer-list");
         const freelancers = freelancerResponse.data.data; 
         
-        const matchedFreelancers = freelancers.filter((freelancer:any) =>
+        const matchedFreelancers = freelancers.filter((freelancer:Freelancer) =>
           freelancerBookmarks.some((bookmark:{itemId:string}) => bookmark.itemId === freelancer._id)
         );
   
