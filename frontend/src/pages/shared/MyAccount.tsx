@@ -128,6 +128,8 @@ const updateAccountType = async (newRole: string) => {
   try {
     const response = await axiosConfig.post('/users/update-role', { role: newRole,userId:userId });
     if (response.status === 200) {
+      localStorage.setItem("accessToken", response.data.token);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
       localStorage.setItem('role', newRole);
       setUserRole(newRole)
       console.log('Account type updated successfully');

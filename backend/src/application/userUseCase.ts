@@ -78,7 +78,10 @@ export const userUseCase = {
           if (!updatedUser) {
             throw {statusCode:404, message:'User not found'};
           }
-          return {updatedUser}
+          
+        const token = JwtService.generateToken({id: updatedUser.id, email:updatedUser.email,role:updatedUser.role});
+        const refreshToken = JwtService.generateRefreshToken({id:updatedUser.id,email:updatedUser.email,role:updatedUser.role})
+          return {token,refreshToken,updatedUser}
     },
     validatePassword: async (userId:string, currentPassword:string) => {
         
