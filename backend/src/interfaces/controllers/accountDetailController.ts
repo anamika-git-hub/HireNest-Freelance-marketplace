@@ -20,7 +20,6 @@ export const AccountDetailController = {
         try {
              const userId = req.user?.userId || ""
             const updates = req.body;
-            console.log('updates',updates)
             const files = req.files as {[key:string]: Express.Multer.File[]};
             if(updates.newPassword){
                 await userUseCase.updatePassword(userId,updates.newPassword);

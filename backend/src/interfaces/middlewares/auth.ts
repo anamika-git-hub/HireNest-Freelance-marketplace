@@ -13,7 +13,6 @@ export const isUser = (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
-          console.log('userData',userData);
           if (userData) {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);
@@ -52,7 +51,6 @@ export const isClient= (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
-          console.log('userData cleint',userData);
           if (userData.role === 'client') {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);
@@ -92,7 +90,6 @@ export const isFreelancer = (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string , role:string};
-          console.log('userData',userData);
           if (userData.role === 'freelancer') {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);
@@ -133,7 +130,6 @@ export const isAdmin = (req: CustomRequest, res: Res, next: Next) => {
       try {
           // Try verifying access token
           userData = JwtService.verifyToken(accessToken) as { id: string ,role:string};
-          console.log('userData',userData);
           if (userData.role === 'admin') {
               req.user = { userId: userData.id };
               return checkTokenBlacklist(req, res, next);

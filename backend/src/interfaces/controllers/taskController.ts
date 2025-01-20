@@ -81,7 +81,6 @@ export const TaskController = {
             }
             // Fetch tasks and count
             const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
-            console.log('tass',tasks)
             const totalTasks = await TaskUseCase.getTasksCount(filters);
             const totalPages = Math.ceil(totalTasks / limit);
     

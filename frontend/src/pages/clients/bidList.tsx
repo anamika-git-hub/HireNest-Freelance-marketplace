@@ -39,7 +39,6 @@ const BiddersList: React.FC = () => {
         const fetchBids = async () => {
           try {
             const response = await axiosConfig.get(`/client/task-bids/${id}`);
-            console.log('resss',response)
             const fetchedBidders = response.data.bids; 
             const fetchedProfiles = await Promise.all(
                 fetchedBidders.map(async (bidder: Bid) => {

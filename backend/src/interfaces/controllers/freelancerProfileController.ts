@@ -31,9 +31,7 @@ export const FreelancerProfileController = {
     },
 
     getFreelancers: async (req: Req, res: Res, next: Next) => {
-
         try {
-            console.log('hhhii')
             const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
@@ -57,8 +55,6 @@ export const FreelancerProfileController = {
                     { tagline : { $regex: searchTerm, $options: "i"} },
                 ];
             }
-            
-            console.log('experience',experience);
              if (experience) {
                 const experienceMatch = experience.match(/^(\d+)(?:\+)?(?:-(\d+))?/);
                 if (experienceMatch) {

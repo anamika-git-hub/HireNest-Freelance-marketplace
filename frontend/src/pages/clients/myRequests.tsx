@@ -66,7 +66,7 @@ const RequestList: React.FC = () => {
               window.location.reload();
             }
           } catch (error) {
-            console.log('Error deleting request', error);
+            toast.error('Failed to delete request')
           }
         }
       };

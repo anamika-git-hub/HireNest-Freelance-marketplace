@@ -53,12 +53,10 @@ export const TaskRepository = {
 
     getTasks: async (filters:FilterCriteria,sortCriteria:{ [key: string]: 1 | -1 },skip:number,limit:number) => {
         const currentDate = new Date().toISOString();
-        console.log('filters',filters) 
         const result = await TaskSubmissionModel.find({
             ...filters,
             timeline: { $gt: currentDate }, 
         }).sort(sortCriteria).skip(skip).limit(limit);
-        console.log('result',result)
         return result
      },
     getTaskCount: async(filters:FilterCriteria) => {

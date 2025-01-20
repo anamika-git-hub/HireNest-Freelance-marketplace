@@ -151,7 +151,6 @@ const MyProfile: React.FC = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        console.log("freelancer profile updated:", response.data);
         if(response.status === 200){
           toast.error('freelancer profile updated successfully')
         }

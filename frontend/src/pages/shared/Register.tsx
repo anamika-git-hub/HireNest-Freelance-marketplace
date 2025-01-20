@@ -22,7 +22,6 @@ const Signup: React.FC = () => {
   };
  const googleSubmit  = async(googleData:any)=>{
   const decodeResponse:any= jwtDecode(googleData.credential)
-  console.log('google',decodeResponse)
    const {email} = decodeResponse
    const user = {email}
    try {
