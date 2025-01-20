@@ -9,7 +9,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axiosConfig.get("/admin/categories");
+                const response = await axiosConfig.get("/users/categories");
                 setCategories(response.data);
             } catch (error) {
                 console.error("Error fetching categories:", error);

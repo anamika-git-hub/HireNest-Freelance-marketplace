@@ -97,7 +97,7 @@ const TaskDetail: React.FC = () => {
   };
 
   const isBidExist = async() => {
-    const response =await axiosConfig.get(`/freelancers/bid/${userId}`)
+    const response =await axiosConfig.get(`/users/bid/${userId}`)
 
     const bidExists = response.data.bid.some((bid:BidFormData) => bid.taskId?._id === id); 
     

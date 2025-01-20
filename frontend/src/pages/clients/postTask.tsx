@@ -34,7 +34,7 @@ const TaskSubmissionForm: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosConfig.get("/admin/categories");
+        const response = await axiosConfig.get("/users/categories");
         if (response.status === 200) {
           setCategories(response.data);
         }

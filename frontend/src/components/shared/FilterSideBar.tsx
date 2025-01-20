@@ -8,7 +8,12 @@ interface Category {
 }
 
 interface FilterSidebarProps {
-  onFilterChange: (filters: { category: string, skills: string[], priceRange: { min: number, max: number } }) => void;
+  onFilterChange: (filters: { 
+    category: string, 
+    skills: string[], 
+    priceRange: { min: number, max: number } 
+    experience: string;
+  }) => void;
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
@@ -17,12 +22,15 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
     const [skillInput, setSkillInput] = useState<string>("");
     const [categories, setCategories] = useState<Category[]>([]);
     const [category, setCategory] = useState<string>("");
-    const [priceRange, setPriceRange] = useState<{ min: number, max: number }>({ min: 0, max: 100 });
+    const [priceRange, setPriceRange] = useState<{ min: number, max: number }>({ min: 0, max: 500 });
+    const [experience, setExperience] = useState<string>("");
+
+    const role = localStorage.getItem('role');
     
       useEffect(() => {
         const fetchCategories = async () => {
           try {
-            const response = await axiosConfig.get("/admin/categories"); 
+            const response = await axiosConfig.get("/users/categories"); 
             if (response.status === 200) {
             setCategories(response.data);
             }
@@ -69,13 +77,55 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
         //   priceRange: newRange
         // });
       };
+      const handleExperienceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setExperience(e.target.value);
+      };
 
       const handleSubmit = () => {
         onFilterChange({
           category,
           skills,
-          priceRange
+          priceRange,
+          experience,
         })
+      }
+
+      const getFilterCriteria = () => {
+        if(role === 'freelancer'){
+          return (
+            <>
+              <label className="block mb-2 font-medium text-sm">Category</label>
+              <select 
+              className="w-full p-2 border rounded-md"
+              value={category}
+              onChange={handleCategoryChange}
+              >
+                  <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )
+        }else if(role === 'client'){
+          return (
+            <>
+            <label className="block mb-2 font-medium text-sm">Experience</label>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={experience}
+              onChange={handleExperienceChange}
+            >
+              <option value="">Select Experience</option>
+              <option value="0-2 years">0-2 years</option>
+              <option value="2-5 years">2-5 years</option>
+              <option value="5+ years">5+ years</option>
+            </select>
+            </>
+          )
+        }
       }
 
   return (
@@ -83,19 +133,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
       <h2 className="text-lg font-semibold mb-4">Search Filters</h2>
       <div className="space-y-4">
         {/* Category Selection */}
-        <label className="block mb-2 font-medium text-sm">Category</label>
-        <select 
-        className="w-full p-2 border rounded-md"
-        value={category}
-        onChange={handleCategoryChange}
-        >
-            <option value="">Select Category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+        {getFilterCriteria()}
 
         {/* Skills Input */}
         <label className="block mb-2 font-medium text-sm">Skills</label>
@@ -150,19 +188,26 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ onFilterChange }) => {
 
         {/* Hourly Rate Range */}
         <label className="block mb-2 font-medium text-sm">Hourly Rate Range</label>
-        <span>${priceRange.max}</span>
+        <span>$ </span>
+        <input
+          type="number"
+          name="max"
+          className="w-16 px-2 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-gray-700"
+          value={priceRange.max}
+          onChange={handlePriceRangeChange}
+        />
         <input
           type="range"
           className="w-full"
           name="max"
           min="10"
-          max="1000"
+          max="500"
           value={priceRange.max}
           onChange={handlePriceRangeChange}
         />
         <div className="flex justify-between text-sm mt-1">
         <span>$0</span>
-        <span>$1000</span>
+        <span>$500</span>
         </div>
 
         {/* Search Button */}

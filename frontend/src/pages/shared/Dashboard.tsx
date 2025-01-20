@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
   
       if (userId) {
         axiosConfig
-          .get(`/freelancers/bid/${userId}`)
+          .get(`/users/bid/${userId}`)
           .then((response) => {
             setBids(response.data.bid);
             setLoading(false);
@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
 
     const fetchBidCount = async (taskId: string) => {
       try {
-        const response = await axiosConfig.get(`/freelancers/task-bids/${taskId}`);
+        const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
         const bidCount = response.data.bids.length;
         setTasks((prevTasks) =>
           prevTasks.map((task) =>

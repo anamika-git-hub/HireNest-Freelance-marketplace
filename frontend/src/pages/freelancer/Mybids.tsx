@@ -32,7 +32,7 @@ const ActiveBids: React.FC = () => {
 
     if (userId) {
       axiosConfig
-        .get(`/freelancers/bid/${userId}`)
+        .get(`/users/bid/${userId}`)
         .then((response) => {
           setBids(response.data.bid);
           setLoading(false);
