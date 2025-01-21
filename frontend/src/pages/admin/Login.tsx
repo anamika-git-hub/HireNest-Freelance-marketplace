@@ -26,7 +26,7 @@ const AdminLogin: React.FC = () => {
           navigate('/admin/dashboard');
           toast.success('Admin logged in successfully');
           localStorage.setItem('accessToken', response.data.token);
-          localStorage.setItem('adminRole', response.data.admin.role);
+          localStorage.setItem('role', response.data.admin.role);
           localStorage.setItem('email', response.data.admin.email);
         }
       } catch (error: any) {
