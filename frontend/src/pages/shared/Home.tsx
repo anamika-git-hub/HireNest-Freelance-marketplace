@@ -15,7 +15,7 @@ const Home: React.FC = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axiosConfig.get("/users/categories");
-                setCategories(response.data);
+                setCategories(response.data.categories);
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }

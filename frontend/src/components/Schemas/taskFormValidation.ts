@@ -18,4 +18,4 @@ export const TaskFormValidation = Yup.object({
     description: Yup.string()
       .required("Description is required")
       .min(10, "Description must be at least 10 characters"),
-  })
+  });

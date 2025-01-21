@@ -32,10 +32,12 @@ export const CategoryUseCase = {
             
         }
     },
-    getAllCategories: async () => {
-        return await CategoryRepository.getAllCategories();
+    getAllCategories: async ({filters,skip,limit}:{filters:any,skip:number, limit:number}) => {
+        return await CategoryRepository.getAllCategories(filters,skip,limit);
     },
-
+    getCategoryCount: async(filters:any)=> {
+        return await CategoryRepository.getCategoryCount(filters)
+    },
     getCategoryById: async (id: string) => {
         return await CategoryRepository.getCategoryById(id);
     },

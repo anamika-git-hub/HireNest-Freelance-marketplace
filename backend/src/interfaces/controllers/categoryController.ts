@@ -17,8 +17,19 @@ export const CategoryController = {
     
     getAllCategories: async (req: Req, res: Res, next: Next) => {
         try {
-            const categories = await CategoryUseCase.getAllCategories();
-            res.status(200).json(categories);
+            const page = parseInt(req.query.page as string,10) || 1;
+            const limit = parseInt(req.query.limit as string,10) || 10;
+            const searchTerm = req.query.searchTerm as string || "";
+
+            const skip = (page - 1)* limit;
+            const filters: any = {}
+            if(searchTerm && searchTerm.trim()){
+                filters.name = {$regex: searchTerm, $options: "i"}
+            }
+            const categories = await CategoryUseCase.getAllCategories({filters, skip, limit});
+            const totalCategories = await CategoryUseCase.getCategoryCount(filters);
+            const totalPages = Math.ceil(totalCategories/limit)
+            res.status(200).json({categories,totalPages});
         } catch (error) {
             next(error);
         }

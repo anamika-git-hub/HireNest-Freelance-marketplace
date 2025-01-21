@@ -24,7 +24,6 @@ interface Freelancer {
   rating: number;
 }
 
-
 const FreelancerList: React.FC = () => {
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

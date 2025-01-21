@@ -3,12 +3,15 @@ import { Icategory } from "../../entities/Category";
 
 export const CategoryRepository = {
     createCategory: async (categoryData: Icategory) => new CategoryModel (categoryData).save(),
-    getAllCategories: async () =>{
-       const categories =  CategoryModel.find();
-        return (await categories).map((category)=>({
-            ...category.toObject(),
-            id : category._id.toString(),
-        }) as Icategory)
+    getAllCategories: async (filters:any, skip:number, limit: number) =>{
+    const categories = await CategoryModel.find({...filters}).skip(skip).limit(limit); 
+    return categories.map((category) => ({
+        ...category.toObject(),
+        id: category._id.toString(),
+    }) as Icategory);
+    },
+    getCategoryCount: async(filters:any) => {
+        return await CategoryModel.countDocuments({...filters})
     },
     getCategoryById: async (id: string) =>{
         const category = await CategoryModel.findById(id);

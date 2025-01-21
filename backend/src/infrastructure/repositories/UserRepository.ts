@@ -5,7 +5,16 @@ export const UserRepository = {
 
     findUserByEmail: async (email: string) => UserModel.findOne({ email }),
     findUserById: async (id: string) => UserModel.findById(id),
-    findUserByRole: async (role: 'client' | 'freelancer' | 'admin')  =>  UserModel.find({role}),
+    findUserByRole: async (filters:any,skip:number, limit:number)  =>  {
+        const result = await UserModel.find({...filters
+        }).skip(skip).limit(limit);
+        return result
+    },
+    findUserCount: async (filters: any) => {
+        return await UserModel.countDocuments({
+            ...filters,
+        });
+    },
     
     createUser: async (userData: Iuser) => new UserModel(userData).save(),
     updateUser: async (id: string, updates: Iuser) => UserModel.findByIdAndUpdate(id, updates, {new: true}),

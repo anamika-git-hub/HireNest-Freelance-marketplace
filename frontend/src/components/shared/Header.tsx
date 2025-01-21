@@ -122,7 +122,6 @@ const Header: React.FC = () => {
             </button>
           </div>
         ) : (
-          
           <div className="flex items-center space-x-4">
             
             <button className="relative hover:text-blue-200">🔔</button>

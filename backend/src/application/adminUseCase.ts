@@ -17,11 +17,11 @@ export const adminUseCase = {
         const token = JwtService.generateToken({id: admin.id, email: admin.email, role: admin.role});
         return {token, admin};
     },
-    getAllFreelancers: async() => {
-        return await UserRepository.findUserByRole('freelancer');
+    getAllUsers: async({filters,skip,limit}:{filters:any,skip:number, limit: number}) => {
+        return await UserRepository.findUserByRole(filters,skip,limit);
     },
-    getAllClients: async () => {
-        return await UserRepository.findUserByRole('client');
+    getUsersCount: async(filters:any) => {
+        return await UserRepository.findUserCount(filters)
     },
     toggleBlockUser: async (userId: string, isBlocked: boolean) => {
         const updatedUser = await UserRepository.toggleBlockUser(userId, isBlocked);

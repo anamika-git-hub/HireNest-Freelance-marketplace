@@ -19,23 +19,46 @@ export const AdminController = {
     },
     getFreelancers: async (req: Req, res: Res, next: Next) => {
         try {
-            const freelancers = await adminUseCase.getAllFreelancers();
-            res.status(200).json({freelancers});
+            const page = parseInt(req.query.page as string,10) || 1;
+            const limit = parseInt(req.query.limit as string,10) || 10;
+            const searchTerm = req.query.searchTerm as string || "";
+
+            const skip = (page - 1)* limit;
+            const filters: any = {}
+             filters.role = 'freelancer'
+            if(searchTerm && searchTerm.trim()) {
+                filters.email = {$regex : searchTerm, $options : "i"}
+            }
+            const freelancers = await adminUseCase.getAllUsers({filters, skip, limit});
+            const totalFreelancers = await adminUseCase.getUsersCount(filters);
+            const totalPages = Math.ceil(totalFreelancers/limit);
+            res.status(200).json({freelancers,totalPages});
         } catch (error) {
             next(error);
         }
     },
     getClients: async (req: Req, res: Res, next: Next) => {
         try {
-            const clients = await adminUseCase.getAllClients();
-            res.status(200).json({clients});
+            const page = parseInt(req.query.page as string,10) || 1;
+            const limit = parseInt(req.query.limit as string,10) || 10;
+            const searchTerm = req.query.searchTerm as string || "";
+
+            const skip = (page - 1)* limit;
+            const filters: any = {}
+             filters.role = 'client'
+            if(searchTerm && searchTerm.trim()) {
+                filters.email = {$regex : searchTerm, $options : "i"}
+            }
+            const clients = await adminUseCase.getAllUsers({filters,skip,limit});
+            const totalClients = await adminUseCase.getUsersCount(filters);
+            const totalPages = Math.ceil(totalClients/limit)
+            res.status(200).json({clients,totalPages});
         } catch (error) {
             next(error);
         }
     },
 
     toggleBlockUser: async (req: Req, res: Res, next: Next) => {
-        
         try {
             const {userId, isBlocked} = req.params;
             const isBlockedBool = isBlocked === 'true';

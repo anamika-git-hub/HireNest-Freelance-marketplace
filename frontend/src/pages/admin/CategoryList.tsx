@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store"; 
 import { getCategories, deleteCategory } from "../../store/categorySlice";
@@ -9,20 +9,52 @@ const ManageCategories: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const categories = useSelector((state: RootState) => state.category.categories);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const ITEMS_PER_PAGE = 4
+  const inputRef = useRef<HTMLInputElement | null>(null);
+     useEffect(() => {
+        const handler = setTimeout(() => {
+          setDebouncedSearchTerm(searchTerm);
+        }, 600);
+    
+        return () => {
+          clearTimeout(handler);
+        };
+      }, [searchTerm]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosConfig.get("/users/categories");
-        dispatch(getCategories(response.data));
+        const response = await axiosConfig.get("/users/categories",{
+          params: {
+            page: currentPage,
+            limit: ITEMS_PER_PAGE,
+            searchTerm: debouncedSearchTerm,
+          }
+        });
+        setTotalPages(response.data.totalPages);
+        dispatch(getCategories(response.data.categories));
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
-  }, [dispatch]);
+  }, [dispatch,debouncedSearchTerm,currentPage]);
+
+
+  useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [debouncedSearchTerm]);
+
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+    };
 
   const handleDeleteCategory = async (id: string) => {
     const confirmed = window.confirm("Are you sure you want to delete this category?");
@@ -35,10 +67,6 @@ const ManageCategories: React.FC = () => {
       }
     }
   };
-
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="p-6 bg-gray-100">
@@ -56,8 +84,8 @@ const ManageCategories: React.FC = () => {
         <input
           type="text"
           placeholder="Search categories..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -72,7 +100,7 @@ const ManageCategories: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <tr
               key={category.id || `${category.name}-${index}`}
               className="border-b text-sm hover:bg-gray-100 transition-colors"
@@ -110,9 +138,27 @@ const ManageCategories: React.FC = () => {
         </tbody>
       </table>
 
-      {filteredCategories.length === 0 && (
+      <div className="flex justify-center items-center mt-6 space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                page === currentPage
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+
+      {categories.length === 0 && (
         <div className="text-center text-gray-600 mt-4">No categories found.</div>
       )}
+
+
     </div>
   );
 };

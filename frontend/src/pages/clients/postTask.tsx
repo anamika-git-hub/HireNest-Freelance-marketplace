@@ -36,7 +36,7 @@ const TaskSubmissionForm: React.FC = () => {
       try {
         const response = await axiosConfig.get("/users/categories");
         if (response.status === 200) {
-          setCategories(response.data);
+          setCategories(response.data.categories);
         }
       } catch (error) {
         console.error("Error fetching categories", error);
