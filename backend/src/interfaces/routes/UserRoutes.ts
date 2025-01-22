@@ -7,6 +7,7 @@ import { BookMarkController } from '../controllers/bookmarkController';
 import { MessageController } from '../controllers/messageController';
 import { uploadProfileImages } from '../middlewares/uploadFileImages';
 import { BidController } from '../controllers/bidController';
+import { TaskController } from '../controllers/taskController';
 import { CategoryController } from '../controllers/categoryController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { isUser } from '../middlewares/auth';
@@ -31,6 +32,7 @@ router.get('/account-detail',isUser,AccountDetailController.getAccountDetail);
 router.post('/update-role',isUser,UserController.updateRole);
 
 router.get("/bid/:id",isUser, BidController.getBidById);
+router.get('/tasks/:id',isUser, TaskController.getTaskById);
 
 router.get("/freelancer-profile/:id",isUser,FreelancerProfileController.getFreelancerByUserId);
 

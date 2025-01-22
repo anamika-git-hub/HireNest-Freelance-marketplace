@@ -41,7 +41,7 @@ const TaskDetail: React.FC = () => {
   useEffect(() => {
     const fetchTaskDetails = async () => {
       try {
-        const response = await axiosConfig.get(`freelancers/tasks/${id}`);
+        const response = await axiosConfig.get(`users/tasks/${id}`);
         setTaskDetails(response.data.task);
       } catch (error) {
         setError("Failed to load task details.");

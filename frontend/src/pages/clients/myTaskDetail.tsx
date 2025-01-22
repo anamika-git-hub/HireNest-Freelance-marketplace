@@ -36,7 +36,7 @@ const [formData,setFormData] = useState ({
 useEffect(() => {
     const fetchTaskDetail = async () => {
       try {
-        const response = await axiosConfig.get(`/freelancers/tasks/${id}`);
+        const response = await axiosConfig.get(`/users/tasks/${id}`);
       
         if (response.data) {
            const task = response.data.task;
