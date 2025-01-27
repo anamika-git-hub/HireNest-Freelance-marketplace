@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { FaEdit, FaEye, FaEyeSlash} from "react-icons/fa";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { MyAccountValidationSchema } from "../../components/Schemas/myAccountValidation";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 
@@ -16,18 +18,7 @@ const MyAccount: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    dob: "",
-    profileImage: "",
-  });
-  const [passwordData, setPasswordData] = useState({
-    currentPassword:"",
-    newPassword:"", 
-    confirmPassword:""
-  });
+
   const [userRole, setUserRole] = useState(localStorage.getItem('role') || 'client');
   const [passwordVisible, setPasswordVisible] = useState({
     currentPassword: false,
@@ -41,14 +32,6 @@ const MyAccount: React.FC = () => {
 
   const handleEditClick = () => {
     fileInputRef.current?.click();
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   const handlePasswordVisibilityToggle = (field: 'currentPassword' | 'newPassword' | 'confirmPassword') => {
@@ -75,46 +58,14 @@ const MyAccount: React.FC = () => {
     fetchUserDetails();
   }, []);
 
-  // Update formData when userDetail changes
-  useEffect(() => {
-    if (userDetail) {
-      setFormData({
-        firstName: userDetail.firstname || "",
-        lastName: userDetail.lastname || "",
-        phone: userDetail.phone || "",
-        dob: userDetail.dateOfBirth ? userDetail.dateOfBirth.toString().split("T")[0] : "", 
-        profileImage: userDetail.profileImage || "",
-      });
-    }
-  }, [userDetail]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        profileImage: URL.createObjectURL(file), 
-      }));
-    }
-  };
-
-  const validateCurrentPassword = async () => {
+  const validateCurrentPassword = async (currentPassword: string) => {
     const userId = localStorage.getItem("userId");
-    const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
-      currentPassword: passwordData.currentPassword
-    });
-   
-    if (response.status === 200) {
-      return true; 
-    } else {
+    try {
+      const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
+        currentPassword
+      });
+      return response.status === 200;
+    } catch (error) {
       toast.error("Incorrect current password.");
       return false;
     }
@@ -145,29 +96,40 @@ const updateAccountType = async (newRole: string) => {
   }
 };
 
+const initialValues = {
+  firstName: userDetail?.firstname || "",
+  lastName: userDetail?.lastname || "",
+  phone: userDetail?.phone || "",
+  dob: userDetail?.dateOfBirth ? userDetail.dateOfBirth.toString().split("T")[0] : "",
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+  profileImage: userDetail?.profileImage || "",
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const isPasswordValid = await validateCurrentPassword();
-    if (!isPasswordValid) {
-      toast.error("Incorrect current password.");
-      return;
-    }
+  const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
+    
+    const isPasswordValid = values.currentPassword ? 
+    await validateCurrentPassword(values.currentPassword) : true;
+
+  if (!isPasswordValid) {
+    setSubmitting(false);
+    return;
+  }
   
     const updatedData = new FormData();
 
-    updatedData.append("firstname", formData.firstName);
-    updatedData.append("lastname", formData.lastName);
-    updatedData.append("phone", formData.phone);
-    updatedData.append("dob", formData.dob);
+    updatedData.append("firstname", values.firstName);
+    updatedData.append("lastname", values.lastName);
+    updatedData.append("phone", values.phone);
+    updatedData.append("dob", values.dob);
     
    if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
     updatedData.append("profileImage", fileInputRef.current.files[0]);
 }
-   if(passwordData.newPassword) {
-    updatedData.append("newPassword", passwordData.newPassword);
-    
-   }
+if (values.newPassword) {
+  updatedData.append("newPassword", values.newPassword);
+}
     try {
         const response = await axiosConfig.put(`/users/update-account`, updatedData, {
           headers: {
@@ -190,8 +152,14 @@ const updateAccountType = async (newRole: string) => {
   }
 
   return (
-    <form
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      validationSchema={MyAccountValidationSchema}
       onSubmit={handleSubmit}
+    >
+      {({ isSubmitting, setFieldValue, values }) => (
+    <Form
       className="p-6 sm:p-10 sm:pt-20 bg-white rounded-lg shadow-lg select-none"
     >
       <div className="space-y-6">
@@ -200,9 +168,9 @@ const updateAccountType = async (newRole: string) => {
           <div className="flex flex-col md:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-6">
             {/* Profile Picture */}
             <div className="w-32 h-32 mt-16 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
-              {formData.profileImage ? (
+              {values.profileImage ? (
                 <img
-                  src={formData.profileImage}
+                  src={values.profileImage}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-md"
                 />
@@ -221,7 +189,12 @@ const updateAccountType = async (newRole: string) => {
             <input
               type="file"
               ref={fileInputRef}
-              onChange={handleFileChange}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setFieldValue('profileImage', URL.createObjectURL(file));
+                }
+              }}
               className="hidden"
               accept="image/*"
             />
@@ -233,25 +206,26 @@ const updateAccountType = async (newRole: string) => {
                 {/* First Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <input
+                  <Field
                     type="text"
                     name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
+                    value={values.firstName}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                  
+                  <ErrorMessage name="firstName" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
   
                 {/* Last Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <input
+                  <Field
                     type="text"
                     name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
+                    value={values.lastName}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                   <ErrorMessage name="lastName" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
               </div>
   
@@ -260,25 +234,25 @@ const updateAccountType = async (newRole: string) => {
                 {/* Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
+                  <Field
                     type="text"
                     name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
+                    value={values.phone}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                   <ErrorMessage name="phone" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
   
                 {/* Date of Birth */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                  <input
+                  <Field
                     type="date"
                     name="dob"
-                    value={formData.dob}
-                    onChange={handleChange}
+                    value={values.dob}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                  <ErrorMessage name="dob" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
               </div>
   
@@ -292,12 +266,9 @@ const updateAccountType = async (newRole: string) => {
                       onClick={async () => {
                         const newRole = "freelancer";
                         setUserRole(newRole);
-                        setFormData((prev) => ({
-                          ...prev,
-                          role: newRole,
-                        }));
                         await updateAccountType(newRole);
                       }}
+
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
                         role === "freelancer"
                           ? "bg-green-500 text-white"
@@ -311,10 +282,6 @@ const updateAccountType = async (newRole: string) => {
                       onClick={async () => {
                         const newRole = "client";
                         setUserRole(newRole);
-                        setFormData((prev) => ({
-                          ...prev,
-                          role: newRole,
-                        }));
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
@@ -331,7 +298,6 @@ const updateAccountType = async (newRole: string) => {
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <input
                     type="email"
-                    name="email"
                     value={email || ""}
                     disabled
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -350,11 +316,10 @@ const updateAccountType = async (newRole: string) => {
             <div>
               <label className="block text-sm font-medium text-gray-700">Current Password</label>
               <div className="relative">
-                <input
+                <Field
                   type={passwordVisible.currentPassword ? "text" : "password"}
                   name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
+                  
                   className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter current Password"
                 />
@@ -365,17 +330,16 @@ const updateAccountType = async (newRole: string) => {
                   {passwordVisible.currentPassword ? <FaEyeSlash /> : <FaEye />}
                 </div>
               </div>
+              <ErrorMessage name="currentPassword" component="div" className="text-red-500 text-sm mt-1" />
             </div>
   
             {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">New Password</label>
               <div className="relative">
-                <input
+                <Field
                   type={passwordVisible.newPassword ? "text" : "password"}
                   name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
                   className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter new password"
                 />
@@ -386,17 +350,16 @@ const updateAccountType = async (newRole: string) => {
                   {passwordVisible.newPassword ? <FaEyeSlash /> : <FaEye />}
                 </div>
               </div>
+              <ErrorMessage name="newPassword" component="div" className="text-red-500 text-sm mt-1" />
             </div>
   
             {/* Repeat New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Repeat New Password</label>
               <div className="relative">
-                <input
+                <Field
                   type={passwordVisible.confirmPassword ? "text" : "password"}
                   name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
                   className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Confirm new password"
                 />
@@ -407,6 +370,7 @@ const updateAccountType = async (newRole: string) => {
                   {passwordVisible.confirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </div>
               </div>
+              <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-sm mt-1" />
             </div>
           </div>
         </div>
@@ -421,7 +385,9 @@ const updateAccountType = async (newRole: string) => {
           </button>
         </div>
       </div>
-    </form>
+    </Form>
+      )}
+</Formik>
   );
   
 };
