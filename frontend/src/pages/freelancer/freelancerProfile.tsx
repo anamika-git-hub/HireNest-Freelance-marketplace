@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import toast from "react-hot-toast";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { FreelancerProfileValidationSchema } from "../../components/Schemas/freelancerProfile";
 
 const FreelancerProfile: React.FC = () => {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-
+  
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [attachments, setAttachments] = useState(
@@ -19,36 +19,25 @@ const FreelancerProfile: React.FC = () => {
   const [modalFile, setModalFile] = useState<File | null>(null);
   const [modalTitle, setModalTitle] = useState("");
   const [modalDescription, setModalDescription] = useState("");
-
-  const [firstName, setFirstName] = useState("");
-  const [location, setLocation] = useState("");
-  const [tagline, setTagline] = useState("");
-  const [experience, setExperience] = useState("");
-  const [hourlyRate, setHourlyRate] = useState<number>(35);
-  const [introduction, setIntroduction] = useState("");
-
   const navigate = useNavigate()
+  const handleEditClick = () => {
+    fileInputRef.current?.click();
+  };
 
    const currentUserId = useSelector((state: RootState) => state.user.userId);
+   console.log('curr',currentUserId)
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const fileURL = URL.createObjectURL(file);
-        setImagePreview(fileURL);
-        setImageFile(file)
-      }
-    };
-    const handleEditClick = () => {
-      fileInputRef.current?.click(); 
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setHourlyRate(Number(value)); 
-    };
+  const initialValues = {
+    name:"",
+    location:"",
+    tagline: "",
+    experience: "",
+    hourlyRate: 10,
+    description:"",
+    profileImage:"",
+  };
 
   const handleAddSkill = () => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
@@ -81,38 +70,34 @@ const FreelancerProfile: React.FC = () => {
     setAttachments(attachments.filter((attachment) => attachment.id !== id));
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
+    console.log(values)
 
 formData.append("userId",currentUserId || "");    
-formData.append("name", firstName);
-formData.append("location", location);
-formData.append("tagline", tagline);
-formData.append("experience", experience);
-formData.append("hourlyRate", hourlyRate.toString());
-formData.append("description", introduction);
-
-if (imageFile) {
-  formData.append("profileImage", imageFile);
-}
-
+formData.append("name", values.name);
+formData.append("location", values.location);
+formData.append("tagline", values.tagline);
+formData.append("experience", values.experience);
+formData.append("hourlyRate", values.hourlyRate.toString());
 skills.forEach((skill) => formData.append("skills[]", skill));
+formData.append("description", values.description);
+
+if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
+  formData.append("profileImage", fileInputRef.current.files[0]);
+}
 
 attachments.forEach((attachment, index) => {
   formData.append(`attachments`, attachment.file);
   formData.append(`attachments[${index}].title`, attachment.title);
   formData.append(`attachments[${index}].description`, attachment.description);
 });
-
-
     try {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
-      toast("Profile submitted successfully!");
+      console.log('ress',response)
+      toast.success("Profile submitted successfully!");
       navigate('/login')
       
     } catch (error) {
@@ -134,14 +119,20 @@ attachments.forEach((attachment, index) => {
         {/* Left Content */}
         <div className="lg:w-1/2">
           <div className="hero-content text-left">
-          <form className="w-full max-w-3xl space-y-8 mt-8" onSubmit={handleSubmit}>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={FreelancerProfileValidationSchema}
+                onSubmit={handleSubmit}
+              >
+              {({ isSubmitting, setFieldValue, values }) => (
+          <Form className="w-full max-w-3xl space-y-8 mt-8">
       
       <div className="flex gap-8 items-start mb-6">
         {/* Profile Photo */}
                     <div className="relative w-32 h-32 bg-gray-500 rounded-md my-7 flex justify-center items-center overflow-hidden">
-                      {imagePreview ? (
+                      {values.profileImage ? (
                         <img
-                          src={imagePreview}
+                          src={values.profileImage}
                           alt="Profile Preview"
                           className="w-full h-full object-cover"
                         />
@@ -162,7 +153,12 @@ attachments.forEach((attachment, index) => {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleImageUpload}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setFieldValue('profileImage', URL.createObjectURL(file));
+                }
+              }}
             />
           {/* Profile Details */}
         <div className="col-span-2 space-y-3">
@@ -170,23 +166,23 @@ attachments.forEach((attachment, index) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Name</label>
-              <input
+              <Field
                 type="text"
-                className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                name = "name"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 placeholder="Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
               />
+               <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
             </div>
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Location</label>
-              <input
+              <Field
                 type="text"
+                name = "location"
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
              />
+              <ErrorMessage name="location" component="div" className="text-red-500 text-sm mt-1" />
             </div>
           </div>
 
@@ -194,23 +190,23 @@ attachments.forEach((attachment, index) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Tagline</label>
-              <input
+              <Field
                 type="text"
+                name="tagline"
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., Web Developer"
-                value={tagline}
-                onChange={(e) => setTagline(e.target.value)}
               />
+              <ErrorMessage name="tagline" component="div" className="text-red-500 text-sm mt-1" />
             </div>
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Experience</label>
-              <input
+              <Field
                 type="text"
+                name="experience"
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., 3 years"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
               />
+               <ErrorMessage name="experience" component="div" className="text-red-500 text-sm mt-1" />
             </div>
           </div>
         </div>
@@ -225,24 +221,22 @@ attachments.forEach((attachment, index) => {
           </label>
           <div className="flex items-center space-x-2">
             <span className="text-gray-500 text-lg font-medium">$</span>
-            <input
+            <Field
               type="number"
+              name="hourlyRate"
               className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
               placeholder="35"
-              value={hourlyRate}
-              onChange={handleChange} 
             />
-             <input
+             <Field
               type="range"
+              name="hourlyRate"
               className="flex-grow w-72"
               min="10"
               max="100"
               step="1"
-              defaultValue={35}
-              value={hourlyRate}
-              onChange={handleChange} 
             />
           </div>
+            <ErrorMessage name="hourlyRate" component="div" className="text-red-500 text-sm mt-1" />
         </div>
         <div>
           <label className="block text-gray-700 text-sm font-medium mb-1">Skills</label>
@@ -285,14 +279,14 @@ attachments.forEach((attachment, index) => {
        {/* Introduction */}
        <div>
         <label className="block text-gray-700 text-sm font-medium mb-1">Introduce Yourself</label>
-        <textarea
+        <Field
+          as="textarea"
+          name="description"
           className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           placeholder="Write about yourself..."
           rows={4}
-          value={introduction}
-              onChange={(e)=>setIntroduction(e.target.value)}
-          
-        ></textarea>
+        />
+         <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
       </div>
 
       {/* Attachments */}
@@ -392,7 +386,9 @@ attachments.forEach((attachment, index) => {
         </button>
       </div>
 
- </form>
+ </Form>
+  )}
+ </Formik>
 
  </div>
           </div>

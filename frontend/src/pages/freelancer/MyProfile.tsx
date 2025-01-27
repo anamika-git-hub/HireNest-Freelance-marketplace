@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import axiosConfig from "../../service/axios";
 import { FaEdit } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { FreelancerProfileValidationSchema } from "../../components/Schemas/freelancerProfile";
 
 interface FreelancerProfile {
   name: string;
@@ -23,16 +25,6 @@ interface FreelancerProfile {
 const MyProfile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [freelancerProfile, setFreelancerProfile] = useState<FreelancerProfile | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    location: "",
-    tagline: "",
-    experience: "",
-    hourlyRate: 0,
-    skills: [] as string[],
-    description: "",
-    profileImage: "",
-  });
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [attachments, setAttachments] = useState<
@@ -53,8 +45,8 @@ const MyProfile: React.FC = () => {
         const userId = localStorage.getItem("userId");
         if (userId) {
           const response = await axiosConfig.get(`/users/freelancer-profile/${userId}`);
-         
           setFreelancerProfile(response.data);
+          setSkills(response.data.skills || []);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -64,39 +56,29 @@ const MyProfile: React.FC = () => {
     fetchFreelancerProfile();
   }, []);
 
-  useEffect(() => {
-    if (freelancerProfile) {
-      setFormData({
-        name: freelancerProfile.name || "",
-        location: freelancerProfile.location || "",
-        tagline: freelancerProfile.tagline || "",
-        experience: freelancerProfile.experience || "",
-        hourlyRate: freelancerProfile.hourlyRate || 0,
-        profileImage: freelancerProfile.profileImage || "",
-        skills: freelancerProfile.skills || [],
-        description: freelancerProfile.description || "",
-      });
-      setSkills(freelancerProfile.skills);
-    }
-  }, [freelancerProfile]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const initialValues = {
+    name: freelancerProfile?.name || "",
+    location: freelancerProfile?.location || "",
+    tagline: freelancerProfile?.tagline || "",
+    experience: freelancerProfile?.experience || "",
+    hourlyRate: freelancerProfile?.hourlyRate || 10,
+    description: freelancerProfile?.description || "",
+    profileImage: freelancerProfile?.profileImage || "",
   };
 
-  const handleAddSkill = () => {
+  const handleAddSkill = (setFieldValue: (field: string, value: any) => void) => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
-      setSkills([...skills, skillInput]);
+      const newSkills = [...skills, skillInput];
+      setSkills(newSkills);
+      setFieldValue('skills', newSkills);
       setSkillInput("");
     }
   };
 
-  const handleRemoveSkill = (skill: string) => {
-    setSkills(skills.filter((s) => s !== skill));
+  const handleRemoveSkill = (skill: string, setFieldValue: (field: string, value: any) => void) => {
+    const newSkills = skills.filter((s) => s !== skill);
+    setSkills(newSkills);
+    setFieldValue('skills', newSkills);
   };
 
   const handleFileUpload = () => {
@@ -119,27 +101,16 @@ const MyProfile: React.FC = () => {
     setAttachments(attachments.filter((attachment) => attachment.id !== id));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        profileImage: URL.createObjectURL(file), 
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
 
     const updatedData = new FormData();
-    updatedData.append("name", formData.name);
-    updatedData.append("location", formData.location);
-    updatedData.append("tagline", formData.tagline);
-    updatedData.append("experience", formData.experience);
-    updatedData.append("hourlyRate", formData.hourlyRate.toString());
+    updatedData.append("name", values.name);
+    updatedData.append("location", values.location);
+    updatedData.append("tagline", values.tagline);
+    updatedData.append("experience", values.experience);
+    updatedData.append("hourlyRate", values.hourlyRate.toString());
     skills.forEach((skill) => updatedData.append("skills[]", skill));
-    updatedData.append("description", formData.description);
+    updatedData.append("description", values.description);
 
     if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
       updatedData.append("profileImage", fileInputRef.current.files[0]);
@@ -152,26 +123,35 @@ const MyProfile: React.FC = () => {
           },
         });
         if(response.status === 200){
-          toast.error('freelancer profile updated successfully')
+          toast.success('freelancer profile updated successfully')
         }
       
     } catch (error) {
       toast.error('Error updating user details')
       console.error("Error updating user details:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-white rounded-lg shadow-lg">
+    <Formik
+    enableReinitialize
+    initialValues={initialValues}
+    validationSchema={FreelancerProfileValidationSchema}
+    onSubmit={handleSubmit}
+  >
+    {({ isSubmitting, setFieldValue, values }) => (
+    <Form className="p-6 md:p-10 bg-white rounded-lg shadow-lg">
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-6">My Profile</h3>
           <div className="flex flex-col md:flex-row md:items-start md:space-x-6 space-y-6 md:space-y-0">
             {/* Profile Picture */}
             <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
-              {formData.profileImage ? (
+              {values.profileImage ? (
                 <img
-                  src={formData.profileImage}
+                  src={values.profileImage}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-md"
                 />
@@ -190,7 +170,12 @@ const MyProfile: React.FC = () => {
             <input
               type="file"
               ref={fileInputRef}
-              onChange={handleFileChange}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setFieldValue('profileImage', URL.createObjectURL(file));
+                }
+              }}
               className="hidden"
               accept="image/*"
             />
@@ -201,25 +186,25 @@ const MyProfile: React.FC = () => {
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <input
+                  <Field
                     type="text"
                     name="name"
-                    value={formData.name}
-                    onChange={handleChange}
+                    value={values.name}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                   <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
   
                 {/* Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Location</label>
-                  <input
+                  <Field
                     type="text"
                     name="location"
-                    value={formData.location}
-                    onChange={handleChange}
+                    value={values.location}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                   <ErrorMessage name="location" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
               </div>
   
@@ -227,24 +212,24 @@ const MyProfile: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tagline</label>
-                  <input
+                  <Field
                     type="text"
                     name="tagline"
-                    value={formData.tagline}
-                    onChange={handleChange}
+                    value={values.tagline}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                  <ErrorMessage name="tagline" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
   
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Experience</label>
-                  <input
+                  <Field
                     type="text"
                     name="experience"
-                    value={formData.experience}
-                    onChange={handleChange}
+                    value={values.experience}
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
+                   <ErrorMessage name="experience" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
               </div>
   
@@ -256,24 +241,23 @@ const MyProfile: React.FC = () => {
                   </label>
                   <div className="flex items-center space-x-2">
                     <span className="text-gray-500 text-lg font-medium">$</span>
-                    <input
+                    <Field
                       type="number"
                       name="hourlyRate"
                       className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                      value={formData.hourlyRate}
-                      onChange={handleChange}
+                      value={values.hourlyRate}
                     />
-                    <input
+                    <Field
                       type="range"
                       name="hourlyRate"
                       className="flex-grow w-full"
                       min="10"
                       max="100"
                       step="1"
-                      value={formData.hourlyRate}
-                      onChange={handleChange}
+                      value={values.hourlyRate}
                     />
                   </div>
+                  <ErrorMessage name="hourlyRate" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
   
                 {/* Skills */}
@@ -288,14 +272,14 @@ const MyProfile: React.FC = () => {
                     />
                     <button
                       type="button"
-                      onClick={handleAddSkill}
+                      onClick={() => handleAddSkill(setFieldValue)}
                       className="px-4 py-2 bg-blue-500 text-white rounded"
                     >
                       Add
                     </button>
                   </div>
                   <ul className="mt-2 flex flex-wrap gap-2">
-                    {skills.map((skill, index) => (
+                    {skills.map((skill) => (
                       <span
                         key={skill}
                         className="inline-flex items-center px-3 py-1 rounded bg-blue-100 text-blue-600 text-sm font-medium"
@@ -303,7 +287,7 @@ const MyProfile: React.FC = () => {
                         {skill}
                         <button
                           type="button"
-                          onClick={() => handleRemoveSkill(skill)}
+                          onClick={() => handleRemoveSkill(skill, setFieldValue)}
                           className="ml-2 text-gray-500 hover:text-gray-700"
                         >
                           ✕
@@ -317,13 +301,14 @@ const MyProfile: React.FC = () => {
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description</label>
-                <textarea
+                <Field
+                  as="textarea"
                   name="description"
-                  value={formData.description}
-                  onChange={handleChange}
+                  value={values.description}
                   className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   rows={4}
                 />
+                 <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
               </div>
             </div>
           </div>
@@ -408,7 +393,9 @@ const MyProfile: React.FC = () => {
           Save Changes
         </button>
       </div>
-    </form>
+    </Form>
+    )}
+    </Formik>
   );
   
 };

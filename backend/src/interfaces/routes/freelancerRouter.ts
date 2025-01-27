@@ -11,7 +11,7 @@ import { isFreelancer } from '../middlewares/auth';
 const router = express.Router();
 router.use(checkTokenBlacklist);
 
-router.post("/setup-freelancer-profile", uploadFreelancerImages,isFreelancer, FreelancerProfileController.createProfile);
+router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfileController.createProfile);
 router.put("/update-freelancer-profile", uploadFreelancerImages,isFreelancer, FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",isFreelancer,TaskController.getTasks);
