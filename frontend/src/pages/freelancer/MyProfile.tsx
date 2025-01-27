@@ -162,13 +162,13 @@ const MyProfile: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-10 pt-20 bg-white rounded-lg shadow-lg">
+    <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-white rounded-lg shadow-lg">
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-6">My Account</h3>
-          <div className="flex items-start space-x-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6">My Profile</h3>
+          <div className="flex flex-col md:flex-row md:items-start md:space-x-6 space-y-6 md:space-y-0">
             {/* Profile Picture */}
-            <div className="w-32 h-32 mt-16 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
+            <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
               {formData.profileImage ? (
                 <img
                   src={formData.profileImage}
@@ -179,13 +179,13 @@ const MyProfile: React.FC = () => {
                 <span>Photo</span>
               )}
               <div
-                className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full"
+                className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full cursor-pointer"
                 onClick={handleEditClick}
               >
                 <FaEdit className="fas fa-edit" />
               </div>
             </div>
-
+  
             {/* Hidden File Input */}
             <input
               type="file"
@@ -194,10 +194,10 @@ const MyProfile: React.FC = () => {
               className="hidden"
               accept="image/*"
             />
-
+  
             {/* Form Section */}
             <div className="flex-1">
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -209,7 +209,7 @@ const MyProfile: React.FC = () => {
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
+  
                 {/* Location */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Location</label>
@@ -222,9 +222,9 @@ const MyProfile: React.FC = () => {
                   />
                 </div>
               </div>
-
+  
               {/* Tagline and Experience */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tagline</label>
                   <input
@@ -235,7 +235,7 @@ const MyProfile: React.FC = () => {
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
+  
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Experience</label>
                   <input
@@ -247,74 +247,73 @@ const MyProfile: React.FC = () => {
                   />
                 </div>
               </div>
-
+  
               {/* Hourly Rate */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-gray-700 text-sm font-medium mb-1">
                     Hourly Rate ($)
                   </label>
                   <div className="flex items-center space-x-2">
-                  <span className="text-gray-500 text-lg font-medium">$</span>
-                  <input
-                    type="number"
-                    name="hourlyRate"
-                    className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                    value={formData.hourlyRate}
-                    onChange={handleChange}
-                  />
-            <input
-              type="range"
-              name="hourlyRate"
-              className="flex-grow w-72"
-              min="10"
-              max="100"
-              step="1"
-              value={formData.hourlyRate}
-              onChange={handleChange}
-              
-            />
-              </div>
+                    <span className="text-gray-500 text-lg font-medium">$</span>
+                    <input
+                      type="number"
+                      name="hourlyRate"
+                      className="w-24 px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                      value={formData.hourlyRate}
+                      onChange={handleChange}
+                    />
+                    <input
+                      type="range"
+                      name="hourlyRate"
+                      className="flex-grow w-full"
+                      min="10"
+                      max="100"
+                      step="1"
+                      value={formData.hourlyRate}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
-              {/* Skills */}
+  
+                {/* Skills */}
                 <div>
-                <label className="block text-gray-700 text-sm font-medium mb-1">Skills</label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    className="px-4 py-2 border border-gray-300 rounded"
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddSkill}
-                    className="px-4 py-2 bg-blue-500 text-white rounded"
-                  >
-                    Add
-                  </button>
-                </div>
-                <ul className="mt-2 space-y-1 flex flex-wrap gap-2">
-                  {skills.map((skill, index) => (
+                  <label className="block text-gray-700 text-sm font-medium mb-1">Skills</label>
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      className="px-4 py-2 border border-gray-300 rounded"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSkill}
+                      className="px-4 py-2 bg-blue-500 text-white rounded"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {skills.map((skill, index) => (
                       <span
-                        key = {skill}
+                        key={skill}
                         className="inline-flex items-center px-3 py-1 rounded bg-blue-100 text-blue-600 text-sm font-medium"
-                        >
-                          {skill}
-                      
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveSkill(skill)}
-                        className="ml-2 text-gray-500 hover:text-gray-700"
                       >
-                        ✕
-                      </button>
+                        {skill}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSkill(skill)}
+                          className="ml-2 text-gray-500 hover:text-gray-700"
+                        >
+                          ✕
+                        </button>
                       </span>
-                  ))}
-                </ul>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              </div>
-
+  
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description</label>
@@ -329,11 +328,11 @@ const MyProfile: React.FC = () => {
             </div>
           </div>
         </div>
-
+  
         {/* Attachment Modal */}
         {modalVisible && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
               <h4 className="text-lg font-semibold">Upload Attachment</h4>
               <input
                 type="file"
@@ -371,7 +370,7 @@ const MyProfile: React.FC = () => {
             </div>
           </div>
         )}
-
+  
         {/* Attachments List */}
         <div className="mt-6">
           <h4 className="text-lg font-semibold text-gray-800 mb-4">Attachments</h4>
@@ -400,7 +399,7 @@ const MyProfile: React.FC = () => {
             Add Attachment
           </button>
         </div>
-
+  
         {/* Submit Button */}
         <button
           type="submit"
@@ -411,6 +410,7 @@ const MyProfile: React.FC = () => {
       </div>
     </form>
   );
+  
 };
 
 export default MyProfile;

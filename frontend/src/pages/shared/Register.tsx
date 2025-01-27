@@ -8,11 +8,24 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import toast from "react-hot-toast";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../../store/userSlice";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [passwordVisible, setPasswordVisible] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+
+  const handlePasswordVisibilityToggle = (field: "password" | "confirmPassword") => {
+    setPasswordVisible((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   const initialValues = {
     email: "",
@@ -139,13 +152,19 @@ const Signup: React.FC = () => {
                   />
                 </div>
   
-                <div>
+                <div className="relative">
                   <Field
-                    type="password"
+                    type={passwordVisible.password ? "text" : "password"}
                     name="password"
                     placeholder="Password"
                     className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                   <div
+                    className="absolute right-3 top-4 cursor-pointer"
+                    onClick={() => handlePasswordVisibilityToggle("password")}
+                  >
+                    {passwordVisible.password ? <FaEyeSlash /> : <FaEye />}
+                  </div>
                   <ErrorMessage
                     name="password"
                     component="div"
@@ -153,13 +172,19 @@ const Signup: React.FC = () => {
                   />
                 </div>
   
-                <div>
+                <div className="relative">
                   <Field
-                    type="password"
+                    type={passwordVisible.confirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     placeholder="Repeat Password"
                     className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <div
+                    className="absolute right-3 top-4 cursor-pointer"
+                    onClick={() => handlePasswordVisibilityToggle("confirmPassword")}
+                  >
+                    {passwordVisible.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </div>
                   <ErrorMessage
                     name="confirmPassword"
                     component="div"

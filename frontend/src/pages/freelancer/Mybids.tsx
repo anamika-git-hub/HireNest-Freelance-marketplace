@@ -121,8 +121,8 @@ const ActiveBids: React.FC = () => {
   }
 
   return (
-    <div className="p-6 pt-24 bg-gray-100 min-h-screen">
-      <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="p-6 pt-24 bg-gray-100 min-h-screen select-none">
+      <div className="bg-white rounded-lg shadow-md p-4 max-w-6xl mx-auto">
         <div className="flex items-center text-blue-600 font-semibold mb-4">
           <FaEdit className="mr-2" /> Bids List
         </div>
@@ -130,11 +130,11 @@ const ActiveBids: React.FC = () => {
           {bids.map((bid, index) => (
             <li
               key={index}
-              className="flex justify-between items-center border-b last:border-b-0 py-4"
+              className="flex flex-col md:flex-row justify-between items-start md:items-center border-b last:border-b-0 py-4 space-y-4 md:space-y-0"
             >
-              <div>
-              <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
-                <h2 className="text-lg font-medium">{bid.taskId.projectName}</h2>
+              <div className="w-full md:w-auto">
+                <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
+                  <h2 className="text-lg font-medium">{bid.taskId.projectName}</h2>
                 </Link>
                 <div className="flex items-center space-x-2 mt-2">
                   <button
@@ -151,27 +151,24 @@ const ActiveBids: React.FC = () => {
                   </button>
                 </div>
               </div>
-              <div className="bg-gray-100 py-4  rounded-md flex justify-evenly w-1/4">
-              <div className="text-center">
-                <p className="text-lg font-medium">${bid.rate}</p>
-                
-                <p className="text-sm text-gray-500">{bid.taskId.rateType} Rate</p>
+              <div className="bg-gray-100 py-4 rounded-md flex justify-evenly w-full md:w-1/4">
+                <div className="text-center">
+                  <p className="text-lg font-medium">${bid.rate}</p>
+                  <p className="text-sm text-gray-500">{bid.taskId.rateType} Rate</p>
                 </div>
                 <div className="text-center">
-                <p className="text-lg font-medium">{bid.deliveryTime}</p>
-                <p className="text-sm text-gray-500"> {bid.timeUnit}</p>
+                  <p className="text-lg font-medium">{bid.deliveryTime}</p>
+                  <p className="text-sm text-gray-500">{bid.timeUnit}</p>
                 </div>
-                
-                
               </div>
             </li>
           ))}
         </ul>
       </div>
-
+  
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-md w-96">
+          <div className="bg-white p-6 rounded-lg shadow-md w-11/12 sm:w-96">
             <h2 className="text-lg font-semibold mb-4">Edit Your Bid</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -229,7 +226,7 @@ const ActiveBids: React.FC = () => {
         </div>
       )}
     </div>
-  );
+  );  
 };
 
 export default ActiveBids;

@@ -114,44 +114,43 @@ const TaskBookmarks: React.FC = () => {
         </div>
         <ul>
           {bookmarks.map((task, index) => (
-                <Link to={`/freelancer/task-detail/${task._id}`}>
-            <li
-              key={index}
-              className="flex justify-between items-center border-b last:border-b-0 py-4"
-            >
-              <div className="w-3/4">
-                <div className="flex items-center space-x-2">
-                  <h2 className="text-lg font-medium">{task.projectName}</h2>
-                  
+            <Link to={`/freelancer/task-detail/${task._id}`} key={index}>
+              <li className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b last:border-b-0 py-4">
+                <div className="sm:w-3/4 w-full">
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-lg font-medium">{task.projectName}</h2>
+                                      
                   {/* {task.isExpiring && (
                     <span className="bg-yellow-100 text-yellow-600 text-xs font-semibold px-2 py-1 rounded">
                       Expiring
                     </span>
                   )} */}
+                  </div>
+                  <div className="flex items-center text-gray-500 text-sm mt-2">
+                    <AiOutlineClockCircle className="mr-2" />
+                    {task.timeLeft}
+                  </div>
                 </div>
-                <div className="flex items-center text-gray-500 text-sm mt-2">
-                  <AiOutlineClockCircle className="mr-2" />
-                  {task.timeLeft}
-                </div>
-               
-              </div>
-             
-              <div className="flex items-center space-x-2 mt-4">
+  
+                <div className="flex items-center mt-4 sm:mt-0">
                   <button
-                  onClick={() => handleRemove(task._id)}
-                   className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
-                    
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent the link default action
+                      handleRemove(task._id);
+                    }}
+                    className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300"
+                  >
                     <FaTrash className="mr-1" /> Remove
                   </button>
                 </div>
-            </li>
+              </li>
             </Link>
-
           ))}
         </ul>
       </div>
     </div>
   );
+  
 };
 
 export default TaskBookmarks;

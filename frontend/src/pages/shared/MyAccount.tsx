@@ -146,7 +146,6 @@ const updateAccountType = async (newRole: string) => {
 };
 
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isPasswordValid = await validateCurrentPassword();
@@ -191,12 +190,14 @@ const updateAccountType = async (newRole: string) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-10 pt-20 bg-white rounded-lg shadow-lg">
+    <form
+      onSubmit={handleSubmit}
+      className="p-6 sm:p-10 sm:pt-20 bg-white rounded-lg shadow-lg select-none"
+    >
       <div className="space-y-6">
         <div>
-        
-          <h3 className="text-lg font-semibold text-gray-800 mb-6">My Account</h3>
-          <div className="flex items-start space-x-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6 ">My Account</h3>
+          <div className="flex flex-col md:flex-row items-start space-y-6 lg:space-y-0 lg:space-x-6">
             {/* Profile Picture */}
             <div className="w-32 h-32 mt-16 bg-gray-200 rounded-md flex justify-center items-center text-gray-500 relative">
               {formData.profileImage ? (
@@ -215,7 +216,7 @@ const updateAccountType = async (newRole: string) => {
                 <FaEdit className="fas fa-edit" />
               </div>
             </div>
-
+  
             {/* Hidden File Input */}
             <input
               type="file"
@@ -224,11 +225,11 @@ const updateAccountType = async (newRole: string) => {
               className="hidden"
               accept="image/*"
             />
-
+  
             {/* Form Section */}
             <div className="flex-1">
               {/* First Name, Last Name, Phone, and DOB */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* First Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">First Name</label>
@@ -240,7 +241,7 @@ const updateAccountType = async (newRole: string) => {
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
+  
                 {/* Last Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Last Name</label>
@@ -253,9 +254,9 @@ const updateAccountType = async (newRole: string) => {
                   />
                 </div>
               </div>
-
+  
               {/* Phone and DOB */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 {/* Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Phone</label>
@@ -267,7 +268,7 @@ const updateAccountType = async (newRole: string) => {
                     className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
+  
                 {/* Date of Birth */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
@@ -280,9 +281,9 @@ const updateAccountType = async (newRole: string) => {
                   />
                 </div>
               </div>
-
+  
               {/* Account Type */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Account Type</label>
                   <div className="mt-2 flex items-center gap-4">
@@ -298,7 +299,9 @@ const updateAccountType = async (newRole: string) => {
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "freelancer" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"
+                        role === "freelancer"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
                       }`}
                     >
                       Freelancer
@@ -315,7 +318,9 @@ const updateAccountType = async (newRole: string) => {
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "client" ? "bg-green-500 text-white" : "bg-gray-200 text-gray-700"
+                        role === "client"
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
                       }`}
                     >
                       Client
@@ -336,11 +341,11 @@ const updateAccountType = async (newRole: string) => {
             </div>
           </div>
         </div>
-
+  
         {/* Password & Security Section */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-6">Password & Security</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Current Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">Current Password</label>
@@ -361,7 +366,7 @@ const updateAccountType = async (newRole: string) => {
                 </div>
               </div>
             </div>
-
+  
             {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700">New Password</label>
@@ -382,12 +387,10 @@ const updateAccountType = async (newRole: string) => {
                 </div>
               </div>
             </div>
-
+  
             {/* Repeat New Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Repeat New Password
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Repeat New Password</label>
               <div className="relative">
                 <input
                   type={passwordVisible.confirmPassword ? "text" : "password"}
@@ -407,7 +410,7 @@ const updateAccountType = async (newRole: string) => {
             </div>
           </div>
         </div>
-
+  
         {/* Save Changes Button */}
         <div className="flex justify-end mt-6">
           <button
@@ -420,6 +423,7 @@ const updateAccountType = async (newRole: string) => {
       </div>
     </form>
   );
+  
 };
 
 export default MyAccount;
