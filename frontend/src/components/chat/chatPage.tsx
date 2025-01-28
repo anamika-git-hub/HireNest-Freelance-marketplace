@@ -11,7 +11,8 @@ const socket = io('http://localhost:5000', {
   query: { userId,role },
 });
 
-interface Freelancer {
+interface Contacts {
+  _id:string;
   name:string;
   firstname: string;
   lastname:string;
@@ -21,6 +22,7 @@ interface Freelancer {
 }
 
 interface Message {
+  receiverId?:string;
   senderId?: string;
   type: 'sent' | 'received';
   text: string;
@@ -28,10 +30,11 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
-  const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null);
+  const [contacts, setContacts] = useState<Contacts[]>([]);
+  const [selectedContact, setSelectedContact] = useState<Contacts | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const role = localStorage.getItem('role') || '';
+  const userId = localStorage.getItem('userId') || '';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,18 +46,19 @@ const Chat: React.FC = () => {
           }
         });
 
-        const freelancerList: Freelancer[] = response.data.map((receiver: Freelancer) => ({
+        const contactList: Contacts[] = response.data.map((receiver: Contacts) => ({
+          _id:receiver._id,
           firstname: receiver.firstname,
           name:receiver.name,
           profileImage: receiver.profileImage,
           userId: receiver.userId, 
         }));
-        setFreelancers(freelancerList);
+        setContacts(contactList);
 
-        if (freelancerList.length > 0) {
-          const firstFreelancer = freelancerList[0];
-          setSelectedFreelancer(firstFreelancer);
-          initializeChat(firstFreelancer.userId);
+        if (contactList.length > 0) {
+          const firstContact = contactList[0];
+          setSelectedContact(firstContact);
+          initializeChat(firstContact._id);
         }
       } catch (error) {
         console.error('Error fetching requests:', error);
@@ -64,15 +68,14 @@ const Chat: React.FC = () => {
     fetchData();
   }, [role,userId]);
 
-  const initializeChat = (freelancerId: string) => {
+  const initializeChat = (contactId: string) => {
     socket.off('message_history');
     socket.off('receive_message');
-    socket.emit('get_messages', { senderId: userId, receiverId: freelancerId ,role});
+    socket.emit('get_messages', { senderId: userId, receiverId:contactId, contactId,role});
 
     socket.on('message_history', (history: Message[]) => {
-
       const updatedHistory = history.map((msg) => ({
-        type: msg.senderId === userId ? 'sent' : 'received', 
+        type: msg.receiverId === contactId ? 'sent' : 'received', 
         text: msg.text,
         time:  msg.time ? new Date(msg.time).toLocaleString() : 'Unknown Time',
       })) as Message[];
@@ -82,7 +85,7 @@ const Chat: React.FC = () => {
 
     socket.on('receive_message', (data: Message) => {
       const formattedMessage: Message = {
-        type: data.senderId === userId ? 'sent' : 'received',
+        type: data.receiverId === contactId ? 'sent' : 'received',
         text: data.text,
         time:  data.time ? new Date(data.time).toLocaleString() : 'Unknown Time',
       };
@@ -95,21 +98,22 @@ const Chat: React.FC = () => {
     };
   };
 
-  const handleFreelancerSelect = (freelancer: Freelancer) => {
-    setSelectedFreelancer(freelancer);
-    initializeChat(freelancer.userId);
+  const handleContactSelect = (contacts: Contacts) => {
+    setSelectedContact(contacts);
+    initializeChat(contacts._id);
   };
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
-      <Sidebar freelancers={freelancers} onSelectFreelancer={handleFreelancerSelect} />
-      {selectedFreelancer && (
+      <Sidebar contacts={contacts} onSelectcontact={handleContactSelect} />
+      {selectedContact && (
         <ChatArea
-          freelancer={selectedFreelancer}
+          contacts={selectedContact}
           messages={messages}
           setMessages={setMessages}
           userId={userId}
           socket={socket}
+          role={role}
         />
       )}
     </div>

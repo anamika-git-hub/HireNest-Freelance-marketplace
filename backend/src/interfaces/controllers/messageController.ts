@@ -20,9 +20,8 @@ export const MessageController = {
 
     setContacts : async (req: Req, res: Res, next: Next) => {
         try {
-            const {userId,receiverId} = req.body;
-            console.log('uuuu',userId,receiverId)
-            const result = await MessageUseCase.setContacts(userId,receiverId)
+            const {senderId,receiverId,role} = req.body;
+            const result = await MessageUseCase.setContacts(senderId,receiverId,role)
             res.status(200).json(result);
         } catch (error) {
             next(error)

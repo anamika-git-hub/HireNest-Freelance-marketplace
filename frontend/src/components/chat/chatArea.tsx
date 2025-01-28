@@ -7,7 +7,8 @@ interface Message {
   time: string;
 }
 
-interface Freelancer {
+interface Contacts {
+  _id:string;
   firstname: string;
   profileImage: string;
   tagline: string;
@@ -15,14 +16,15 @@ interface Freelancer {
 }
 
 interface ChatAreaProps {
-  freelancer: Freelancer;
+  contacts: Contacts;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   userId: string;
   socket: Socket;
+  role: string;
 }
 
-const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socket }) => {
+const ChatArea: React.FC<ChatAreaProps> = ({ contacts, messages, userId, socket, role }) => {
   const [newMessage, setNewMessage] = React.useState('');
 
   const sendMessage = () => {
@@ -32,7 +34,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
         text: newMessage,
         time: new Date().toLocaleString(),
       };
-      socket.emit('send_message', { ...messageData, senderId: userId, receiverId: freelancer.userId });
+      socket.emit('send_message', { ...messageData, senderId: userId, receiverId: contacts._id,role });
       setNewMessage('');
     }
   };
@@ -40,15 +42,15 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
   return (
     <div className="w-full lg:w-2/3 h-full bg-white flex flex-col">
       <div className="flex justify-between items-center p-4 border-b h-20">
-        <h2 className="text-lg font-medium">{freelancer.firstname}</h2>
+        <h2 className="text-lg font-medium">{contacts.firstname}</h2>
         <button className="text-sm text-gray-500 hover:text-red-500">Delete Conversation</button>
       </div>
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.type === 'sent' ? 'justify-end' : 'justify-start'}`}>
+          <div key={idx} className={`flex ${msg.type === 'received' ? 'justify-start' : 'justify-end'}`}>
             <div
               className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.type === 'sent' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
+                msg.type === 'received' ?'bg-gray-100 text-gray-800' :'bg-blue-500 text-white' 
               }`}
             >
               {msg.text}

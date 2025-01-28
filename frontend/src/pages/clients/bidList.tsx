@@ -34,6 +34,7 @@ const BiddersList: React.FC = () => {
     const [freelancerProfiles, setFreelancerProfiles] = useState<BidderProfile[]>([]);
     const [messageText, setMessageText] = React.useState("");
     const userId = localStorage.getItem('userId')
+    const role = localStorage.getItem('role')
 
     useEffect(() => {
         const fetchBids = async () => {
@@ -66,7 +67,7 @@ const BiddersList: React.FC = () => {
 
 
       const sendMessage = async(bidderId: string) => {
-       await axiosConfig.post('/users/set-contacts',{userId,receiverId:bidderId})
+       await axiosConfig.post('/users/set-contacts',{senderId:userId,receiverId:bidderId,role})
       navigate(`/messages`);
 };
 

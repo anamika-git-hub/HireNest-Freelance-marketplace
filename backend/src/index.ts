@@ -11,6 +11,8 @@ import { Server } from 'socket.io';
 import http from 'http';
 import { MessageModel } from './infrastructure/models/MessageModel';
 import { ChatModel } from './infrastructure/models/ChatModel';
+import { FreelancerProfileRepository } from './infrastructure/repositories/FreelancerProfileRepository';
+import { AccountDetailRepository } from './infrastructure/repositories/accountDetail';
 import { IMessage } from './entities/Message';
 
 const port = Config.PORT ;
@@ -43,37 +45,48 @@ app.use(catchError);
 const socketConnection = new Map<string, string>();
 
 
-io.on('connection',(socket) => {
+io.on('connection',async(socket) => {
   const userId = socket.handshake.query.userId as string;
   const role = socket.handshake.query.role as string;
-    console.log(`User connected with ID: ${userId}`);
-  socketConnection.set(userId, socket.id);
-    socket.on('get_messages', async ({ senderId, receiverId }) => {
+    let uniqueId: string | null = null;
+    if(role === 'freelancer'){
+      const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(userId);
+      uniqueId = freelancerProfile ? freelancerProfile._id.toString() : null;
+    }else if( role === 'client'){
+      const accountDetail = await AccountDetailRepository.findUserDetailsById(userId);
+      uniqueId = accountDetail ? accountDetail._id.toString() : null;
+    }
+    if (uniqueId) {
+      socketConnection.set(uniqueId, socket.id);
+    }
+
+    socket.on('get_messages', async ({ senderId, receiverId, role }) => {
         try {
+          if(role === 'freelancer'){
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(senderId);
+            senderId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          }else if( role === 'client'){
+            const accountDetail = await AccountDetailRepository.findUserDetailsById(senderId);
+            senderId = accountDetail ? accountDetail._id.toString() : null;
+          }
           const chat = await ChatModel.findOne({
             participants: { $all: [senderId, receiverId] },
           }).populate({
             path: 'messages',
             model: 'Message',
-            populate: {
-              path: 'senderId receiverId',
-              model: 'User',
-            },
           });
     
           if (!chat) {
             socket.emit('message_history', []);
             return;
           }
-    
           const messages =  (chat.messages as unknown as IMessage[]).map((msg)  => ({
-            senderId: msg.senderId._id,
-            receiverId: msg.receiverId._id,
+            senderId: msg.senderId,
+            receiverId: msg.receiverId,
             text: msg.text,
             type: msg.type,
             time: msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown Time',
           }));
-    
           socket.emit('message_history', messages);
         } catch (error) {
           console.error('Error fetching messages:', error);
@@ -82,33 +95,50 @@ io.on('connection',(socket) => {
 
       socket.on('send_message', async (data) => {
         try {
-          const { senderId, receiverId, text, type, time } = data;
-          console.log('dd',data)
+          const { senderId, receiverId,role, text, type, time } = data;
+        
+          let adjustedSenderId: string | null = senderId;
+          let senderRef,receiverRef
+          if (role === 'freelancer') {
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(senderId);
+            adjustedSenderId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          } else if (role === 'client') {
+            const accountDetail = await AccountDetailRepository.findUserDetailsById(senderId);
+            adjustedSenderId = accountDetail ? accountDetail._id.toString() : null;
+          }
+      
+          if (!adjustedSenderId) {
+            console.error('Sender or receiver ID could not be determined.');
+            return;
+          }
+
           let socketId = socketConnection.get(receiverId) as string
-          
-          let receiveId = socketConnection.get(senderId) as string
-          console.log('rrss',socketId,receiveId)
+          let receiveId = socketConnection.get(adjustedSenderId) as string
+
           let chat = await ChatModel.findOne({
-            participants: { $all: [senderId, receiverId] },
+            participants: { $all: [adjustedSenderId, receiverId] },
           });
     
           if (!chat) {
             chat = new ChatModel({
-              participants: [senderId, receiverId],
+              participants: [adjustedSenderId, receiverId],
               messages: [],
             });
             await chat.save();
           }
           const message = new MessageModel({
-            senderId,
+            userId:senderId,
+            senderId:adjustedSenderId,
             receiverId,
+            senderRef:senderRef,
+            receiverRef:receiverRef,
             text,
             type,
             time,
             isRead: false, 
           });
           await message.save();
-    
+     
           chat.messages.push(message._id);
           await chat.save();
           io.to(socketId).emit('receive_message', message);
@@ -118,30 +148,6 @@ io.on('connection',(socket) => {
           console.error('Error sending message:', error);
         }
       });
-
-      socket.on('create_chat_room', async (data) => {
-        try {
-          const { senderId, receiverId } = data;
-          let chat = await ChatModel.findOne({
-            participants: { $all: [senderId, receiverId] },
-          });
-      
-          if (!chat) {
-            chat = new ChatModel({
-              participants: [senderId, receiverId],
-              messages: [], 
-            });
-            await chat.save();
-          }
-          
-          io.to(senderId).emit('chat_created', chat);
-          io.to(receiverId).emit('chat_created', chat);
-      
-        } catch (err) {
-          console.error("Error creating chat room: ", err);
-        }
-      });
-      
 
     socket.on('disconnect',() => {
         console.log('A user disconnected:', socket.id);        

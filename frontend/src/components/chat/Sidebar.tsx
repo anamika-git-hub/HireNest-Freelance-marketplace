@@ -1,44 +1,44 @@
 import React from 'react';
 
-interface Freelancer {
-  name:string;
+interface Contacts {
+  _id:string;
+  name: string;
   firstname: string;
-  lastname:string;
+  lastname: string;
   profileImage: string;
   tagline: string;
   userId: string;
 }
 
 interface SidebarProps {
-  freelancers: Freelancer[];
-  onSelectFreelancer: (freelancer: Freelancer) => void;
+  contacts: Contacts[];
+  onSelectcontact: (contacts: Contacts) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ freelancers, onSelectFreelancer }) => {
+
+const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectcontact }) => {
   return (
-    <div className="w-1/3 bg-white h-full border-r">
-      <div className="p-4 border-b">
+    <div className="w-full lg:w-1/3 bg-white h-full border-r">
+      <div className="p-4 border-b h-20">
         <input
           type="text"
           placeholder="Search"
-          className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-10 px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       <ul>
-        {freelancers.map((freelancer, idx) => (
+        {contacts.map((contact, idx) => (
           <li
             key={idx}
             className="flex items-center p-4 hover:bg-gray-200 cursor-pointer"
-            onClick={() => onSelectFreelancer(freelancer)}
+            onClick={() => onSelectcontact(contact)}
           >
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-gray-300">
-                <img className="w-10 h-10 rounded-full bg-gray-300" src={freelancer.profileImage} alt="" />
-              </div>
+            <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
+              <img className="w-full h-full" src={contact.profileImage} alt="" />
             </div>
-            <div className="ml-4 flex-1">
-              <h4 className="font-medium text-gray-800">{freelancer.firstname} {freelancer.lastname} {freelancer.name}</h4>
-              <p className="text-sm text-gray-500 truncate">{freelancer.tagline}</p>
+            <div className="ml-4">
+              <h4 className="font-medium text-gray-800">{contact.firstname} {contact.lastname} {contact.name}  </h4>
+              <p className="text-sm text-gray-500 truncate">{contact.tagline}</p>
             </div>
           </li>
         ))}
