@@ -45,6 +45,7 @@ const socketConnection = new Map<string, string>();
 
 io.on('connection',(socket) => {
   const userId = socket.handshake.query.userId as string;
+  const role = socket.handshake.query.role as string;
     console.log(`User connected with ID: ${userId}`);
   socketConnection.set(userId, socket.id);
     socket.on('get_messages', async ({ senderId, receiverId }) => {
@@ -82,9 +83,11 @@ io.on('connection',(socket) => {
       socket.on('send_message', async (data) => {
         try {
           const { senderId, receiverId, text, type, time } = data;
+          console.log('dd',data)
           let socketId = socketConnection.get(receiverId) as string
-       
+          
           let receiveId = socketConnection.get(senderId) as string
+          console.log('rrss',socketId,receiveId)
           let chat = await ChatModel.findOne({
             participants: { $all: [senderId, receiverId] },
           });
@@ -104,12 +107,10 @@ io.on('connection',(socket) => {
             time,
             isRead: false, 
           });
-    
           await message.save();
     
           chat.messages.push(message._id);
           await chat.save();
-    
           io.to(socketId).emit('receive_message', message);
           io.to(receiveId).emit('receive_message', message);
     

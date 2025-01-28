@@ -4,11 +4,11 @@ import ChatArea from './chatArea';
 import { io } from 'socket.io-client';
 import axiosConfig from '../../service/axios';
 
-
 const userId = localStorage.getItem('userId') || '';
+const role = localStorage.getItem('role') || '';
 
 const socket = io('http://localhost:5000', {
-  query: { userId }
+  query: { userId,role },
 });
 
 interface Freelancer {
@@ -32,8 +32,6 @@ const Chat: React.FC = () => {
   const [selectedFreelancer, setSelectedFreelancer] = useState<Freelancer | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const role = localStorage.getItem('role') || '';
-
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,7 +65,9 @@ const Chat: React.FC = () => {
   }, [role,userId]);
 
   const initializeChat = (freelancerId: string) => {
-    socket.emit('get_messages', { senderId: userId, receiverId: freelancerId });
+    socket.off('message_history');
+    socket.off('receive_message');
+    socket.emit('get_messages', { senderId: userId, receiverId: freelancerId ,role});
 
     socket.on('message_history', (history: Message[]) => {
 
@@ -101,19 +101,17 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-100 p-6 pt-24">
-      <div className="bg-white h-full rounded-lg shadow-md p-4 flex">
-        <Sidebar freelancers={freelancers} onSelectFreelancer={handleFreelancerSelect} />
-        {selectedFreelancer && (
-          <ChatArea
-            freelancer={selectedFreelancer}
-            messages={messages}
-            setMessages={setMessages}
-            userId={userId}
-            socket={socket}
-          />
-        )}
-      </div>
+    <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
+      <Sidebar freelancers={freelancers} onSelectFreelancer={handleFreelancerSelect} />
+      {selectedFreelancer && (
+        <ChatArea
+          freelancer={selectedFreelancer}
+          messages={messages}
+          setMessages={setMessages}
+          userId={userId}
+          socket={socket}
+        />
+      )}
     </div>
   );
 };

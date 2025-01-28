@@ -23,7 +23,6 @@ interface ChatAreaProps {
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socket }) => {
- 
   const [newMessage, setNewMessage] = React.useState('');
 
   const sendMessage = () => {
@@ -39,8 +38,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
   };
 
   return (
-    <div className="w-2/3 h-full bg-white flex flex-col">
-      <div className="flex justify-between items-center p-6 border-b">
+    <div className="w-full lg:w-2/3 h-full bg-white flex flex-col">
+      <div className="flex justify-between items-center p-4 border-b h-20">
         <h2 className="text-lg font-medium">{freelancer.firstname}</h2>
         <button className="text-sm text-gray-500 hover:text-red-500">Delete Conversation</button>
       </div>
@@ -57,16 +56,15 @@ const ChatArea: React.FC<ChatAreaProps> = ({ freelancer, messages, userId, socke
           </div>
         ))}
       </div>
-
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex items-center space-x-2">
         <input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 w-5/6 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
-        <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md" onClick={sendMessage}>
+        <button className="px-4 py-2 bg-blue-500 text-white rounded-md" onClick={sendMessage}>
           Send
         </button>
       </div>
