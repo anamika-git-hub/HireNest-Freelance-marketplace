@@ -3,6 +3,7 @@ import express from 'express';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { BidController} from '../controllers/bidController';
 import { TaskController } from '../controllers/taskController';
+import { RequestController } from '../controllers/requestController';
 import { uploadFreelancerImages } from '../middlewares/uploadFileImages';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { isFreelancer } from '../middlewares/auth';
@@ -15,7 +16,7 @@ router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfi
 router.put("/update-freelancer-profile", uploadFreelancerImages,isFreelancer, FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",isFreelancer,TaskController.getTasks);
-
+router.get("/freelancer-request",isFreelancer,RequestController.getRequestByFreelancerId)
 
 router.post("/create-bid",isFreelancer,  BidController.createBid);
 router.put("/update-bid/:id", isFreelancer, BidController.updateBid);

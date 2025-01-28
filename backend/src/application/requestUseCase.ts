@@ -54,5 +54,10 @@ export const RequestUseCase = {
     },
     getRequestByUserId: async (id:string) => {
         return await RequestRepository.getRequestByUserId(id);
-    }
+    },
+    getRequestByFreelancerId: async (id:string) => {
+        let freelancerDetail = await FreelancerProfileRepository.getFreelancerByUserId(id)
+        let freelancerId = freelancerDetail._id.toString() 
+        return await RequestRepository.getRequestByFreelancerId(freelancerId);
+    },
 };

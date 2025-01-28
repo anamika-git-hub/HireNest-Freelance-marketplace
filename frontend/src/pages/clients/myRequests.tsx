@@ -20,7 +20,7 @@ interface Request {
     createdAt: Date;
 }
 
-const RequestList: React.FC = () => {
+const MyRequestList: React.FC = () => {
     const [request, setRequest] = useState<Request[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -262,4 +262,4 @@ const RequestList: React.FC = () => {
   );
 };
 
-export default RequestList;
+export default MyRequestList;

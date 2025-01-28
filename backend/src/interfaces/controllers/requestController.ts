@@ -55,5 +55,14 @@ export const RequestController = {
         } catch (error) {
             
         }
-    }
+    },
+    getRequestByFreelancerId:  async (req:CustomRequest, res: Res, next: Next) => {
+        try {
+            const userId = req.user?.userId || '';
+            const requests = await RequestUseCase.getRequestByFreelancerId(userId);
+            res.status(200).json({ message: "Requests fetched successfully", requests})
+        } catch (error) {
+            
+        }
+    },
 };

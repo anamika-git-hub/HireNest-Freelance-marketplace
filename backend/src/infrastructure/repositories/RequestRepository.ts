@@ -67,5 +67,18 @@ export const RequestRepository = {
                 throw new Error(`Failed to get request by Id due to an unknown error`);
             } 
         }
-    }
+    },
+    getRequestByFreelancerId: async (id: string) => {
+        try {
+            const request = await RequestModel.find({freelancerId:id})
+            if (!request) throw new Error("Request not found");
+            return request;
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get request by userId: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get request by userId due to an unknown error`);
+            } 
+        }
+    },
 };
