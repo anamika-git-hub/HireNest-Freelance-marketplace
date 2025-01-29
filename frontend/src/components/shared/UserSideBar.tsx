@@ -11,6 +11,7 @@ import {
   FaUser,
   FaGavel,
   FaBars,
+  FaChevronDown
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import Header from "./Header";
@@ -24,6 +25,8 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
 
   const handleLogout = () => {
     localStorage.removeItem("role");
@@ -49,21 +52,44 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (userRole === "freelancer") {
       return (
         <>
-          <NavLink
-            to="/freelancer/bids"
+        <NavLink
+          to="/freelancer/bids"
+          className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+        >
+          <FaGavel className="mr-3" />
+          <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Bids</span>
+        </NavLink>
+      
+        {/* Dropdown Menu */}
+        <div className="relative">
+          <button
             className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
-          >
-            <FaGavel className="mr-3" />
-            <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Bids</span>
-          </NavLink>
-          <NavLink
-            to="/freelancer/my-profile"
-            className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+            onClick={() => setDropdownOpen(!dropdownOpen)} // Toggle dropdown
           >
             <FaUser className="mr-3" />
-            <span className={`${!sidebarOpen && "hidden"} lg:inline`}>My Profile</span>
-          </NavLink>
-        </>
+            <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Profile & Leads</span>
+            <FaChevronDown className="ml-2" />
+          </button>
+      
+          {dropdownOpen && (
+            <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg z-10">
+              <NavLink
+                to="/freelancer/my-profile"
+                className="block px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+              >
+                My Profile
+              </NavLink>
+              <NavLink
+                to="/freelancer/requests"
+                className="block px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+              >
+                Requests
+              </NavLink>
+            </div>
+          )}
+        </div>
+      </>
+      
       );
     } else if (userRole === "client") {
       return (

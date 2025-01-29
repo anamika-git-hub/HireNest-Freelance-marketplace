@@ -45,7 +45,8 @@ router.delete('/bookmarks/:id',isUser,BookMarkController.deleteBookmarks);
 router.get('/get-receivers',isUser,MessageController.getReceiver);
 router.post('/set-contacts',isUser,MessageController.setContacts);
 
-router.get('/notifications/:type',isUser,UserController.getNotification);
+router.get('/notifications',isUser,UserController.getNotification);
+router.put('/mark-as-read/:id',isUser,UserController.notificationRead)
 
 
 export default router;

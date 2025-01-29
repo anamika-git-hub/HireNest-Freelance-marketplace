@@ -102,12 +102,23 @@ export const UserController = {
         try {
             
             const userId = req.user?.userId || '';
-            const {type} = req.params;
-            const result = await userUseCase.getNotification(userId,type)
+            const result = await userUseCase.getNotification(userId)
             res.status(200).json(result)
         } catch (error) {
           next(error)
         }
-    }
+    },
+
+    notificationRead:async (req: Req, res: Res, next: Next) => {
+        try {
+            
+            const { id } = req.params;
+            console.log(id)
+            const result = await userUseCase.notificationRead(id)
+            res.status(200).json(result)
+        } catch (error) {
+          next(error)
+        }
+    },
    
 }

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logoutUser } from '../../store/userSlice';
 import axiosConfig from '../../service/axios';
-import {FaSignOutAlt,FaCog} from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
+import { MdDashboard,MdWork,MdGavel,MdSync } from "react-icons/md";
+import { io } from 'socket.io-client';
+import { Link } from 'react-router-dom';
 
 interface UserDetail {
   profileImage: string;
@@ -12,15 +14,30 @@ interface UserDetail {
   lastname: string;
 }
 
+interface Notification {
+  types: string;
+  isRead: boolean;
+}
+const userId = localStorage.getItem('userId') || '';
+const userRole = localStorage.getItem('role') || 'guest';
+
+const notificationSocket = io('http://localhost:5000/notifications', {
+  query: { userId },
+});
+
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
+ 
   const [userDetail,setUserDetail] = useState<UserDetail | null>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const notificationMenuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userRole = localStorage.getItem('role') || 'guest';
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -34,7 +51,41 @@ const Header: React.FC = () => {
         console.error("Error fetching user details:", error);
       }
     };
+
     fetchUserDetails();
+  }, []);
+
+  useEffect(()=>{
+    const fetchNotifications = async () => {
+      if (userId) {
+        try {
+          const response = await axiosConfig.get(`/users/notifications`);
+
+           if (userRole === 'client') {
+          const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'bid' && !notif.isRead);
+            setNotifications(filteredNotifications);
+          } else if(userRole === 'freelancer') {
+            const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'request' && !notif.isRead);
+            setNotifications(filteredNotifications); 
+          }
+        } catch (error) {
+          console.error("Error fetching notifications:", error);
+        }
+      }
+    };
+    
+    fetchNotifications();
+  },[userId,userRole])
+
+  useEffect(() => {
+    notificationSocket.on('new_notification', (notification) => {
+      console.log('nooo',notification)
+      setNotifications((prev) => [notification, ...prev]);
+    });
+
+    return () => {
+      notificationSocket.off('new_notification');
+    };
   }, []);
 
   const getNavLinks = () => {
@@ -77,7 +128,12 @@ const Header: React.FC = () => {
         profileMenuRef.current &&
         !profileMenuRef.current.contains(event.target as Node)
       ) {
-        setIsProfileMenuOpen(false); 
+        setIsProfileMenuOpen(false);
+      } else if (
+        notificationMenuRef.current && 
+        !notificationMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
       }
     };
 
@@ -93,8 +149,17 @@ const Header: React.FC = () => {
     navigate('/login');
   };
 
+  const handleNotificationClick = async(notificationId:string,index: number) => {
+    await axiosConfig.put(`/users/mark-as-read/${notificationId}`);
+    setNotifications((prevNotifications) => {
+      const updatedNotifications = prevNotifications.filter((_, i) => i !== index);
+      navigate('/notification')
+      return updatedNotifications;
+    });
+  };
+
   return (
-    <header className="bg-white text-white w-10/12 shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-full px-6">
+    <header className="bg-white text-white w-10/12 shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-full px-6 select-none">
       <div className="flex justify-between items-center h-16">
         <div className="text-2xl font-bold flex items-center text-blue-600">
           <span className="mr-2">🔷</span> HireNest
@@ -124,7 +189,61 @@ const Header: React.FC = () => {
         ) : (
           <div className="flex items-center space-x-4">
             
-            <button className="relative hover:text-blue-200">🔔</button>
+            <button
+        onClick={() => setShowDropdown(!showDropdown)}
+        className="relative text-gray-700 hover:text-blue-600"
+      >
+        <FaBell className="text-xl text-blue-500" />
+        {notifications.length > 0 && (
+          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {notifications.length}
+          </span>
+        )}
+      </button>
+              {/* Notification Dropdown */}
+              {showDropdown && (
+  <div className="absolute right-0 mt-64 w-80 bg-white shadow-lg rounded-lg p-3 border border-gray-200 max-h-96 overflow-y-auto" ref={notificationMenuRef}>
+    <h3 className="text-gray-700 font-semibold mb-2">Notifications</h3>
+
+    <div className="flex flex-col-reverse">
+      {notifications.length > 0 ? (
+        notifications.map((notif, index) => (
+          <div key={index} onClick={() => handleNotificationClick(notif._id,index)} className="p-3 flex items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+            {notif.types === "request" && (
+              <div className="flex">
+                <MdWork className="text-gray-500 text-xl" />
+                <p className="ml-3 text-sm text-gray-700">
+                  You have a new request from
+                  <a href="/freelancer/requests" className="text-blue-500 hover:underline">
+                    {' '} {notif.senderName}
+                  </a>
+                </p>
+              </div>
+            )}
+            {notif.types === "bid" && (
+              <div className="flex">
+                <MdGavel className="text-gray-500 text-xl" />
+                <p className="ml-3 text-sm text-gray-700">
+                  <a href={notif.bidderProfileUrl} className="text-blue-500 hover:underline">
+                    {notif.senderName}
+                  </a>{' '} placed a bid on your{' '}
+                  <a href={notif.projectUrl} className="text-blue-500 hover:underline">
+                    {notif.projectName}
+                  </a>{' '} project.
+                </p>
+              </div>
+            )}
+            {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />}
+            <p className="text-xs text-gray-500">{new Date(notif.time).toLocaleString()}</p>
+          </div>
+        ))
+      ) : (
+        <p className="text-center text-gray-500 py-2">No notifications</p>
+      )}
+    </div>
+  </div>
+)}
+
             <button className="relative hover:text-blue-200">✉️</button>
             <div className="relative" ref={profileMenuRef}>
   <img

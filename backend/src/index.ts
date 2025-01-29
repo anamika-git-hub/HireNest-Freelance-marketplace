@@ -42,8 +42,37 @@ app.use('/api/freelancers',freelancerRouter);
 app.use('/api/client/',clientRouter);
 
 app.use(catchError);
-const socketConnection = new Map<string, string>();
 
+//---------------Notification ----------------//
+const notificationIo = io.of('/notifications'); 
+
+const notificationConnections = new Map<string, string>();
+
+notificationIo.on('connection', async (socket) => {
+  const userId = socket.handshake.query.userId as string;
+  if (userId) {
+    notificationConnections.set(userId, socket.id);
+    console.log('connected')
+  }
+
+  socket.on('disconnect', () => {
+    notificationConnections.delete(userId);
+    console.log('disconnected')
+  });
+});
+
+// Function to send notifications
+export const sendNotification = (userId: string, notification: any) => {
+  const socketId = notificationConnections.get(userId);
+  if (socketId) {
+    notificationIo.to(socketId).emit('new_notification', notification);
+  }
+};
+
+
+//------------------Chat----------------///
+
+const socketConnection = new Map<string, string>();
 
 io.on('connection',async(socket) => {
   const userId = socket.handshake.query.userId as string;

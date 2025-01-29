@@ -4,6 +4,7 @@ import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
 import { IBidSubmissionForm } from "../entities/Bids";
+import { sendNotification } from "..";
 
 export const BidUseCase = {
     createBid: async (data: IBidSubmissionForm) => {
@@ -24,6 +25,19 @@ export const BidUseCase = {
                             projectUrl:`/client/bidders-list/${taskId}`
                         }
              await NotificationRepository.createNotification(notification);
+
+             sendNotification(user.clientId.toString(), {
+                senderId:bidderId,
+                userId: user.clientId, 
+                senderName: sender.name, 
+                projectName: user.projectName,
+                text: `${sender.name} placed a bid on your ${user.projectName} project`,
+                isRead: false,
+                createdAt: new Date(),
+                types:'bid',
+                bidderProfileUrl:`/client/freelancer-detail/${sender._id}`,
+                projectUrl:`/client/bidders-list/${taskId}`
+            });
             return await BidRepository.createBid(data);
 
         } catch (error) {

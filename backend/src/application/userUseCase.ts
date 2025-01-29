@@ -124,10 +124,15 @@ export const userUseCase = {
           }
           return {updatedUser}
     },
-    getNotification: async(userId:string, type:string) => {
-        const result = await NotificationRepository.getNotification(userId,type);
+    getNotification: async(userId:string) => {
+        const result = await NotificationRepository.getNotification(userId);
         return result
-    }
+    },
+    notificationRead: async(notificationId:string) => {
+        const result = await NotificationRepository.notificationRead(notificationId);
+        return result
+    },
+    
 
    
 }
