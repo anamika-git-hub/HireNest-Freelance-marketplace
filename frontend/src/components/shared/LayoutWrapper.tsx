@@ -3,9 +3,10 @@ import Header from "./Header";
 import Footer from "./Footer";
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  let userRole = localStorage.getItem('role') || 'guest'
   return (
     <>
-      <Header />
+      <Header userRole={userRole}/>
       {children}
       <Footer />
     </>

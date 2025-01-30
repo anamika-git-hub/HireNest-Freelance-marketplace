@@ -70,7 +70,7 @@ const MyAccount: React.FC = () => {
       return false;
     }
   };
-  
+ 
 
 // Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
@@ -81,10 +81,14 @@ const updateAccountType = async (newRole: string) => {
     if (response.status === 200) {
       localStorage.setItem("accessToken", response.data.token);
       localStorage.setItem("refreshToken", response.data.refreshToken);
-      localStorage.setItem('role', newRole);
-      setUserRole(newRole)
+       localStorage.setItem("role", newRole);
+  setUserRole(newRole); 
+
+  window.dispatchEvent(new Event("roleChange")); 
+
+  toast.success(`Role changed to ${newRole}`);
       console.log('Account type updated successfully');
-      window.location.reload();
+      // window.location.reload();
 
     } else {
       console.error('Failed to update account type');
@@ -270,7 +274,7 @@ if (values.newPassword) {
                       }}
 
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "freelancer"
+                        userRole === "freelancer"
                           ? "bg-green-500 text-white"
                           : "bg-gray-200 text-gray-700"
                       }`}
@@ -285,7 +289,7 @@ if (values.newPassword) {
                         await updateAccountType(newRole);
                       }}
                       className={`px-4 py-2 text-sm rounded-md focus:outline-none ${
-                        role === "client"
+                        userRole === "client"
                           ? "bg-green-500 text-white"
                           : "bg-gray-200 text-gray-700"
                       }`}

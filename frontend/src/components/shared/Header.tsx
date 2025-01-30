@@ -26,7 +26,7 @@ const notificationSocket = io('http://localhost:5000/notifications', {
 });
 
 
-const Header: React.FC = () => {
+const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
  
@@ -205,10 +205,10 @@ const Header: React.FC = () => {
   <div className="absolute right-0 mt-64 w-80 bg-white shadow-lg rounded-lg p-3 border border-gray-200 max-h-96 overflow-y-auto" ref={notificationMenuRef}>
     <h3 className="text-gray-700 font-semibold mb-2">Notifications</h3>
 
-    <div className="flex flex-col-reverse">
+    <div className="">
       {notifications.length > 0 ? (
         notifications.map((notif, index) => (
-          <div key={index} onClick={() => handleNotificationClick(notif._id,index)} className="p-3 flex items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+          <div key={index} onClick={() => handleNotificationClick(notif._id,index)} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
             {notif.types === "request" && (
               <div className="flex">
                 <MdWork className="text-gray-500 text-xl" />
@@ -234,7 +234,7 @@ const Header: React.FC = () => {
               </div>
             )}
             {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />}
-            <p className="text-xs text-gray-500">{new Date(notif.time).toLocaleString()}</p>
+            <p className="text-xs pl-3 pt-1 text-gray-500">{new Date(notif.createdAt).toLocaleString()}</p>
           </div>
         ))
       ) : (

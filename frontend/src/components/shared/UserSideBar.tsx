@@ -21,12 +21,25 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/userSlice";
 
 const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const userRole = localStorage.getItem("role");
+  const [userRole, setUserRole] = useState(localStorage.getItem("role") || "client");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUserRole(localStorage.getItem("role") || "client"); 
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("roleChange", handleStorageChange); 
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("roleChange", handleStorageChange);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("role");
@@ -38,7 +51,6 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     setSidebarOpen((prev) => !prev);
   };
 
-  // Ensure the sidebar responds to screen size changes
   useEffect(() => {
     const handleResize = () => {
       setSidebarOpen(window.innerWidth >= 1024);
@@ -64,7 +76,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="relative">
           <button
             className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
-            onClick={() => setDropdownOpen(!dropdownOpen)} // Toggle dropdown
+            onClick={() => setDropdownOpen(!dropdownOpen)} 
           >
             <FaUser className="mr-3" />
             <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Profile & Leads</span>
@@ -197,7 +209,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Main Content */}
       <div className={`flex-1`} >
-        <Header />
+        <Header userRole={userRole} />
         {children}
         </div>
         </div>

@@ -5,7 +5,7 @@ export const NotificationRepository = {
     createNotification: async (data:INotification) => new NotificationModel(data).save(),
 
     getNotification: async (userId:string) => {
-        return await NotificationModel.find({userId})
+        return await NotificationModel.find({userId}).sort({createdAt:-1})
     },
 
     deleteNotification: async (id: string) => {
