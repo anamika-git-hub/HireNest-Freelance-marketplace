@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect } from "react";
+import { UserRoleProvider,useUserRole } from "../../context/userRoleContext";
 import { NavLink } from "react-router-dom";
 import {
   FaEnvelope,
@@ -19,6 +20,7 @@ import Footer from "./Footer";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/userSlice";
+
 
 const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || "client");
@@ -128,7 +130,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const renderBookmarksLink = () => {
     return userRole === "freelancer" ? (
       <NavLink
-        to="/task-bookmarks"
+        to="/freelancer/task-bookmarks"
         className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
       >
         <FaBookmark className="mr-3" />
@@ -136,7 +138,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </NavLink>
     ) : (
       <NavLink
-        to="/freelancer-bookmarks"
+        to="/client/freelancer-bookmarks"
         className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
       >
         <FaBookmark className="mr-3" />
@@ -209,7 +211,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Main Content */}
       <div className={`flex-1`} >
-        <Header userRole={userRole} />
+        <Header/>
         {children}
         </div>
         </div>

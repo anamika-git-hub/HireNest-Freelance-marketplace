@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
     }
     const fetchNotifications = async() => {
         if(userId){
-            const response = await axiosConfig.get(`/users/notifications/${type}`)
+            const response = await axiosConfig.get(`/users/notifications`)
            
             setNotifications(response.data);
             setLoading(false)

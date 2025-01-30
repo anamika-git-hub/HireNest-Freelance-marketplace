@@ -1,14 +1,16 @@
 import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { UserRoleProvider } from "../../context/userRoleContext";
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  let userRole = localStorage.getItem('role') || 'guest'
   return (
     <>
-      <Header userRole={userRole}/>
+    <UserRoleProvider showSidebar={false}>
+      <Header />
       {children}
       <Footer />
+      </UserRoleProvider>
     </>
   );
 };
