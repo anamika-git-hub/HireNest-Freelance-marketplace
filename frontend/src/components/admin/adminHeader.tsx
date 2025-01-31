@@ -36,6 +36,7 @@ const AdminHeader: React.FC = () => {
         <button className="text-gray-600 text-xl">
           <i className="fas fa-bars"></i>
         </button>
+        
         <h1 className="text-lg font-semibold text-gray-700">HireNest</h1>
       </div>
       <div className="flex items-center space-x-4">

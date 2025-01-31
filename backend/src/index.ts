@@ -87,6 +87,7 @@ io.on('connection',async(socket) => {
     }
     if (uniqueId) {
       socketConnection.set(uniqueId, socket.id);
+      console.log(`User connected: ${userId} with socket ID: ${socket.id}`);
     }
 
     socket.on('get_messages', async ({ senderId, receiverId, role }) => {
