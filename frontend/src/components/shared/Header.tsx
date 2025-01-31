@@ -7,6 +7,7 @@ import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
 import { MdDashboard,MdWork,MdGavel,MdSync } from "react-icons/md";
 import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
+import { useUserRole } from '../../context/userRoleContext';
 
 interface UserDetail {
   profileImage: string;
@@ -19,16 +20,18 @@ interface Notification {
   isRead: boolean;
 }
 const userId = localStorage.getItem('userId') || '';
-const userRole = localStorage.getItem('role') || 'guest';
+const role = localStorage.getItem('role') || 'guest';
 
 const notificationSocket = io('http://localhost:5000/notifications', {
-  query: { userId },
+  query: { userId ,role},
 });
 
 
-const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
+const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [role,setRole] = useState(localStorage.getItem('role') || 'guest')
+  const {userRole} = useUserRole(); 
  
   const [userDetail,setUserDetail] = useState<UserDetail | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -55,6 +58,10 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
     fetchUserDetails();
   }, []);
 
+  useEffect(() => {
+    console.log("User Role Changed:", userRole); // Debugging purpose
+  }, [userRole]);
+
   useEffect(()=>{
     const fetchNotifications = async () => {
       if (userId) {
@@ -75,11 +82,11 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
     };
     
     fetchNotifications();
-  },[userId,userRole])
+  },[userRole])
+  
 
   useEffect(() => {
     notificationSocket.on('new_notification', (notification) => {
-      console.log('nooo',notification)
       setNotifications((prev) => [notification, ...prev]);
     });
 
@@ -92,30 +99,31 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
     if (userRole === "freelancer") {
       return (
         <>
-          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
-          <a href="/freelancer/task-list" className="text-gray-700 hover:text-blue-600">Find Work</a>
+    <Link to="/" className="text-gray-700 hover:text-blue-800">Home</Link>
+    <Link to="/about" className="text-gray-700 hover:text-blue-800">About</Link>
+    <Link to="/contact" className="text-gray-700 hover:text-blue-800">Contact</Link>
+    <Link to="/freelancer/task-list" className="text-gray-700 hover:text-blue-800">Find Work</Link>
+
         </>
       );
     } else if (userRole === "client") {
       return (
         <>
-          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
-          <a href="/client/task-form" className="text-gray-700 hover:text-blue-600">Post Task</a>
-          <a href="/client/freelancer-list" className="text-gray-700 hover:text-blue-600">Find Talent</a>
+          <Link to="/" className="text-gray-700 hover:text-blue-800">Home</Link>
+          <Link to="/about" className="text-gray-700 hover:text-blue-800">About</Link>
+          <Link to="/contact" className="text-gray-700 hover:text-blue-800">Contact</Link>
+          <Link to="/client/task-form" className="text-gray-700 hover:text-blue-800">Post Task</Link>
+          <Link to="/client/freelancer-list" className="text-gray-700 hover:text-blue-800">Find Talent</Link>
         </>
       );
     } else {
       return (
         <>
-          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
-          <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
-          <a href="/client/freelancer-list" className="text-gray-700 hover:text-blue-600">Find Talent</a>
-          <a href="/freelancer/task-list" className="text-gray-700 hover:text-blue-600">Find Work</a>
+          <Link to="/" className="text-gray-700 hover:text-blue-800">Home</Link>
+          <Link to="/about" className="text-gray-700 hover:text-blue-800">About</Link>
+          <Link to="/contact" className="text-gray-700 hover:text-blue-800">Contact</Link>
+          <Link to="/client/freelancer-list" className="text-gray-700 hover:text-blue-800">Find Talent</Link>
+          <Link to="/freelancer/task-list" className="text-gray-700 hover:text-blue-800">Find Work</Link>
         </>
       );
     }
@@ -146,7 +154,9 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
   const handleLogout = () => {
     localStorage.removeItem('role');
     dispatch(logoutUser())
+    setRole('guest');
     navigate('/login');
+    
   };
 
   const handleNotificationClick = async(notificationId:string,index: number) => {
@@ -161,27 +171,25 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
   return (
     <header className="bg-white text-white w-10/12 shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-full px-6 select-none">
       <div className="flex justify-between items-center h-16">
-        <div className="text-2xl font-bold flex items-center text-blue-600">
-          <span className="mr-2">🔷</span> HireNest
-        </div>
-
+          <img className='w-50 h-20 mt-1' src="../assets/HireNest.png" alt="logo" />
+        
         {/* Desktop Nav Links */}
         <nav className="hidden lg:flex space-x-6 items-center">
           {getNavLinks()}
         </nav>
 
         {/* Auth Buttons for Guest */}
-        {userRole === "guest" ? (
+        {role === "guest" ? (
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate("/login")}
-              className="hover:text-blue-200 px-4 py-2 bg-blue-600 rounded-full"
+              className="hover:text-blue-200 px-4 py-2 bg-blue-950 rounded-full"
             >
               Sign In
             </button>
             <button
               onClick={() => navigate("/register")}
-              className="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full hover:bg-gray-100"
+              className="bg-white text-blue-950 border border-blue-950 px-4 py-2 rounded-full hover:bg-gray-100"
             >
               Sign Up
             </button>
@@ -193,9 +201,9 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative text-gray-700 hover:text-blue-600"
       >
-        <FaBell className="text-xl text-blue-500" />
+        <FaBell className="text-xl text-blue-800" />
         {notifications.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute top-0 right-0 left-3 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
             {notifications.length}
           </span>
         )}
@@ -305,7 +313,7 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="lg:hidden focus:outline-none text-blue-600"
+          className="lg:hidden focus:outline-none text-blue-950"
         >
           {isMenuOpen ? "✖" : "☰"}
         </button>
@@ -316,10 +324,10 @@ const Header: React.FC<{ userRole: string }> = ({ userRole }) => {
         <div className="lg:hidden bg-white text-gray-700 shadow-md p-4 absolute rounded-lg mt-2 top-full left-1/2 transform -translate-x-1/2 w-full">
           <div className="flex flex-col space-y-2">
             {getNavLinks()}
-            {userRole === "guest" && (
+            {role === "guest" && (
               <>
-                <a href="/login" className="block py-2 text-blue-600">Sign In</a>
-                <a href="/register" className="block py-2 text-blue-600">Sign Up</a>
+                <a href="/login" className="block py-2 text-blue-950">Sign In</a>
+                <a href="/register" className="block py-2 text-blue-950">Sign Up</a>
               </>
             )}
           </div>
