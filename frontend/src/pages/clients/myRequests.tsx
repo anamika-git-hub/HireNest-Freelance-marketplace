@@ -4,6 +4,7 @@ import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface FreelancerProfile {
     _id:string;
@@ -32,6 +33,7 @@ const MyRequestList: React.FC = () => {
       email:'',
       description:''
     })
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchRequests = async () => {
@@ -57,11 +59,14 @@ const MyRequestList: React.FC = () => {
         
       }, []);
 
-      const handleDeleteRequest = async (id: string) => {
-        const confirmed = window.confirm('Are you sure you want to delete this request');
-        if (confirmed) {
+      const handleDeleteRequest = (id:string) => {
+        setConfirmDelete(id);
+      }
+
+      const confirmDeleteRequest = async () => {
+        if (confirmDelete) {
           try {
-            const response = await axiosConfig.delete(`/client/delete-request/${id}`);
+            const response = await axiosConfig.delete(`/client/delete-request/${confirmDelete}`);
             if (response.status === 200) {
               window.location.reload();
             }
@@ -257,7 +262,15 @@ const MyRequestList: React.FC = () => {
           </div>
         </div>
       )}
-
+      
+      {
+        confirmDelete && 
+        <ConfirmMessage
+        message="Are you sure you want to delete this request"
+        onConfirm={confirmDeleteRequest}
+        onCancel={() => setConfirmDelete(null)}
+        />
+      }
     </div>
   );
 };

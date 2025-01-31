@@ -4,6 +4,7 @@ import { FaUsers, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface Task {
     _id: string;
@@ -23,6 +24,7 @@ const FreelancerBookmarks: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<string | null> (null);
 
   useEffect(() => {
     const getBookmarksAndFreelancers = async () => {
@@ -51,17 +53,20 @@ const FreelancerBookmarks: React.FC = () => {
     getBookmarksAndFreelancers();
   }, []);
 
-  const handleRemove = async (id: string) => {
+  const handleRemove = (id:string)=> {
+    setConfirmRemove(id);
+  }
+
+  const confirmRemoveBookMark = async () => {
     const userId = localStorage.getItem('userId')
-    
-    const confirmed = window.confirm("Are you sure you want to remove this bookmark?");
-    if(confirmed){
+
+    if(confirmRemove){
       try {
-        await axiosConfig.delete(`/users/bookmarks/${id}`, {
+        await axiosConfig.delete(`/users/bookmarks/${confirmRemove}`, {
           data: {userId, type: "freelancer" }, 
         });
     
-        setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== id));
+        setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== confirmRemove));
     
       } catch (err) {
         console.error("Error removing bookmark:", err);
@@ -85,12 +90,14 @@ const FreelancerBookmarks: React.FC = () => {
         </div>
         <ul>
           {bookmarks.map((freelancer, index) => (
-                    <Link to={`/client/freelancer-detail/${freelancer._id}`}>
+                    
             <li
               key={index}
               className="flex justify-between items-center border-b last:border-b-0 py-4"
             >
+              
               <div className="w-3/4">
+              <Link to={`/client/freelancer-detail/${freelancer._id}`}>
                 <div className="flex items-center space-x-2">
                 <img
                     src={freelancer.profileImage || "/default-avatar.jpg"}
@@ -110,9 +117,9 @@ const FreelancerBookmarks: React.FC = () => {
                   )} */}
                 </div>
               
+                </Link>
                
               </div>
-             
               <div className="flex items-center space-x-2 mt-4">
                   <button
                   onClick={() => handleRemove(freelancer._id)}
@@ -122,10 +129,17 @@ const FreelancerBookmarks: React.FC = () => {
                   </button>
                 </div>
             </li>
-            </Link>
+           
           ))}
         </ul>
       </div>
+      {confirmRemove && (
+        <ConfirmMessage
+          message="Are you sure you want to remove this bookmark?"
+          onConfirm={confirmRemoveBookMark}
+          onCancel={()=> setConfirmRemove(null)}
+          />
+      )}
     </div>
   );
 };

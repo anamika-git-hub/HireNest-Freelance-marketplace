@@ -4,6 +4,7 @@ import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface Bid {
   _id: string;
@@ -26,6 +27,8 @@ const ActiveBids: React.FC = () => {
     deliveryTime: 0,
     timeUnit: "Days",
   });
+  
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -47,12 +50,17 @@ const ActiveBids: React.FC = () => {
     }
   }, []);
 
-  const deleteBid = async (bidId: string) => {
-    if (window.confirm("Are you sure you want to delete this bid?")) {
+
+  const deleteBid = (bidId: string) => {
+    setConfirmDelete(bidId);
+  }
+
+  const confirmDeleteBid = async () => {
+    if (confirmDelete) {
       try {
-        const response = await axiosConfig.delete(`/freelancers/delete-bid/${bidId}`);
+        const response = await axiosConfig.delete(`/freelancers/delete-bid/${confirmDelete}`);
         if (response.status === 200) {
-          setBids((prevBids) => prevBids.filter((bid) => bid._id !== bidId));
+          setBids((prevBids) => prevBids.filter((bid) => bid._id !== confirmDelete));
           toast.success("Bid deleted successfully");
         }
       } catch (err) {
@@ -225,6 +233,14 @@ const ActiveBids: React.FC = () => {
           </div>
         </div>
       )}
+
+      {confirmDelete && 
+      <ConfirmMessage
+       message="Are you sure you want to delete this bid?"
+       onConfirm={confirmDeleteBid}
+       onCancel={()=>setConfirmDelete(null)}
+       />
+      }
     </div>
   );  
 };

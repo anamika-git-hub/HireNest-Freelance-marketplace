@@ -4,6 +4,7 @@ import { RootState } from "../../store/store";
 import { getCategories, deleteCategory } from "../../store/categorySlice";
 import axiosConfig from "../../service/axios";
 import { useNavigate } from "react-router-dom";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 const ManageCategories: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const ManageCategories: React.FC = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const ITEMS_PER_PAGE = 4
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -56,15 +58,19 @@ const ManageCategories: React.FC = () => {
       setCurrentPage(page);
     };
 
-  const handleDeleteCategory = async (id: string) => {
-    const confirmed = window.confirm("Are you sure you want to delete this category?");
-    if (confirmed) {
+    const handleDeleteCategory = (id: string) => {
+      setConfirmDelete(id); 
+    };
+
+  const confirmDeleteCategory = async () => {
+    if (confirmDelete) {
       try {
-        await axiosConfig.delete(`/admin/categories/${id}`);
-        dispatch(deleteCategory(id));
+        await axiosConfig.delete(`/admin/categories/${confirmDelete}`);
+        dispatch(deleteCategory(confirmDelete));
       } catch (error) {
         console.error("Error deleting category:", error);
       }
+      setConfirmDelete(null); // Close modal
     }
   };
 
@@ -158,7 +164,14 @@ const ManageCategories: React.FC = () => {
         <div className="text-center text-gray-600 mt-4">No categories found.</div>
       )}
 
-
+       {/* Confirm Dialog Modal */}
+       {confirmDelete && (
+        <ConfirmMessage
+          message="Are you sure you want to delete this category?"
+          onConfirm={confirmDeleteCategory}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { AiOutlineClockCircle } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface Task {
   _id: string;
@@ -23,6 +24,7 @@ const MyTaskList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -78,12 +80,15 @@ const MyTaskList: React.FC = () => {
     return `${days} days, ${hours} hours left`;
   };
 
-  const handleDelete = async (taskId: string) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+  const handleDelete = (taskId:string) => {
+    setConfirmDelete(taskId);
+  }
+
+  const confirmDeleteTask = async () => {
     if (confirmDelete) {
       try {
-        await axiosConfig.delete(`/client/delete-task/${taskId}`);
-        setTasks((prevTasks) => prevTasks.filter((task) => task._id !== taskId));
+        await axiosConfig.delete(`/client/delete-task/${confirmDelete}`);
+        setTasks((prevTasks) => prevTasks.filter((task) => task._id !== confirmDelete));
         toast.success("Task deleted successfully.");
       } catch (err) {
         console.error("Error deleting task:", err);
@@ -180,6 +185,13 @@ const MyTaskList: React.FC = () => {
           })}
         </ul>
       </div>
+      {confirmDelete && 
+      <ConfirmMessage
+      message="Are you sure you want to delete this task?"
+      onConfirm={confirmDeleteTask}
+      onCancel={()=> setConfirmDelete(null)}
+      />
+      }
     </div>
   );
 };

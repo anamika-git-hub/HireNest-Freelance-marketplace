@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUsersByType } from "../../store/userSlice";
 import axiosConfig from "../../service/axios";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface User {
   name?:string;
@@ -20,6 +21,7 @@ const ManageUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [confirmDelete, setConfirmDelete] = useState<{ userId: string; isBlocked: boolean } | null>(null); 
 
   const ITEMS_PER_PAGE = 6
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -68,22 +70,26 @@ const ManageUsers: React.FC = () => {
       }
     }, [debouncedSearchTerm]);
 
-  const toggleBlockUser = async (userId: string, isBlocked: boolean) => {
-    const action = isBlocked ? "unblock" : "block"; 
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} this user?`
-    );
-    
-    if (confirmed) {
+    const toggleBlockUser = async (userId: string, isBlocked: boolean) => {
+      setConfirmDelete({ userId, isBlocked });  // Set confirmation state
+    };
+
+ 
+    const confirmAction = async () => {
+      if (!confirmDelete) return;
+  
+      const { userId, isBlocked } = confirmDelete;
+      const action = isBlocked ? "unblock" : "block";
+  
       try {
         await axiosConfig.put(`/admin/${userId}/${isBlocked}`);
-        
-        fetchUsers(); 
+        fetchUsers();
       } catch (error) {
         console.error(`Error during ${action} action:`, error);
+      } finally {
+        setConfirmDelete(null);  // Reset confirmation state
       }
-    }
-}
+    };
 
 const handlePageChange = (page: number) => {
   setCurrentPage(page);
@@ -173,6 +179,15 @@ const handlePageChange = (page: number) => {
             </button>
           ))}
         </div>
+
+         {/* ConfirmMessage Modal */}
+      {confirmDelete && (
+        <ConfirmMessage
+          message={`Are you sure you want to ${confirmDelete.isBlocked ? "unblock" : "block"} this user?`}
+          onConfirm={confirmAction}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   );
 };

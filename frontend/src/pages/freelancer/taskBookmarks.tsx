@@ -4,6 +4,7 @@ import { FaUsers, FaTrash } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface Task {
     _id: string;
@@ -17,6 +18,7 @@ const TaskBookmarks: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
 
   useEffect(() => {
     const getBookmarksAndTasks = async () => {
@@ -63,18 +65,19 @@ const TaskBookmarks: React.FC = () => {
     return () => clearInterval(timer); 
   }, [bookmarks]);
 
+ const handleRemove = (id:string) =>{
+  setConfirmRemove(id);
+ }
 
-  const handleRemove = async (id: string) => {
+  const confirmRemoveBookmark = async () => {
     const userId = localStorage.getItem('userId')
-    
-    const confirmed = window.confirm("Are you sure you want to remove this bookmark?");
-    if(confirmed){
+    if(confirmRemove){
       try {
-        await axiosConfig.delete(`/users/bookmarks/${id}`, {
+        await axiosConfig.delete(`/users/bookmarks/${confirmRemove}`, {
           data: {userId, type: "task" }, 
         });
     
-        setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== id));
+        setBookmarks((prevBookmarks) => prevBookmarks.filter((bookmark) => bookmark._id !== confirmRemove));
     
       } catch (err) {
         console.error("Error removing bookmark:", err);
@@ -148,6 +151,13 @@ const TaskBookmarks: React.FC = () => {
           ))}
         </ul>
       </div>
+      {confirmRemove && 
+        <ConfirmMessage
+        message = "Are you sure you want to remove this bookmark?"
+        onConfirm = {confirmRemoveBookmark}
+        onCancel={()=>setConfirmRemove(null)}
+        />
+      }
     </div>
   );
   
