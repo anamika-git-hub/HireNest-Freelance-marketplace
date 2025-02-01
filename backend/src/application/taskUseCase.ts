@@ -49,8 +49,8 @@ export const TaskUseCase = {
                 });
                 return result.secure_url;
             };
-
-            let updatedAttachments = updates.attachments || [];
+               let updatedAttachments = Array.isArray(updates.attachments) ? updates.attachments : 
+                (typeof updates.attachments === 'string' ? [updates.attachments] : []);
 
             if (files.attachments) {
                 const newAttachments = await Promise.all(
