@@ -171,7 +171,7 @@ const Header: React.FC = () => {
   return (
     <header className="bg-white text-white w-10/12 shadow-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-50 rounded-full px-6 select-none">
       <div className="flex justify-between items-center h-16">
-          <img className='w-50 h-20 mt-1' src="../assets/HireNest.png" alt="logo" />
+          <img className='w-50 h-20 mt-1' src="/assets/HireNest.png" alt="logo" />
         
         {/* Desktop Nav Links */}
         <nav className="hidden lg:flex space-x-6 items-center">
@@ -201,7 +201,7 @@ const Header: React.FC = () => {
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative text-gray-700 hover:text-blue-600"
       >
-        <FaBell className="text-xl text-blue-800" />
+        <FaBell className="text-xl text-blue-600" />
         {notifications.length > 0 && (
           <span className="absolute top-0 right-0 left-3 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
             {notifications.length}
