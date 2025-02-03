@@ -8,50 +8,72 @@ const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || '';
 
 const socket = io('http://localhost:5000', {
-  query: { userId,role },
+  query: { userId, role },
 });
 
 interface Contacts {
-  _id:string;
-  name:string;
-  firstname: string;
-  lastname:string;
+  _id: string;
+  name: string;
   profileImage: string;
   tagline: string;
   userId: string;
+  lastMessage?: Message;
+  unreadCount: number;
 }
 
 interface Message {
-  receiverId?:string;
+  receiverId?: string;
   senderId?: string;
   type: 'sent' | 'received';
   text: string;
   time: string;
+  createdAt?: Date;
+  isRead?: boolean;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video' | 'audio' | 'file';
+  fileName?: string;
 }
 
 const Chat: React.FC = () => {
   const [contacts, setContacts] = useState<Contacts[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contacts | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const role = localStorage.getItem('role') || '';
   const userId = localStorage.getItem('userId') || '';
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosConfig.get(`/users/get-receivers`,{
-          params:{
-            role:role,
-            userId:userId
+        const response = await axiosConfig.get('/users/get-receivers', {
+          params: {
+            role: role,
+            userId: userId
           }
         });
 
+        console.log('ressss',response.data)
+
         const contactList: Contacts[] = response.data.map((receiver: Contacts) => ({
-          _id:receiver._id,
-          firstname: receiver.firstname,
-          name:receiver.name,
+          _id: receiver._id,
+          name: receiver.name,
           profileImage: receiver.profileImage,
-          userId: receiver.userId, 
+          userId: receiver.userId,
+          lastMessage: receiver.lastMessage,
+          unreadCount: receiver.unreadCount,
         }));
         setContacts(contactList);
 
@@ -66,20 +88,41 @@ const Chat: React.FC = () => {
     };
 
     fetchData();
-  }, [role,userId]);
+  }, [role, userId]);
+
+  useEffect(() => {
+    // ... existing socket event listeners ...
+
+    socket.on('messages_marked_read', ({ chatId, readBy }) => {
+      setMessages(prevMessages => 
+        prevMessages.map(msg => {
+          if (msg.receiverId === readBy) {
+            return { ...msg, isRead: true };
+          }
+          return msg;
+        })
+      );
+    });
+
+    return () => {
+      // ... existing cleanup ...
+      socket.off('messages_marked_read');
+    };
+  }, [socket]);
 
   const initializeChat = (contactId: string) => {
     socket.off('message_history');
     socket.off('receive_message');
-    socket.emit('get_messages', { senderId: userId, receiverId:contactId, contactId,role});
+    socket.emit('get_messages', { senderId: userId, receiverId: contactId, contactId, role });
 
     socket.on('message_history', (history: Message[]) => {
       const updatedHistory = history.map((msg) => ({
-        type: msg.receiverId === contactId ? 'sent' : 'received', 
+        type: msg.receiverId === contactId ? 'sent' : 'received',
         text: msg.text,
-        time:  msg.time ? new Date(msg.time).toLocaleString() : 'Unknown Time',
+        time: msg.time ,
+        isRead: msg.isRead,
       })) as Message[];
-      
+
       setMessages(updatedHistory);
     });
 
@@ -87,7 +130,8 @@ const Chat: React.FC = () => {
       const formattedMessage: Message = {
         type: data.receiverId === contactId ? 'sent' : 'received',
         text: data.text,
-        time:  data.time ? new Date(data.time).toLocaleString() : 'Unknown Time',
+        time: data.time ,
+        isRead: data.isRead,
       };
       setMessages((prevMessages) => [...prevMessages, formattedMessage]);
     });
@@ -98,15 +142,29 @@ const Chat: React.FC = () => {
     };
   };
 
-  const handleContactSelect = (contacts: Contacts) => {
-    setSelectedContact(contacts);
-    initializeChat(contacts._id);
+  const handleContactSelect = (contact: Contacts) => {
+    setSelectedContact(contact);
+    setSelectedContactId(contact._id);
+    initializeChat(contact._id);
+    if (isMobileView) {
+      setShowChat(true);
+    }
+  };
+
+  const handleBackToContacts = () => {
+    setShowChat(false);
   };
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
-      <Sidebar contacts={contacts} onSelectcontact={handleContactSelect} />
-      {selectedContact && (
+       {(!isMobileView || (isMobileView && !showChat)) && (
+        <Sidebar 
+          contacts={contacts} 
+          onSelectContact={handleContactSelect} 
+          selectedContactId={selectedContactId}
+        />
+      )}
+      {(!isMobileView || (isMobileView && showChat)) && selectedContact && (
         <ChatArea
           contacts={selectedContact}
           messages={messages}
@@ -114,6 +172,8 @@ const Chat: React.FC = () => {
           userId={userId}
           socket={socket}
           role={role}
+          onBack={handleBackToContacts}
+          isMobileView={isMobileView}
         />
       )}
     </div>

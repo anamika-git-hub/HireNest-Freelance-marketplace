@@ -116,12 +116,73 @@ io.on('connection',async(socket) => {
             text: msg.text,
             type: msg.type,
             time: msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown Time',
+            isRead: msg.isRead
           }));
           socket.emit('message_history', messages);
         } catch (error) {
           console.error('Error fetching messages:', error);
         }
       });
+       
+      socket.on('mark_messages_read', async (data) => {
+        try {
+          const { senderId, receiverId, role } = data;
+          
+          let adjustedSenderId: string | null = senderId;
+          
+          if (role === 'freelancer') {
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(senderId);
+            adjustedSenderId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          } else if (role === 'client') {
+            const accountDetail = await AccountDetailRepository.findUserDetailsById(senderId);
+            adjustedSenderId = accountDetail ? accountDetail._id.toString() : null;
+          }
+      
+          if (!adjustedSenderId) {
+            console.error('Sender ID could not be determined.');
+            return;
+          }
+      
+          // Find the chat between these users
+          const chat = await ChatModel.findOne({
+            participants: { $all: [adjustedSenderId, receiverId] },
+          });
+      
+          if (chat) {
+            // Update all unread messages where the current user is the receiver
+            await MessageModel.updateMany(
+              {
+                _id: { $in: chat.messages },
+                receiverId: adjustedSenderId,
+                isRead: false
+              },
+              {
+                $set: { isRead: true }
+              }
+            );
+      
+            // Emit an event to both users to update the read status in their UI
+            const socketId = socketConnection.get(receiverId);
+            const receiveId = socketConnection.get(adjustedSenderId);
+      
+            if (socketId) {
+              io.to(socketId).emit('messages_marked_read', {
+                chatId: chat._id,
+                readBy: adjustedSenderId
+              });
+            }
+            if (receiveId) {
+              io.to(receiveId).emit('messages_marked_read', {
+                chatId: chat._id,
+                readBy: adjustedSenderId
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error marking messages as read:', error);
+        }
+      });
+
 
       socket.on('send_message', async (data) => {
         try {
