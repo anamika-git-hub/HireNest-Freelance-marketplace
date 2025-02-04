@@ -144,10 +144,11 @@ if (values.newPassword) {
         if(response.status === 200){
           toast.success("user details updated")
         }
-        
-      
     } catch (error) {
       console.error("Error updating user details:", error);
+      toast.error("Error updating user details")
+    } finally {
+      setSubmitting(false)
     }
   };
   
@@ -380,12 +381,12 @@ if (values.newPassword) {
         </div>
   
         {/* Save Changes Button */}
-        <div className="flex justify-end mt-6">
+        <div className="flex justify-center mt-6">
           <button
             type="submit"
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg focus:outline-none"
+            className="w-1/4 px-6 py-3 bg-blue-500 text-white rounded-lg focus:outline-none"
           >
-            Save Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>

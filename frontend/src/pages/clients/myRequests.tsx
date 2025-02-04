@@ -1,10 +1,12 @@
 import React,{useState,useEffect} from "react";
-import { FaUser,FaTrash } from "react-icons/fa";
+import { FaUser,FaTrash ,FaTimes} from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 import ConfirmMessage from "../../components/shared/ConfirmMessage";
+import { Formik,Form,Field, ErrorMessage } from "formik";
+import { RequestSchema } from "../../components/Schemas/requestSchema";
 
 interface FreelancerProfile {
     _id:string;
@@ -39,88 +41,72 @@ const MyRequestList: React.FC = () => {
         const fetchRequests = async () => {
           try {
             const response = await axiosConfig.get(`/client/client-request`);
-            
             const fetchedFreelancers = response.data.requests; 
             const fetchedProfiles = await Promise.all(
               fetchedFreelancers.map(async (request:Request) => {
                    return request.freelancerId
                 })
               );
-             
               setFreelancerProfiles(fetchedProfiles);
               setRequest(fetchedFreelancers);
-            setLoading(false);
+              setLoading(false);
           } catch (err) {
             setError("Failed to load bidders. Please try again later.");
             setLoading(false);
           }
         };
           fetchRequests();
-        
-      }, []);
+    }, []);
 
-      const handleDeleteRequest = (id:string) => {
-        setConfirmDelete(id);
-      }
+    const handleDeleteRequest = (id:string) => {
+      setConfirmDelete(id);
+    }
 
-      const confirmDeleteRequest = async () => {
-        if (confirmDelete) {
-          try {
-            const response = await axiosConfig.delete(`/client/delete-request/${confirmDelete}`);
+    const confirmDeleteRequest = async () => {
+      if (confirmDelete) {
+        try {
+          const response = await axiosConfig.delete(`/client/delete-request/${confirmDelete}`);
             if (response.status === 200) {
               window.location.reload();
             }
-          } catch (error) {
-            toast.error('Failed to delete request')
-          }
+        } catch (error) {
+          toast.error('Failed to delete request')
         }
-      };
-
-      const handleEdit = async (request:Request) => {
-        setSelectedRequest(request);
-        setFormData({
-          fullName: request.fullName,
-          email: request.email,
-          description: request.description
-        });
-        setShowModal(true)
       }
-       const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-          const { name, value } = e.target;
-          setFormData((prevState) => ({
-            ...prevState,
-            [name]: value,
-          }));
-        };
+    };
 
-        const handleSubmit = async (e: React.FormEvent) => {
-          e.preventDefault();
-      
-          if (selectedRequest) {
-            try {
-              const updatedRequest = {
-                fullName: formData.fullName,
-                email: formData.email,
-                description: formData.description,
-              };
-      
-              const response = await axiosConfig.put(
-                `/client/update-request/${selectedRequest._id}`,
-                updatedRequest
-              );
-      
-              if (response.status === 200) {
-                toast.success("Request updated successfully!");
+    const handleEdit = async (request:Request) => {
+      setSelectedRequest(request);
+      setFormData({
+        fullName: request.fullName,
+        email: request.email,
+        description: request.description
+      });
+      setShowModal(true)
+    }
+
+    const handleSubmit = async (values: typeof formData, { setSubmitting, resetForm }: any) => {
+      if (selectedRequest) {
+        try {
+          const response = await axiosConfig.put(
+            `/client/update-request/${selectedRequest._id}`,
+            values
+          );
+          if (response.status === 200) {
+            toast.success("Request updated successfully!");
       
                 setRequest((prevRequests) =>
                   prevRequests.map((request) =>
-                    request._id === selectedRequest._id ? { ...request, ...updatedRequest } : request
+                    request._id === selectedRequest._id ? { ...request, ...values} : request
                   )
                 );
                 setShowModal(false);
+                resetForm();
               }
             } catch {
               toast.error("Failed to update bid. Please try again.");
+            } finally {
+              setSubmitting(false);
             }
           }
         };
@@ -189,76 +175,113 @@ const MyRequestList: React.FC = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-          <button
-        onClick={() => setShowModal(false)}
-        className=" top-3 right-3 text-gray-900 hover:text-gray-600 focus:outline-none"
-        aria-label="Close"
-      >
-        ✖
-      </button>
-          
-      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-blue-50 p-5 text-center border-b border-gray-100 relative">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
+              <h2 className="text-xl font-bold text-gray-800">Update Request</h2>
+              <p className="text-xs text-gray-500 mt-1">Modify your existing request details</p>
+            </div>
 
-        {/* Full Name Field */}
-        <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-            Full Name
-          </label>
-          <input
-            type="text"
-            name="fullName"
-            id="fullName"
-            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
-            placeholder="Enter your full name"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            {/* Formik Form */}
+            <Formik
+              initialValues={{
+                fullName: selectedRequest?.fullName || '',
+                email: selectedRequest?.email || '',
+                description: selectedRequest?.description || ''
+              }}
+              validationSchema={RequestSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting, errors, touched }) => (
+                <Form className="p-6 space-y-4">
+                  {/* Full Name Field */}
+                  <div>
+                    <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <Field
+                      type="text"
+                      name="fullName"
+                      id="fullName"
+                      className={`w-full px-3 py-2 border ${
+                        touched.fullName && errors.fullName 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
+                      placeholder="Enter your full name"
+                    />
+                    <ErrorMessage 
+                      name="fullName" 
+                      component="div" 
+                      className="text-red-500 text-xs mt-1" 
+                    />
+                  </div>
 
-        {/* Email Field */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <Field
+                      type="email"
+                      name="email"
+                      id="email"
+                      className={`w-full px-3 py-2 border ${
+                        touched.email && errors.email 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
+                      placeholder="Enter your email"
+                    />
+                    <ErrorMessage 
+                      name="email" 
+                      component="div" 
+                      className="text-red-500 text-xs mt-1" 
+                    />
+                  </div>
 
-        {/* Description Field */}
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={5}
-            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm py-3 px-4"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Describe your project..."
-          />
-        </div>
+                  {/* Description Field */}
+                  <div>
+                    <label htmlFor="description" className="block text-xs font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <Field
+                      as="textarea"
+                      name="description"
+                      id="description"
+                      rows={4}
+                      className={`w-full px-3 py-2 border ${
+                        touched.description && errors.description 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-blue-500'
+                      } rounded-lg focus:ring-1 focus:border-transparent text-sm resize-none`}
+                      placeholder="Describe your project..."
+                    />
+                    <ErrorMessage 
+                      name="description" 
+                      component="div" 
+                      className="text-red-500 text-xs mt-1" 
+                    />
+                  </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
-        >
-          Send Message
-        </button>
-      </form>
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Updating..." : "Update Request"}
+                  </button>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       )}
@@ -266,9 +289,9 @@ const MyRequestList: React.FC = () => {
       {
         confirmDelete && 
         <ConfirmMessage
-        message="Are you sure you want to delete this request"
-        onConfirm={confirmDeleteRequest}
-        onCancel={() => setConfirmDelete(null)}
+          message="Are you sure you want to delete this request"
+          onConfirm={confirmDeleteRequest}
+          onCancel={() => setConfirmDelete(null)}
         />
       }
     </div>

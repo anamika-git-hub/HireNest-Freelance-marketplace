@@ -1,4 +1,7 @@
-import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import React, { useEffect, useState} from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { BidValidationSchema } from "../../components/Schemas/bidValidationSchema";
+import * as Yup from 'yup'; 
 import { FaRegBookmark, FaCopy, FaShareAlt } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
@@ -12,28 +15,29 @@ interface TaskDetails {
   skills: string[];
   rateType: string;
   minRate: number ;
-  maxRate: number | string;
+  maxRate: number ;
   description: string;
   attachments: string[];
 }
 
-interface BidFormData {
-  taskId?: { _id: string };
+interface BidFormValues {
   rate: number;
   deliveryTime: number;
   timeUnit: string;
 }
+
+interface BidFormData extends BidFormValues {
+  taskId?: { _id: string };
+}
+
+type ValidationSchemaType = Yup.ObjectSchema<BidFormValues>;
 
 const TaskDetail: React.FC = () => {
   const [taskDetails, setTaskDetails] = useState<TaskDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
-  const [formData, setFormData] = useState<BidFormData>({
-    rate:0,
-    deliveryTime: 0,
-    timeUnit: "Days",
-  });
+  const [validationSchema, setValidationSchema] = useState<ValidationSchemaType | null>(null);
 
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem('userId')
@@ -43,6 +47,13 @@ const TaskDetail: React.FC = () => {
       try {
         const response = await axiosConfig.get(`users/tasks/${id}`);
         setTaskDetails(response.data.task);
+
+        const schema = BidValidationSchema({
+          minRate: response.data.task.minRate,
+          maxRate: response.data.task.maxRate
+        });
+        setValidationSchema(schema);
+
       } catch (error) {
         setError("Failed to load task details.");
       } finally {
@@ -62,12 +73,6 @@ const TaskDetail: React.FC = () => {
       const timeDiff = deadline.getTime() - now.getTime();
       const defaultDeliveryTime = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); 
 
-      setFormData({
-        rate: taskDetails.minRate,
-        deliveryTime: defaultDeliveryTime > 0 ? defaultDeliveryTime : 1, 
-        timeUnit: "Days",
-      });
-
       if (timeDiff <= 0) {
         setTimeLeft("Task deadline reached");
         return;
@@ -86,38 +91,35 @@ const TaskDetail: React.FC = () => {
     return () => clearInterval(timer);
   }, [taskDetails]);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const isBidExist = async() => {
     const response =await axiosConfig.get(`/users/bid/${userId}`)
-
     const bidExists = response.data.bid.some((bid:BidFormData) => bid.taskId?._id === id); 
-    
     return bidExists
   }
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: BidFormValues, { setSubmitting, resetForm }: any) => {
+    try {
     const bidExist = await isBidExist()
     if(bidExist){
       toast.error('This task is already bidded');
+      setSubmitting(false);
       return;
     }
-    try {
-       await axiosConfig.post(`freelancers/create-bid`, {...formData,taskId:id,bidderId:userId});
-      toast.success("Bid placed successfully!");
+    
+    await axiosConfig.post(`freelancers/create-bid`, {
+      ...values, 
+      taskId: id, 
+      bidderId: userId
+    });
+    
+    toast.success("Bid placed successfully!");
+    resetForm();
       
     } catch (error) {
       console.error("Error placing bid:", error);
       toast.error("Failed to place bid. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -139,7 +141,13 @@ const TaskDetail: React.FC = () => {
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
 
-  if (!taskDetails) return <div>No task found</div>;
+  if (!taskDetails || !validationSchema) return <div>No task found</div>;
+
+  const initialValues = {
+    rate: taskDetails.minRate,
+    deliveryTime: Math.max(1, Math.floor((new Date(taskDetails.timeline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))),
+    timeUnit: "Days",
+  };
 
   return (
     <div className="min-h-screen text-gray-800">
@@ -210,8 +218,16 @@ const TaskDetail: React.FC = () => {
               </div>
 
               {/* Bid Card */}
-              <form
-                onSubmit={handleSubmit}
+              <Formik
+               initialValues={initialValues}
+               validationSchema={validationSchema}
+               onSubmit={handleSubmit}
+               enableReinitialize
+               >
+                {({isSubmitting, errors, touched}) => (
+
+                
+              <Form
                 className="bg-white p-6 rounded-lg shadow-md"
               >
                 <h2 className="text-lg font-semibold mb-4">Bid on this job!</h2>
@@ -219,14 +235,19 @@ const TaskDetail: React.FC = () => {
                   <label className="text-gray-600 text-sm block mb-2">
                     Set your minimum rate
                   </label>
-                  <input
+                  <Field
                     type="number"
                     name="rate"
-                    placeholder="$100"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value= {formData.rate}
-                    onChange={handleChange}
-                    required
+                    placeholder="Enter the rate"
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none 
+                      ${errors.rate && touched.rate 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'focus:ring-2 focus:ring-blue-500'}`}
+                  />
+                  <ErrorMessage 
+                    name="rate" 
+                    component="div" 
+                    className="text-red-500 text-sm mt-1" 
                   />
                 </div>
                 <div className="mb-4">
@@ -234,34 +255,47 @@ const TaskDetail: React.FC = () => {
                     Set your delivery time
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      type="number"
-                      name="deliveryTime"
-                      className="w-16 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="3"
-                      value={formData.deliveryTime}
-                      onChange={handleChange}
-                      required
-                    />
-                    <select
-                      name="timeUnit"
-                      className="border px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      value={formData.timeUnit}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="Days">Days</option>
-                      <option value="Weeks">Weeks</option>
-                    </select>
+                  <Field
+                    type="number"
+                    name="deliveryTime"
+                    className={`w-16 px-2 py-2 border rounded-lg focus:outline-none 
+                      ${errors.deliveryTime && touched.deliveryTime 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'focus:ring-2 focus:ring-blue-500'}`}
+                    placeholder="3"
+                  />
+                    <Field
+                    as="select"
+                    name="timeUnit"
+                    className={`border px-4 py-2 rounded-lg 
+                      ${errors.timeUnit && touched.timeUnit 
+                        ? 'border-red-500 focus:ring-red-500' 
+                        : 'focus:ring-2 focus:ring-blue-500'}`}
+                  >
+                    <option value="Days">Days</option>
+                    <option value="Weeks">Weeks</option>
+                  </Field>
                   </div>
+                  {errors.deliveryTime && touched.deliveryTime && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {errors.deliveryTime}
+                  </div>
+                )}
+                {errors.timeUnit && touched.timeUnit && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {errors.timeUnit}
+                  </div>
+                )}
                 </div>
                 <button
                   type="submit"
                   className="bg-blue-600 text-white w-full py-2 rounded-lg hover:bg-blue-700"
                 >
-                  Place a Bid
+                  {isSubmitting ? 'Placing Bid...' : 'Place a Bid'}
                 </button>
-              </form>
+              </Form>
+              )}
+              </Formik>
               {/* Bookmark, Copy, and Share Section */}
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-md mt-6">
             <button

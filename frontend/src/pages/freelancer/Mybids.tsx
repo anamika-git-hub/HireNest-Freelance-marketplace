@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 import ConfirmMessage from "../../components/shared/ConfirmMessage";
+import { BidValidationSchema } from "../../components/Schemas/bidValidationSchema";
 
 interface Bid {
   _id: string;
   rate: number;
   deliveryTime: number;
-  taskId: { _id: string, projectName: string, rateType: string };
+  taskId: { _id: string, projectName: string, rateType: string , minRate: number, maxRate: number };
   timeUnit: string;
   createdAt: Date;
   status: "pending" | "accepted" | "rejected";
+}
+
+interface FormValues {
+  rate: number;
+  deliveryTime: number;
+  timeUnit: string;
 }
 
 const ActiveBids: React.FC = () => {
@@ -22,12 +30,6 @@ const ActiveBids: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null); 
-  const [formData, setFormData] = useState({
-    rate: 0,
-    deliveryTime: 0,
-    timeUnit: "Days",
-  });
-  
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,7 +52,6 @@ const ActiveBids: React.FC = () => {
     }
   }, []);
 
-
   const deleteBid = (bidId: string) => {
     setConfirmDelete(bidId);
   }
@@ -68,35 +69,21 @@ const ActiveBids: React.FC = () => {
         toast.error("Failed to delete bid. Please try again.");
       }
     }
+    setConfirmDelete(null);
   };
 
   const handleEditClick = (bid: Bid) => {
-    setSelectedBid(bid); 
-    setFormData({
-      rate: bid.rate,
-      deliveryTime: bid.deliveryTime,
-      timeUnit: bid.timeUnit,
-    });
+    setSelectedBid(bid);
     setShowModal(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
     if (selectedBid) {
       try {
         const updatedBid = {
-          rate: formData.rate,
-          deliveryTime: formData.deliveryTime,
-          timeUnit: formData.timeUnit,
+          rate: values.rate,
+          deliveryTime: values.deliveryTime,
+          timeUnit: values.timeUnit,
         };
 
         const response = await axiosConfig.put(
@@ -117,6 +104,7 @@ const ActiveBids: React.FC = () => {
       } catch {
         toast.error("Failed to update bid. Please try again.");
       }
+      setSubmitting(false);
     }
   };
 
@@ -132,7 +120,7 @@ const ActiveBids: React.FC = () => {
     <div className="p-6 pt-24 bg-gray-100 min-h-screen select-none">
       <div className="bg-white rounded-lg shadow-md p-4 max-w-6xl mx-auto">
         <div className="flex items-center text-blue-600 font-semibold mb-4">
-          <FaEdit className="mr-2" /> Bids List
+          <FaEdit className="mr-2"/> Bids List
         </div>
         <ul>
           {bids.map((bid, index) => (
@@ -174,72 +162,92 @@ const ActiveBids: React.FC = () => {
         </ul>
       </div>
   
-      {showModal && (
+      {showModal && selectedBid && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-md w-11/12 sm:w-96">
+          <div className="bg-white p-6 rounded-lg shadow-md w-11/12 sm:w-96 relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              <FaTimes className="w-5 h-5" />
+            </button>
             <h2 className="text-lg font-semibold mb-4">Edit Your Bid</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-gray-600 text-sm">Set your minimum rate</label>
-                <input
-                  type="number"
-                  name="rate"
-                  value={formData.rate}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-gray-600 text-sm">Set your delivery time</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    name="deliveryTime"
-                    value={formData.deliveryTime}
-                    onChange={handleChange}
-                    className="w-16 px-2 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="3"
-                    required
-                  />
-                  <select
-                    name="timeUnit"
-                    value={formData.timeUnit}
-                    onChange={handleChange}
-                    className="border px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="Days">Days</option>
-                    <option value="Weeks">Weeks</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="bg-gray-300 text-black px-4 py-2 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Update Bid
-                </button>
-              </div>
-            </form>
+            <Formik
+              initialValues={{
+                rate: selectedBid.rate,
+                deliveryTime: selectedBid.deliveryTime,
+                timeUnit: selectedBid.timeUnit,
+              }}
+              validationSchema={BidValidationSchema({
+                minRate: selectedBid.taskId.minRate,
+                maxRate: selectedBid.taskId.maxRate,
+              })}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting }) => (
+                <Form className="space-y-4">
+                  <div>
+                    <label className="text-gray-600 text-sm">Set your minimum rate</label>
+                    <Field
+                      type="number"
+                      name="rate"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <ErrorMessage
+                      name="rate"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-gray-600 text-sm">Set your delivery time</label>
+                    <div className="flex gap-2">
+                      <Field
+                        type="number"
+                        name="deliveryTime"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <Field
+                        as="select"
+                        name="timeUnit"
+                        className="border px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Days">Days</option>
+                        <option value="Weeks">Weeks</option>
+                      </Field>
+                    </div>
+                    <ErrorMessage
+                      name="deliveryTime"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                    <ErrorMessage
+                      name="timeUnit"
+                      component="div"
+                      className="text-red-500 text-sm mt-1"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      {isSubmitting ? "Updating..." : "Update Bid"}
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       )}
 
       {confirmDelete && 
-      <ConfirmMessage
-       message="Are you sure you want to delete this bid?"
-       onConfirm={confirmDeleteBid}
-       onCancel={()=>setConfirmDelete(null)}
-       />
+        <ConfirmMessage
+          message="Are you sure you want to delete this bid?"
+          onConfirm={confirmDeleteBid}
+          onCancel={() => setConfirmDelete(null)}
+        />
       }
     </div>
   );  

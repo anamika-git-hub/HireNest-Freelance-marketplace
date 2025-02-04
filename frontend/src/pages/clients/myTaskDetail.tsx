@@ -91,7 +91,7 @@ const TaskDetailForm: React.FC = () => {
       onSubmit={handleSubmit}
       enableReinitialize
     >
-      {({ values, setFieldValue, errors, touched }) => (
+      {({isSubmitting, values, setFieldValue, errors, touched }) => (
         <Form className="p-10 pt-20 bg-white rounded-lg shadow-lg">
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">Update Task</h3>
@@ -286,7 +286,7 @@ const TaskDetailForm: React.FC = () => {
                 type="submit"
                 className="px-6 py-3 bg-blue-600 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Post Task
+               {isSubmitting ? "Posting..." : "Post Task"}
               </button>
             </div>
           </div>
