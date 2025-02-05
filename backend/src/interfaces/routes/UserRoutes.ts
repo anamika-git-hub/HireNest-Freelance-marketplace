@@ -10,7 +10,7 @@ import { BidController } from '../controllers/bidController';
 import { TaskController } from '../controllers/taskController';
 import { CategoryController } from '../controllers/categoryController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
-import { isUser } from '../middlewares/auth';
+import { checkAuth } from '../middlewares/auth';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -24,29 +24,29 @@ router.post('/validate-password/:id',UserController.validatePassword);
 router.post('/forgot-password',UserController.forgotPassword);
 router.post('/reset-password',UserController.resetPassword);
 
-router.get('/categories',isUser,CategoryController.getAllCategories);
+router.get('/categories',checkAuth('user'),CategoryController.getAllCategories);
 
 router.post('/setup-account', uploadProfileImages, AccountDetailController.setUpAccount);
-router.put ('/update-account',uploadProfileImages,isUser, AccountDetailController.updateAccount);
-router.get('/account-detail',isUser,AccountDetailController.getAccountDetail);
-router.post('/update-role',isUser,UserController.updateRole);
+router.put ('/update-account',uploadProfileImages,checkAuth('user'), AccountDetailController.updateAccount);
+router.get('/account-detail',checkAuth('user'),AccountDetailController.getAccountDetail);
+router.post('/update-role',checkAuth('user'),UserController.updateRole);
 
-router.get("/bid/:id",isUser, BidController.getBidById);
-router.get('/tasks/:id',isUser, TaskController.getTaskById);
+router.get("/bid/:id",checkAuth('user'), BidController.getBidById);
+router.get('/tasks/:id',checkAuth('user'), TaskController.getTaskById);
 
-router.get("/freelancer-profile/:id",isUser,FreelancerProfileController.getFreelancerByUserId);
+router.get("/freelancer-profile/:id",checkAuth('user'),FreelancerProfileController.getFreelancerByUserId);
 
-router.post('/bookmarks',isUser,BookMarkController.createBookmarks); 
-router.get('/bookmarks',isUser,BookMarkController.getBookmarks);
+router.post('/bookmarks',checkAuth('user'),BookMarkController.createBookmarks); 
+router.get('/bookmarks',checkAuth('user'),BookMarkController.getBookmarks);
 
-router.get('/task-bookmarks',isUser,BookMarkController.getBookmarks);
-router.delete('/bookmarks/:id',isUser,BookMarkController.deleteBookmarks);
+router.get('/task-bookmarks',checkAuth('user'),BookMarkController.getBookmarks);
+router.delete('/bookmarks/:id',checkAuth('user'),BookMarkController.deleteBookmarks);
 
-router.get('/get-receivers',isUser,MessageController.getReceiver);
-router.post('/set-contacts',isUser,MessageController.setContacts);
+router.get('/get-receivers',checkAuth('user'),MessageController.getReceiver);
+router.post('/set-contacts',checkAuth('user'),MessageController.setContacts);
 
-router.get('/notifications',isUser,UserController.getNotification);
-router.put('/mark-as-read/:id',isUser,UserController.notificationRead)
+router.get('/notifications',checkAuth('user'),UserController.getNotification);
+router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead)
 
 
 export default router;

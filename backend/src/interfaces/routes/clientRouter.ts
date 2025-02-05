@@ -6,25 +6,25 @@ import { BidController } from '../controllers/bidController';
 import { RequestController } from '../controllers/requestController';
 import { uploadTaskFiles } from '../middlewares/uploadFileImages';  
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
-import { isClient } from '../middlewares/auth';
+import { checkAuth } from '../middlewares/auth';
 
 const router = express.Router();
 
 router.use(checkTokenBlacklist);
 
-router.post("/create-task", uploadTaskFiles,isClient, TaskController.createTask);
-router.put("/update-task/:id", uploadTaskFiles,isClient, TaskController.updateTask);
-router.delete("/delete-task/:id",isClient, TaskController.deleteTask);
-router.get('/my-tasks',isClient,TaskController.getTasksByUserId);
+router.post("/create-task", uploadTaskFiles,checkAuth('client'), TaskController.createTask);
+router.put("/update-task/:id", uploadTaskFiles,checkAuth('client'), TaskController.updateTask);
+router.delete("/delete-task/:id",checkAuth('client'), TaskController.deleteTask);
+router.get('/my-tasks',checkAuth('client'),TaskController.getTasksByUserId);
 
-router.get('/freelancer-list',isClient,FreelancerProfileController.getFreelancers);
-router.get('/freelancer/:id',isClient,FreelancerProfileController.getFreelancerById);
+router.get('/freelancer-list',checkAuth('client'),FreelancerProfileController.getFreelancers);
+router.get('/freelancer/:id',checkAuth('client'),FreelancerProfileController.getFreelancerById);
 
 
-router.get("/task-bids/:taskId",isClient, BidController.getBidsByTask);
-router.post("/create-request",isClient,  RequestController.createRequest);
-router.put("/update-request/:id", isClient, RequestController.updateRequest);
-router.delete("/delete-request/:id",isClient, RequestController.deleteRequest);
-router.get("/client-request",isClient,RequestController.getRequestByUserId)
-router.get("/request/:id",isClient, RequestController.getRequestById);
+router.get("/task-bids/:taskId",checkAuth('client'), BidController.getBidsByTask);
+router.post("/create-request",checkAuth('client'),  RequestController.createRequest);
+router.put("/update-request/:id", checkAuth('client'), RequestController.updateRequest);
+router.delete("/delete-request/:id",checkAuth('client'), RequestController.deleteRequest);
+router.get("/client-request",checkAuth('client'),RequestController.getRequestByUserId)
+router.get("/request/:id",checkAuth('client'), RequestController.getRequestById);
 export default router;
