@@ -7,6 +7,7 @@ import { RequestController } from '../controllers/requestController';
 import { uploadTaskFiles } from '../middlewares/uploadFileImages';  
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
+import { MilestoneController } from '../controllers/milestoneController';
 
 const router = express.Router();
 
@@ -27,4 +28,7 @@ router.put("/update-request/:id", checkAuth('client'), RequestController.updateR
 router.delete("/delete-request/:id",checkAuth('client'), RequestController.deleteRequest);
 router.get("/client-request",checkAuth('client'),RequestController.getRequestByUserId)
 router.get("/request/:id",checkAuth('client'), RequestController.getRequestById);
+
+router.post("/create-milestone",checkAuth('client'),MilestoneController.createMilestone);
+router.patch("/bid-status/:id",checkAuth('client'),BidController.BidStatusUpdate)
 export default router;

@@ -16,6 +16,7 @@ export const BidController = {
         try {
             const { id } = req.params;
             const updates = req.body;
+            console.log(id,updates)
 
             const result = await BidUseCase.updateBid(id, updates);
             res.status(200).json({ message: "Bid updated successfully", bid: result });
@@ -49,6 +50,18 @@ export const BidController = {
             const { id } = req.params;
             const bid = await BidUseCase.getBidById(id);
             res.status(200).json({ message: "Bid fetched successfully", bid });
+        } catch (error) {
+            next(error);
+        }
+    },
+    BidStatusUpdate:async (req: Req, res: Res, next: Next) => {
+    console.log('sssss')
+        try {
+            const { id } = req.params;
+            const {status, taskId} = req.body;
+            console.log('dkfjsdlfs',id,status,taskId)
+            const updatedBid = await BidUseCase.updateBidStatus(id,status);
+            res.status(200).json({ message: "Bid fetched successfully", updatedBid });
         } catch (error) {
             next(error);
         }

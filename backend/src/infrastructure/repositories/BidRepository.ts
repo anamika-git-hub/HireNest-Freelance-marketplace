@@ -69,4 +69,18 @@ export const BidRepository = {
             } 
         }
     },
+
+    updateBidStatus: async (id: string, status:string) => {
+        try {
+            const updatedBid = await BidSubmissionModel.findByIdAndUpdate(id, {status}, { new: true });
+            if (!updatedBid) throw new Error("Bid not found");
+            return updatedBid;
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update bid: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update bid due to an unknown error`);
+            } 
+        }
+    },
 };

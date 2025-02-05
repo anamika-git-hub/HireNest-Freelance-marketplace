@@ -77,4 +77,7 @@ export const BidUseCase = {
     getBidById: async (id: string) => {
         return await BidRepository.getBidById(id);
     },
+    updateBidStatus: async (id: string, status:string) => {
+        return await BidRepository.updateBidStatus(id,status);
+    },
 };

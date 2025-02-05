@@ -52,14 +52,6 @@ const FreelancerDetail: React.FC = () => {
     getFreelancerDetail();
   }, [id]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleSubmit = async (values: RequestFormData, { setSubmitting, resetForm }: any) => {
     
     try {
