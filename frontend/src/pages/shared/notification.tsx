@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { FaBell, FaUserCircle } from "react-icons/fa";
-import { MdWork, MdGavel, MdSync } from "react-icons/md";
+import { FaBell } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
-import { Link } from "react-router-dom";
+import NotificationIcon from "../../components/shared/notificationIcon";
+import NotificationContent from "../../components/shared/notificationContent";
 
 interface Notification {
+  role: string;
   text: string;
   bidderProfileUrl: string;
   projectUrl: string;
@@ -14,95 +15,52 @@ interface Notification {
   projectName: string;
 }
 
+interface NotificationItemProps {
+  notification: Notification;
+  role: string | null;
+}
+
+const NotificationItem: React.FC<NotificationItemProps> = ({ notification, role }) => (
+  <div className="p-3 flex items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+    <div className="flex">
+      <NotificationIcon type={notification.types} />
+      <NotificationContent notification={notification} role={role} />
+    </div>
+  </div>
+);
+
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
 
-const fetchNotifications = async () => {
-  if (userId) {
-    const response = await axiosConfig.get(`/users/notifications`);
-    console.log('ress', response.data);
-
-    if (role === 'client') {
-      const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'bid');
-      setNotifications(filteredNotifications);
-    } else if(role === 'freelancer') {
-      const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'request');
-      setNotifications(filteredNotifications); 
-    }
-
-    setLoading(false);
-  } else {
-    setError('User not logged in');
-    setLoading(false);
-  }
-};
-
-
   useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        if (!userId) {
+          throw new Error('User not logged in');
+        }
+
+        const { data } = await axiosConfig.get('/users/notifications');
+        const filteredNotifications = data.filter(
+          (notif: Notification) => notif.role === role
+        );
+        setNotifications(filteredNotifications);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNotifications();
-  }, []);
+  }, [userId, role]);
 
-  if (loading) {
-    return <Loader visible={loading} />;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  const notificationText = () => {
-    return (
-      <>
-        {notifications.length > 0 ? (
-          notifications.map((notif, index) => (
-            <div key={index} className="p-3 flex items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
-              {/* Icon Based on Notification Type */}
-              {notif.types === "request" && <div className="flex ">
-                  <MdWork className="text-gray-500 text-xl" />
-                    <p className="ml-3 text-sm text-gray-700">
-                      You have a new request from 
-                      <a href="/freelancer/requests"
-                      className="text-blue-500 hover:underline"
-                      > {' '}
-                      {notif.senderName}</a>
-                     
-                    </p>
-                </div>}
-              {notif.types === "bid" &&
-                <div className="flex ">
-                  <MdGavel className="text-gray-500 text-xl" />
-                    <p className="ml-3 text-sm text-gray-700">
-                      <a
-                        href={notif.bidderProfileUrl}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {notif.senderName}
-                      </a>{' '}
-                      placed a bid on your{' '}
-                      <a
-                        href={notif.projectUrl}
-                        className="text-blue-500 hover:underline"
-                      >
-                        {notif.projectName}
-                      </a>{' '}
-                      project.
-                    </p>
-                </div>
-              }
-              {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />}
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500 py-2">No notifications</p>
-        )}
-      </>
-    );
-  };
+  if (loading) return <Loader visible={loading} />;
+  if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
     <div className="p-6 pt-24 bg-gray-100 min-h-screen select-none">
@@ -114,7 +72,17 @@ const fetchNotifications = async () => {
           </button>
         </div>
         <ul className="mt-4 divide-y divide-gray-200">
-          {notificationText()}
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
+              <NotificationItem 
+                key={index} 
+                notification={notification} 
+                role={role} 
+              />
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-2">No notifications</p>
+          )}
         </ul>
       </div>
     </div>

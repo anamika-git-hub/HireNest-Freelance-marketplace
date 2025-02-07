@@ -5,6 +5,17 @@ import { FreelancerProfileRepository } from "../infrastructure/repositories/Free
 import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
 import { IBidSubmissionForm } from "../entities/Bids";
 import { sendNotification } from "..";
+import { ITaskSubmissionForm } from "../entities/Tasks";
+
+
+const getNotificationText = (status: 'accepted' | 'rejected', projectName: string): string => {
+    const messages = {
+        accepted: `Congratulations! Your bid for the project ${projectName} has been accepted by the client.`,
+        rejected: `We regret to inform you that the client has rejected your bid for ${projectName}.`
+    } as const;
+    
+    return messages[status];
+};
 
 export const BidUseCase = {
     createBid: async (data: IBidSubmissionForm) => {
@@ -15,7 +26,8 @@ export const BidUseCase = {
                     const notification = {
                             senderId:bidderId,
                             userId: user.clientId, 
-                            senderName: sender.name, 
+                            role:'client',
+                            senderName: sender.name,
                             projectName: user.projectName,
                             text: `${sender.name} placed a bid on your ${user.projectName} project`,
                             isRead: false,
@@ -75,9 +87,37 @@ export const BidUseCase = {
     },
 
     getBidById: async (id: string) => {
-        return await BidRepository.getBidById(id);
+        return await BidRepository.getBidByBidderId(id);
     },
     updateBidStatus: async (id: string, status:string) => {
-        return await BidRepository.updateBidStatus(id,status);
-    },
+        const bid = await BidRepository.getBidById(id);
+        if (!bid?.taskId) return await BidRepository.updateBidStatus(id, status);
+    
+        const { clientId, _id: taskId, projectName } = bid.taskId;
+        const { bidderId } = bid;
+    
+        if (status === 'accepted' || status === 'rejected') {
+            const notificationData = {
+                senderId: clientId,
+                userId: bidderId,
+                role: 'freelancer',
+                projectName,
+                text: getNotificationText(status, projectName),
+                isRead: false,
+                createdAt: new Date(),
+                types: status,
+                projectUrl: `/freelancer/task-detail/${taskId}`
+            };
+    
+            await NotificationRepository.createNotification(notificationData);
+    
+            sendNotification(bidderId.toString(), {
+                ...notificationData,
+                text: getNotificationText(status === 'accepted' ? 'rejected' : 'accepted', projectName),
+                projectUrl: `/client/task-detail/${taskId}`
+            });
+        }
+    
+        return await BidRepository.updateBidStatus(id, status);
+    }
 };

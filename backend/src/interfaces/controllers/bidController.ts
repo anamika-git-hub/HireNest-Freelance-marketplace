@@ -55,11 +55,9 @@ export const BidController = {
         }
     },
     BidStatusUpdate:async (req: Req, res: Res, next: Next) => {
-    console.log('sssss')
         try {
             const { id } = req.params;
             const {status, taskId} = req.body;
-            console.log('dkfjsdlfs',id,status,taskId)
             const updatedBid = await BidUseCase.updateBidStatus(id,status);
             res.status(200).json({ message: "Bid fetched successfully", updatedBid });
         } catch (error) {

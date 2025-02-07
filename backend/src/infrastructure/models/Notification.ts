@@ -12,6 +12,16 @@ export const NotificationSchema = new Schema<INotification>(
             type:mongoose.Schema.Types.ObjectId,
             ref:'User'
         },
+        role:{
+            type:String,
+            required:true
+        },
+        bidStatus:{
+            type:String
+        },
+        requestStatus: {
+            type: String,
+        },
         senderName: {
             type:String,
         },
@@ -29,7 +39,7 @@ export const NotificationSchema = new Schema<INotification>(
         },
         types: {
             type:String,
-            enum:['bid','request'],
+            enum:['bid','request','accepted','rejected'],
             required:true
         },
         createdAt: { 

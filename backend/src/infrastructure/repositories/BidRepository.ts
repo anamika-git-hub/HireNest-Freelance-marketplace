@@ -56,7 +56,7 @@ export const BidRepository = {
         }
     },
 
-    getBidById: async (id: string) => {
+    getBidByBidderId: async (id: string) => {
         try {
             const bid = await BidSubmissionModel.find({bidderId:id}).populate("taskId");
             if (!bid) throw new Error("Bid not found");
@@ -67,6 +67,20 @@ export const BidRepository = {
             }else {
                 throw new Error(`Failed to get bids by Id due to an unknown error`);
             } 
+        }
+    },
+
+    getBidById: async (id:string) => {
+        try {
+            const bid = await BidSubmissionModel.findById(id).populate("taskId")
+            if (!bid) throw new Error("Bid not found");
+            return bid;
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get bids by Id: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get bids by Id due to an unknown error`);
+            }  
         }
     },
 
