@@ -57,9 +57,9 @@ export const BidController = {
     BidStatusUpdate:async (req: Req, res: Res, next: Next) => {
         try {
             const { id } = req.params;
-            const {status, taskId} = req.body;
+            const {status} = req.body;
             const updatedBid = await BidUseCase.updateBidStatus(id,status);
-            res.status(200).json({ message: "Bid fetched successfully", updatedBid });
+            res.status(200).json({ message: "Bid updated successfully", updatedBid });
         } catch (error) {
             next(error);
         }

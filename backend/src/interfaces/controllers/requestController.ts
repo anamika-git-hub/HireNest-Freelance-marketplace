@@ -65,4 +65,14 @@ export const RequestController = {
             
         }
     },
+    requestStatusUpdate: async(req: Req, res: Res, next: Next) => {
+        try {
+            const {id} = req.params;
+            const {status} = req.body;
+            const updatedRequest = await RequestUseCase.updateRequestStatus(id,status);
+            res.status(200).json({message:"Request updated successfully",updatedRequest});
+        } catch (error) {
+            next(error);   
+        }
+    }
 };

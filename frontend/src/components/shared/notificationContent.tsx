@@ -1,12 +1,14 @@
+import { Underline } from "lucide-react";
 
 interface Notification {
     role: string;
     text: string;
-    bidderProfileUrl: string;
+    profileUrl: string;
     projectUrl: string;
     types: string;
     senderName: string;
     projectName: string;
+    freelancerName: string;
   }
   
 interface NotificationItemProps {
@@ -26,7 +28,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
       ),
       bid: () => (
         <p className="ml-3 text-sm text-gray-700">
-          <a href={notification.bidderProfileUrl} className="text-blue-500 hover:underline">
+          <a href={notification.profileUrl} className="text-blue-500 hover:underline">
             {notification.senderName}
           </a>{' '}
           placed a bid on your{' '}
@@ -47,6 +49,16 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
               has been accepted by the client.
             </p>
           );
+        }else if(role === 'client') {
+          return (
+            <p className="ml-3 text-sm text-gray-700">
+              Congratulations! Your request for the freelancer{' '}
+              <a href={notification.profileUrl} className="text-blue-500 hover:Underline">
+                {notification.freelancerName}
+              </a>{' '}
+              has been accepted.
+            </p>
+          )
         }
         return null;
       },
@@ -58,6 +70,17 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
               <a href={notification.projectUrl} className="text-blue-500 hover:underline">
                 {notification.projectName}
               </a>{' '}
+              .
+            </p>
+          );
+        } else if (role === 'client') {
+          return (
+            <p className="ml-3 text-sm text-gray-700">
+              We regret to inform you that the freelancer{' '}
+              <a href={notification.profileUrl} className="text-blue-500 hover:underline">
+                {notification.freelancerName}
+              </a>{' '}
+               has rejected your request.
               .
             </p>
           );

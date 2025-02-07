@@ -6,12 +6,13 @@ export interface INotification {
    role:string;
    senderName?:string;
    projectName?:string;
+   freelancerName?:string;
    bidStatus?:string;
    requestStatus?:string;
    text: string;
    types: string;
    isRead: boolean;
    createdAt: Date;
-   bidderProfileUrl?:string;
+   profileUrl?:string;
    projectUrl?:string;
 }

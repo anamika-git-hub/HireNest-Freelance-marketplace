@@ -3,6 +3,7 @@ import { FaUser,FaTrash } from "react-icons/fa";
 import { useParams,useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
+import toast from "react-hot-toast";
 
 interface Request {
     _id:string;
@@ -11,6 +12,7 @@ interface Request {
       email: string;
       description: string;
       createdAt: Date;
+      status: 'pending' | 'accepted' | 'rejected'; 
   }
 
 const RequestList: React.FC = () => {
@@ -22,31 +24,46 @@ const RequestList: React.FC = () => {
     const userId = localStorage.getItem('userId')
     const role = localStorage.getItem('role')
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-          try {
-            const response = await axiosConfig.get(`/freelancers/freelancer-request`);
-            console.log('response',response)
-            const fetchedRequests = response.data.requests; 
-              setRequest(fetchedRequests);
-            setLoading(false);
-          } catch (err) {
-            setError("Failed to load requests. Please try again later.");
-            setLoading(false);
-          } finally {
-            setLoading(false)
-          }
-        };
-          fetchRequests();
-        
-      }, []);
+    const fetchRequests = async () => {
+      try {
+        const response = await axiosConfig.get(`/freelancers/freelancer-request`);
+        const fetchedRequests = response.data.requests; 
+        setRequest(fetchedRequests);
+        setLoading(false);
+      } catch (err) {
+          setError("Failed to load requests. Please try again later.");
+          setLoading(false);
+      } finally {
+          setLoading(false)
+      }
+    };
 
+    useEffect(()=>{
+      fetchRequests();
+    },[]);
+    
+    const handleRequestStatusUpdate = async (requestId:string, status: 'accepted' | 'rejected' ) => {
+      try {
+        setLoading(true);
+        const response = await axiosConfig.patch(`/freelancers/request-status/${requestId}`,{
+          status
+        });
+        if(response.status === 200){
+          toast.success(`Request ${status} successfully`);
+          await  fetchRequests();
+        }
+      } catch (error:any) {
+        toast.error(error.response?.data?.message || `Failed to ${status} request`);
+      } finally {
+        setLoading(false);
+      }
+    };
 
 
       const sendMessage = async(requesterId: string) => {
        await axiosConfig.post('/users/set-contacts',{senderId:userId,receiverId:requesterId,role})
       navigate(`/messages`);
-};
+     };
 
     
       if (loading) {
@@ -87,16 +104,35 @@ const RequestList: React.FC = () => {
                       <span>{request.email}</span>
                     </p>
                     <div className="flex mt-3 space-x-2">
-                      <button className="px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Accept Offer
-                      </button>
+
+                    {request.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleRequestStatusUpdate(request._id, 'accepted')}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleRequestStatusUpdate(request._id, 'rejected')}
+                            className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {request.status !== 'pending' && (
+                        <span className={`px-4 py-2 rounded-md ${
+                          request.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                        </span>
+                      )}
+
                       <button
                        onClick={() => sendMessage(request.requesterId)} 
                        className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900">
                         Send Message
-                      </button>
-                      <button className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400">
-                        <FaTrash className="mr-1" />
                       </button>
                     </div>
                   </div>

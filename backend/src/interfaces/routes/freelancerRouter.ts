@@ -22,4 +22,6 @@ router.post("/create-bid",checkAuth('freelancer'),  BidController.createBid);
 router.put("/update-bid/:id", checkAuth('freelancer'), BidController.updateBid);
 router.delete("/delete-bid/:id",checkAuth('freelancer'), BidController.deleteBid);
 
+router.patch("/request-status/:id", checkAuth('freelancer'),RequestController.requestStatusUpdate);
+
 export default router;

@@ -3,6 +3,15 @@ import { IRequest } from "../entities/RequestForm";
 import { AccountDetailRepository } from "../infrastructure/repositories/accountDetail";
 import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
+import { sendNotification } from "..";
+
+const getNotificationText = (status: 'accepted' | 'rejected',freelancerName: string): string => {
+    const messages = {
+        accepted: `Congratulations! Your request for the freelancer ${freelancerName} has been accepted by the freelancer.`,
+        rejected: `We regret to inform you that the freelancer has rejected your request for ${freelancerName}.`
+    } as const;
+    return messages[status];
+}
 
 export const RequestUseCase = {
     createRequest: async (data: IRequest) => {
@@ -61,4 +70,35 @@ export const RequestUseCase = {
         let freelancerId = freelancerDetail._id.toString() 
         return await RequestRepository.getRequestByFreelancerId(freelancerId);
     },
+    updateRequestStatus: async (id:string, status:string) => {
+        const request = await RequestRepository.getRequestById(id);
+        if(!request?.freelancerId) return await RequestRepository.updateRequestStatus(id,status)
+        const {userId, _id:freelncerProfileId ,name} = request?.freelancerId;
+        console.log(request?.freelancerId.userId)
+        if (status === 'accepted' || status === 'rejected') {
+            const notificationData = {
+                senderId: userId,
+                userId: request?.requesterId,
+                role: 'client',
+                freelancerName:name,
+                text: getNotificationText(status,name),
+                isRead: false,
+                createdAt: new Date(),
+                types: status,
+                profileUrl:`/client/freelancer-detail/${freelncerProfileId}`
+
+            };
+
+            await NotificationRepository.createNotification(notificationData);
+
+            sendNotification(request?.requesterId.toString(), {
+                ...notificationData,
+                text:getNotificationText(status === 'accepted' ? 'rejected' : 'accepted', name),
+                profileUrl:`/client/freelancer-detail/${freelncerProfileId}`
+            })
+        }
+
+        return await RequestRepository.updateRequestStatus(id,status)
+
+    }
 };

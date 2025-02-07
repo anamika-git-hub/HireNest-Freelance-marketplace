@@ -58,7 +58,7 @@ export const RequestRepository = {
     },
     getRequestById: async (id: string) => {
         try {
-            const request = await RequestModel.findById(id)
+            const request = await RequestModel.findById(id).populate('freelancerId')
             return request
         } catch (error) {
             if(error instanceof Error){
@@ -79,6 +79,20 @@ export const RequestRepository = {
             }else {
                 throw new Error(`Failed to get request by userId due to an unknown error`);
             } 
+        }
+    },
+
+    updateRequestStatus: async (id: string, status:string) => {
+        try {
+            const updatedRequest = await RequestModel.findByIdAndUpdate(id,{status}, {new:true});
+            if(!updatedRequest) throw new Error ('Request not found');
+            return updatedRequest;
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to update the request: ${error.message}`);
+            }else {
+                throw new Error(`Failed to update request due to an unknown error`)
+            }
         }
     },
 };

@@ -33,7 +33,7 @@ export const BidUseCase = {
                             isRead: false,
                             createdAt: new Date(),
                             types:'bid',
-                            bidderProfileUrl:`/client/freelancer-detail/${sender._id}`,
+                            profileUrl:`/client/freelancer-detail/${sender._id}`,
                             projectUrl:`/client/bidders-list/${taskId}`
                         }
              await NotificationRepository.createNotification(notification);
@@ -47,7 +47,7 @@ export const BidUseCase = {
                 isRead: false,
                 createdAt: new Date(),
                 types:'bid',
-                bidderProfileUrl:`/client/freelancer-detail/${sender._id}`,
+                profileUrl:`/client/freelancer-detail/${sender._id}`,
                 projectUrl:`/client/bidders-list/${taskId}`
             });
             return await BidRepository.createBid(data);

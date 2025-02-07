@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
+import { IFreelancerProfile } from "./freelancerProfile";
 
 export interface IRequest {
-    freelancerId:mongoose.Types.ObjectId;
+    freelancerId:IFreelancerProfile;
     requesterId: mongoose.Types.ObjectId;
     fullName: string;
     email: string;
     description: string;
     createdAt: Date;
+    status: "pending" | "accepted" | "rejected";
 }

@@ -28,6 +28,9 @@ export const NotificationSchema = new Schema<INotification>(
         projectName: {
             type:String
         },
+        freelancerName: {
+            type:String
+        },
         text: {
             type: String,
             required:true
@@ -46,7 +49,7 @@ export const NotificationSchema = new Schema<INotification>(
             type: Date, 
             default: Date.now 
         },
-        bidderProfileUrl: {
+        profileUrl: {
             type: String,
         },
         projectUrl: {

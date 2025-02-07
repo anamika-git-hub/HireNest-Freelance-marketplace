@@ -8,6 +8,7 @@ import { MdDashboard,MdWork,MdGavel,MdSync } from "react-icons/md";
 import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { useUserRole } from '../../context/userRoleContext';
+import NotificationItem from './notificationItem';
 
 interface UserDetail {
   profileImage: string;
@@ -18,6 +19,7 @@ interface UserDetail {
 interface Notification {
   types: string;
   isRead: boolean;
+  role: string;
 }
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || 'guest';
@@ -59,22 +61,18 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("User Role Changed:", userRole); // Debugging purpose
+    console.log("User Role Changed:", userRole); 
   }, [userRole]);
 
   useEffect(()=>{
     const fetchNotifications = async () => {
       if (userId) {
         try {
-          const response = await axiosConfig.get(`/users/notifications`);
-
-           if (userRole === 'client') {
-          const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'bid' && !notif.isRead);
-            setNotifications(filteredNotifications);
-          } else if(userRole === 'freelancer') {
-            const filteredNotifications = response.data.filter((notif: Notification) => notif.types === 'request' && !notif.isRead);
-            setNotifications(filteredNotifications); 
-          }
+          const { data } = await axiosConfig.get('/users/notifications');
+        const filteredNotifications = data.filter(
+          (notif: Notification) => notif.role === role
+        );
+        setNotifications(filteredNotifications);
         } catch (error) {
           console.error("Error fetching notifications:", error);
         }
@@ -215,10 +213,16 @@ const Header: React.FC = () => {
 
     <div className="">
       {notifications.length > 0 ? (
-        notifications.map((notif, index) => (
-          <div key={index} onClick={() => handleNotificationClick(notif._id,index)} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
-            {notif.types === "request" && (
+        notifications.map((notification, index) => (
+          <div key={index} onClick={() => handleNotificationClick(notification._id,index)} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+            <NotificationItem 
+                key={index} 
+                notification={notification} 
+                role={role} 
+              />
+            {/* {notif.types === "request" && (
               <div className="flex">
+
                 <MdWork className="text-gray-500 text-xl" />
                 <p className="ml-3 text-sm text-gray-700">
                   You have a new request from
@@ -232,7 +236,7 @@ const Header: React.FC = () => {
               <div className="flex">
                 <MdGavel className="text-gray-500 text-xl" />
                 <p className="ml-3 text-sm text-gray-700">
-                  <a href={notif.bidderProfileUrl} className="text-blue-500 hover:underline">
+                  <a href={notif.profileUrl} className="text-blue-500 hover:underline">
                     {notif.senderName}
                   </a>{' '} placed a bid on your{' '}
                   <a href={notif.projectUrl} className="text-blue-500 hover:underline">
@@ -241,13 +245,14 @@ const Header: React.FC = () => {
                 </p>
               </div>
             )}
-            {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />}
-            <p className="text-xs pl-3 pt-1 text-gray-500">{new Date(notif.createdAt).toLocaleString()}</p>
+            {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />} */}
+            {/* <p className="text-xs pl-3 pt-1 text-gray-500">{new Date(notification.createdAt).toLocaleString()}</p> */}
           </div>
         ))
       ) : (
         <p className="text-center text-gray-500 py-2">No notifications</p>
       )}
+
     </div>
   </div>
 )}
