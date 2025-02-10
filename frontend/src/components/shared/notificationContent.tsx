@@ -1,6 +1,6 @@
-import { Underline } from "lucide-react";
 
 interface Notification {
+    _id?: string;
     role: string;
     text: string;
     profileUrl: string;
@@ -14,12 +14,22 @@ interface Notification {
 interface NotificationItemProps {
     notification: Notification;
     role: string | null;
+    index?:number;
+    handleNotificationClick?:(notificationId?:string, index?: number) => void;
   }
 
-const NotificationContent: React.FC<NotificationItemProps> = ({ notification, role }) => {
+const NotificationContent: React.FC<NotificationItemProps> = ({ notification, role ,handleNotificationClick, index}) => {
+  const handleClick = () => {
+    console.log('111111')
+    if (handleNotificationClick) {
+      console.log('222222222222')
+      handleNotificationClick(notification._id,index);
+    }
+};
+
     const messages = {
       request: () => (
-        <p className="ml-3 text-sm text-gray-700">
+        <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
           You have a new request from
           <a href="/freelancer/requests" className="text-blue-500 hover:underline">
             {' '}{notification.senderName}
@@ -27,7 +37,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
         </p>
       ),
       bid: () => (
-        <p className="ml-3 text-sm text-gray-700">
+        <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
           <a href={notification.profileUrl} className="text-blue-500 hover:underline">
             {notification.senderName}
           </a>{' '}
@@ -41,7 +51,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
       accepted: () => {
         if (role === 'freelancer') {
           return (
-            <p className="ml-3 text-sm text-gray-700">
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               Congratulations! Your bid for the project{' '}
               <a href={notification.projectUrl} className="text-blue-500 hover:underline">
                 {notification.projectName}
@@ -51,7 +61,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
           );
         }else if(role === 'client') {
           return (
-            <p className="ml-3 text-sm text-gray-700">
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               Congratulations! Your request for the freelancer{' '}
               <a href={notification.profileUrl} className="text-blue-500 hover:Underline">
                 {notification.freelancerName}
@@ -65,7 +75,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
       rejected: () => {
         if (role === 'freelancer') {
           return (
-            <p className="ml-3 text-sm text-gray-700">
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               We regret to inform you that the client has rejected your bid for{' '}
               <a href={notification.projectUrl} className="text-blue-500 hover:underline">
                 {notification.projectName}
@@ -75,7 +85,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
           );
         } else if (role === 'client') {
           return (
-            <p className="ml-3 text-sm text-gray-700">
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               We regret to inform you that the freelancer{' '}
               <a href={notification.profileUrl} className="text-blue-500 hover:underline">
                 {notification.freelancerName}

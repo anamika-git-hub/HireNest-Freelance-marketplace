@@ -70,7 +70,7 @@ const Header: React.FC = () => {
         try {
           const { data } = await axiosConfig.get('/users/notifications');
         const filteredNotifications = data.filter(
-          (notif: Notification) => notif.role === role
+          (notif: Notification) => notif.role === role && !notif.isRead
         );
         setNotifications(filteredNotifications);
         } catch (error) {
@@ -157,7 +157,8 @@ const Header: React.FC = () => {
     
   };
 
-  const handleNotificationClick = async(notificationId:string,index: number) => {
+  const handleNotificationClick = async(notificationId?:string,index?: number) => {
+    console.log('33',notificationId,index)
     await axiosConfig.put(`/users/mark-as-read/${notificationId}`);
     setNotifications((prevNotifications) => {
       const updatedNotifications = prevNotifications.filter((_, i) => i !== index);
@@ -214,39 +215,15 @@ const Header: React.FC = () => {
     <div className="">
       {notifications.length > 0 ? (
         notifications.map((notification, index) => (
-          <div key={index} onClick={() => handleNotificationClick(notification._id,index)} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+          <div key={index} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
             <NotificationItem 
                 key={index} 
                 notification={notification} 
                 role={role} 
+                handleNotificationClick = {handleNotificationClick}
+                index={index}
               />
-            {/* {notif.types === "request" && (
-              <div className="flex">
-
-                <MdWork className="text-gray-500 text-xl" />
-                <p className="ml-3 text-sm text-gray-700">
-                  You have a new request from
-                  <a href="/freelancer/requests" className="text-blue-500 hover:underline">
-                    {' '} {notif.senderName}
-                  </a>
-                </p>
-              </div>
-            )}
-            {notif.types === "bid" && (
-              <div className="flex">
-                <MdGavel className="text-gray-500 text-xl" />
-                <p className="ml-3 text-sm text-gray-700">
-                  <a href={notif.profileUrl} className="text-blue-500 hover:underline">
-                    {notif.senderName}
-                  </a>{' '} placed a bid on your{' '}
-                  <a href={notif.projectUrl} className="text-blue-500 hover:underline">
-                    {notif.projectName}
-                  </a>{' '} project.
-                </p>
-              </div>
-            )}
-            {notif.types === "job_expiry" && <MdSync className="text-gray-500 text-2xl" />} */}
-            {/* <p className="text-xs pl-3 pt-1 text-gray-500">{new Date(notification.createdAt).toLocaleString()}</p> */}
+            
           </div>
         ))
       ) : (

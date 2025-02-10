@@ -15,13 +15,17 @@ interface Notification {
 interface NotificationItemProps {
   notification: Notification;
   role: string | null;
+  index?:number;
+  handleNotificationClick?:(notificationId?:string,index?: number) => void;
 }
 
-const NotificationItem: React.FC<NotificationItemProps> = ({ notification, role }) => (
+
+
+const NotificationItem: React.FC<NotificationItemProps> = ({ notification, role, handleNotificationClick ,index}) => (
   <div className="p-3 flex items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
     <div className="flex">
       <NotificationIcon type={notification.types} />
-      <NotificationContent notification={notification} role={role} />
+      <NotificationContent notification={notification} role={role} handleNotificationClick = {handleNotificationClick} index={index}/>
     </div>
   </div>
 );
