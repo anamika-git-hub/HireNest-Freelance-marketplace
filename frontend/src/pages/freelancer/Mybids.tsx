@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 import ConfirmMessage from "../../components/shared/ConfirmMessage";
@@ -31,6 +31,8 @@ const ActiveBids: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null); 
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -133,13 +135,37 @@ const ActiveBids: React.FC = () => {
                   <h2 className="text-lg font-medium">{bid.taskId.projectName}</h2>
                 </Link>
                 <div className="flex items-center space-x-2 mt-2">
+                {bid.status === 'pending' && (
+                  <>
                   <button
                     onClick={() => handleEditClick(bid)}
                     className="flex items-center bg-black text-white px-3 py-1 rounded-md hover:bg-gray-800"
                   >
                     <FaEdit className="mr-1" /> Edit
                   </button>
-                  <button
+                  
+                  </>
+                   )}
+                    {bid.status !== 'pending' && (
+                        <div className="flex items-center gap-2">
+                        <span className={`px-4 py-2 rounded-md ${
+                          bid.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                        </span>
+
+                        {bid.status === 'accepted' && (
+                          <button
+                            onClick={() => navigate(`/freelancer/contract/${bid._id}`)} 
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                          >
+                            View Contract
+                          </button>
+                        )}
+                        </div>
+                      )}
+
+                      <button
                     onClick={() => deleteBid(bid._id)}
                     className="flex items-center bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
                   >

@@ -1,8 +1,13 @@
 import mongoose, { Schema } from "mongoose";
-import { IMilestone } from "../../entities/milestone";
+import { IContract } from "../../entities/contract";
 
-const MilestoneSchema = new Schema<IMilestone>(
+const ContractSchema = new Schema<IContract>(
     {   
+        bidId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"BidSubmission",
+        default: null
+        },
         taskId:{
             type: mongoose.Schema.Types.ObjectId,
             ref:"TaskSubmission",
@@ -22,6 +27,9 @@ const MilestoneSchema = new Schema<IMilestone>(
             type:Number,
             required:true
         },
+        description: {
+            type:String,
+        },
         milestones: [
             {
                 title:String,
@@ -33,7 +41,7 @@ const MilestoneSchema = new Schema<IMilestone>(
     },{timestamps:true}
 );
 
-export const MilestoneModel = mongoose.model<IMilestone>(
-    'milestone',MilestoneSchema
+export const ContractModel = mongoose.model<IContract>(
+    'contract',ContractSchema
 );
 

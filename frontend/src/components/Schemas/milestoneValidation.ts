@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 
-const MileStoneValidationSchema = (context:any) =>
+const ContractValidationSchema = (context:any) =>
     Yup.object().shape({
     title: Yup.string().required("Title is required"),
     budget: Yup.number().positive("Budget must be positive").required("Budget is required"),
@@ -23,4 +23,4 @@ const MileStoneValidationSchema = (context:any) =>
       })
     ),
 })
-  export default MileStoneValidationSchema;
+  export default ContractValidationSchema;

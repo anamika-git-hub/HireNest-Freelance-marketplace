@@ -11,6 +11,7 @@ import { TaskController } from '../controllers/taskController';
 import { CategoryController } from '../controllers/categoryController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { checkAuth } from '../middlewares/auth';
+import { ContractController } from '../controllers/ContractController';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -49,4 +50,5 @@ router.get('/notifications',checkAuth('user'),UserController.getNotification);
 router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead)
 
 
+router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
 export default router;

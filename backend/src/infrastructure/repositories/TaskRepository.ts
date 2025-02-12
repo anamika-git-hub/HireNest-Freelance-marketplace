@@ -102,6 +102,18 @@ export const TaskRepository = {
                 throw new Error(`Failed to get Task by userId due to an unknown error`);
             } 
         }
+    },
+
+    updateTaskStatus: async (id:string,status: string) => {
+        try {
+            return await TaskSubmissionModel.findByIdAndUpdate(id,{ status: status }, { new: true })
+        } catch (error) {
+            if(error instanceof Error){
+                throw new Error(`Failed to get Task by userId: ${error.message}`);
+            }else {
+                throw new Error(`Failed to get Task by userId due to an unknown error`);
+            }   
+        }
     }
 
 };

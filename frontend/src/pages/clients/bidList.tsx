@@ -9,6 +9,7 @@ interface Bid {
   _id: string; 
   rate: string;
   deliveryTime: number;
+  taskId:string;
   timeUnit: string;
   bidderId: string;
   status: 'pending' | 'accepted' | 'rejected'; 
@@ -62,6 +63,18 @@ const BiddersList: React.FC = () => {
   const handleBidStatusUpdate = async (bidId: string, status: 'accepted' | 'rejected', freelancerId?: string) => {
     try {
       setLoading(true);
+
+      if(status === 'accepted' && id) {
+        const taskResponse = await axiosConfig.get(`/users/tasks/${id}`);
+        const taskStatus = taskResponse.data.task.status;
+        console.log('ll',taskResponse,taskStatus)
+
+        if (taskStatus === 'onhold') {
+          toast.error("This task is currently on hold and cannot be accepted.");
+          setLoading(false);
+          return;
+        }
+      }
       const response = await axiosConfig.patch(`/client/bid-status/${bidId}`, {
         status,
         taskId: id
@@ -71,8 +84,9 @@ const BiddersList: React.FC = () => {
         toast.success(`Bid ${status} successfully`);
         
         if (status === 'accepted' && freelancerId) {
-          navigate('/client/send-offer', {
+          navigate('/client/send-contract', {
             state: {
+              bidId:bidId,
               taskId: id,
               freelancerId: freelancerId,
             }
@@ -153,11 +167,22 @@ const BiddersList: React.FC = () => {
                         </>
                       )}
                       {bid.status !== 'pending' && (
+                        <div className="flex items-center gap-2">
                         <span className={`px-4 py-2 rounded-md ${
                           bid.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                           {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
                         </span>
+
+                        {bid.status === 'accepted' && (
+                          <button
+                            onClick={() => navigate(`/client/my-contract/${bid._id}`)} 
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                          >
+                            View Contract
+                          </button>
+                        )}
+                        </div>
                       )}
                       <button
                         onClick={() => sendMessage(bid.bidderId)}

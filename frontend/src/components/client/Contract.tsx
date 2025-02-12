@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
-interface MilestoneFormValues {
+interface ContractFormValues {
   title: string;
   budget: string;
   description: string;
@@ -17,9 +17,9 @@ interface MilestoneFormValues {
   }[];
 }
 
-const MilestoneSection: React.FC = () => {
+const ContractSection: React.FC = () => {
   const location = useLocation();
-  const { taskId, freelancerId } = location.state;
+  const {bidId, taskId, freelancerId } = location.state;
   
   const initialMilestone = { 
     title: "", 
@@ -28,16 +28,17 @@ const MilestoneSection: React.FC = () => {
     cost: "", 
   };
 
-  const initialValues: MilestoneFormValues = {
+  const initialValues: ContractFormValues = {
     title: "",
     budget: "",
     description: "",
     milestones: [initialMilestone]
   };
 
-  const MileStoneValidationSchema = Yup.object().shape({
+  const ContractValidationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     budget: Yup.number().positive("Budget must be positive").required("Budget is required"),
+    description: Yup.string().required("Description is required"),
     milestones: Yup.array().of(
       Yup.object().shape({
         title: Yup.string().required("Milestone title is required"),
@@ -61,7 +62,7 @@ const MilestoneSection: React.FC = () => {
     )
   });
 
-  const handleSubmit = async (values: MilestoneFormValues, { setSubmitting, resetForm }: any) => {
+  const handleSubmit = async (values: ContractFormValues, { setSubmitting, resetForm }: any) => {
     try {
       // Convert string values to numbers where needed
       const formattedValues = {
@@ -73,8 +74,9 @@ const MilestoneSection: React.FC = () => {
         }))
       };
 
-      const response = await axiosConfig.post("/client/create-milestone", {
+      const response = await axiosConfig.post("/client/create-contract", {
         ...formattedValues,
+        bidId,
         taskId,
         freelancerId
       });
@@ -105,7 +107,7 @@ const MilestoneSection: React.FC = () => {
             description: "", 
             milestones: [initialMilestone] 
           }}
-          validationSchema={MileStoneValidationSchema}
+          validationSchema={ContractValidationSchema}
           onSubmit={handleSubmit}
         >
           {({ values, setFieldValue, isSubmitting , errors ,touched}) => (
@@ -135,7 +137,19 @@ const MilestoneSection: React.FC = () => {
                   />
                   <ErrorMessage name="budget" component="div" className="text-red-600 text-sm" />
                 </div>
+                
               </div>
+              <div>
+                  <label className="block font-medium mb-2">Description</label>
+                  <Field
+                   as="textarea"
+                   name="description"
+                   rows={4}
+                    className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter project description"
+                  />
+                  <ErrorMessage name="description" component="div" className="text-red-600 text-sm mt-1" />
+               </div>
 
               {/* Description and Milestones sections remain the same */}
               <div className="mb-6">
@@ -233,4 +247,4 @@ const MilestoneSection: React.FC = () => {
   );
 };
 
-export default MilestoneSection;
+export default ContractSection;

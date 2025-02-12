@@ -101,8 +101,16 @@ export const BidUseCase = {
          if (!isPopulatedTask(bid.taskId)) {
             throw new Error('Task data not populated');
         }
-        const { clientId, _id: taskId, projectName } = bid.taskId;
+        const { clientId, _id, projectName } = bid.taskId;
         const { bidderId } = bid;
+        const taskId = _id?.toString()
+        if (!taskId) {
+            throw new Error('Task ID is undefined');
+        }
+
+        if (status === 'accepted') {
+            await TaskRepository.updateTaskStatus(taskId, 'onhold');
+        }
     
         if (status === 'accepted' || status === 'rejected') {
             const notificationData = {

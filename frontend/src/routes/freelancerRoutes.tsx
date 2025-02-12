@@ -11,6 +11,7 @@ import TaskBookmarks from '../pages/freelancer/taskBookmarks';
 import RequestList from '../pages/freelancer/requests';
 import TaskList from '../pages/clients/taskList';
 import TaskDetail from '../pages/clients/taskDetail';
+import ContractDetails from '../pages/freelancer/contract';
 
 const FreelancerRoutes = () => (
   <Routes>
@@ -21,6 +22,7 @@ const FreelancerRoutes = () => (
     <Route path="/my-profile" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><MyProfile/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/task-bookmarks" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><TaskBookmarks/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/requests" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><RequestList/></UserRoleProvider></UserPrivateRoute>} />
+    <Route path="/contract/:id" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><ContractDetails/></UserRoleProvider></UserPrivateRoute>} />
   </Routes>
 );
 
