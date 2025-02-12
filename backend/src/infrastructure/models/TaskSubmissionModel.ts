@@ -43,7 +43,12 @@ const TaskSubmissionSchema = new Schema<ITaskSubmissionForm>({
     attachments: [{
         type: Schema.Types.Mixed, 
         required: false
-    }]
+    }],
+    status: {
+        type: String,
+        enum: ['pending','onhold','ongoing','completed'],
+        default: 'pending'
+    },
 }, { timestamps: true });
 
 export const TaskSubmissionModel = mongoose.model<ITaskSubmissionForm>('TaskSubmission', TaskSubmissionSchema);

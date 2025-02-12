@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { ITaskSubmissionForm } from "./Tasks";
 
 export interface IBidSubmissionForm {
-    taskId: ITaskSubmissionForm;
+    taskId: mongoose.Types.ObjectId | ITaskSubmissionForm;
     bidderId:  mongoose.Types.ObjectId;
     rate: number;
     deliveryTime: number;

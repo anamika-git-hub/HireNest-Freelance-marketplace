@@ -12,4 +12,5 @@ export interface ITaskSubmissionForm {
     maxRate: number | string;
     description: string;
     attachments: String[];
+    status: "pending" | "onhold" | "ongoing" | "completed"
 }

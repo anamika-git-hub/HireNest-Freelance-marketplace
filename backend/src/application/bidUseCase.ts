@@ -92,7 +92,15 @@ export const BidUseCase = {
     updateBidStatus: async (id: string, status:string) => {
         const bid = await BidRepository.getBidById(id);
         if (!bid?.taskId) return await BidRepository.updateBidStatus(id, status);
-    
+        function isPopulatedTask(
+            task: mongoose.Types.ObjectId | ITaskSubmissionForm
+        ): task is ITaskSubmissionForm {
+            return (task as ITaskSubmissionForm).projectName !== undefined;
+        }
+
+         if (!isPopulatedTask(bid.taskId)) {
+            throw new Error('Task data not populated');
+        }
         const { clientId, _id: taskId, projectName } = bid.taskId;
         const { bidderId } = bid;
     
