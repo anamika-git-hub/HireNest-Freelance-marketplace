@@ -7,6 +7,7 @@ import { RequestController } from '../controllers/requestController';
 import { uploadFreelancerImages } from '../middlewares/uploadFileImages';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
+import { ContractController } from '../controllers/ContractController';
 
 
 const router = express.Router();
@@ -23,5 +24,7 @@ router.put("/update-bid/:id", checkAuth('freelancer'), BidController.updateBid);
 router.delete("/delete-bid/:id",checkAuth('freelancer'), BidController.deleteBid);
 
 router.patch("/request-status/:id", checkAuth('freelancer'),RequestController.requestStatusUpdate);
+
+router.patch("/contract-status/:id",checkAuth('freelancer'),ContractController.updateContractStatus);
 
 export default router;

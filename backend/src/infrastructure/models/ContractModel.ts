@@ -29,6 +29,11 @@ const ContractSchema = new Schema<IContract>(
         },
         description: {
             type:String,
+        }, 
+        status: {
+            type: String,
+            enum: ["pending", "accepted", "rejected"],
+            default: "pending",
         },
         milestones: [
             {

@@ -12,6 +12,7 @@ interface Bid {
   taskId:string;
   timeUnit: string;
   bidderId: string;
+  contractStatus: 'pending' | 'accepted' | 'rejected'; 
   status: 'pending' | 'accepted' | 'rejected'; 
 }
 
@@ -45,8 +46,23 @@ const BiddersList: React.FC = () => {
         })
       );
 
+      const bidsWithContractStatus = await Promise.all(
+        fetchedBidders.map(async (bid:Bid) => {
+          if (bid.status === 'accepted') {
+            try {
+              const contractResponse = await axiosConfig.get(`/users/contract/${bid._id}`);
+              
+              return { ...bid, contractStatus: contractResponse.data.result.status };
+            } catch {
+              return { ...bid, contractStatus: null };
+            }
+          }
+          return { ...bid, contractStatus: null };
+        })
+      );
+
       setFreelancerProfiles(fetchedProfiles);
-      setBids(fetchedBidders);
+      setBids(bidsWithContractStatus);
       setLoading(false);
     } catch (err) {
       setError("Failed to load bidders. Please try again later.");
@@ -60,6 +76,8 @@ const BiddersList: React.FC = () => {
     }
   }, [id]);
 
+  console.log('kdkdkd',bids)
+
   const handleBidStatusUpdate = async (bidId: string, status: 'accepted' | 'rejected', freelancerId?: string) => {
     try {
       setLoading(true);
@@ -67,7 +85,6 @@ const BiddersList: React.FC = () => {
       if(status === 'accepted' && id) {
         const taskResponse = await axiosConfig.get(`/users/tasks/${id}`);
         const taskStatus = taskResponse.data.task.status;
-        console.log('ll',taskResponse,taskStatus)
 
         if (taskStatus === 'onhold') {
           toast.error("This task is currently on hold and cannot be accepted.");
@@ -149,6 +166,16 @@ const BiddersList: React.FC = () => {
                     <p className="text-sm text-gray-500 flex items-center space-x-2">
                       <span>{freelancerProfile.tagline}</span>
                     </p>
+                    {bid.status === 'accepted' && (
+                      <>
+                      {bid.contractStatus === 'rejected' && (
+                        <p className="text-sm text-red-800 flex items-center space-x-2">
+                          <span>Contract rejected by the freelancer</span>
+                        </p>
+                      )}
+                      </>
+                    )}
+
                     <div className="flex mt-3 space-x-2">
                       {bid.status === 'pending' && (
                         <>
@@ -175,13 +202,27 @@ const BiddersList: React.FC = () => {
                         </span>
 
                         {bid.status === 'accepted' && (
-                          <button
-                            onClick={() => navigate(`/client/my-contract/${bid._id}`)} 
-                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                          >
-                            View Contract
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {bid.contractStatus === 'rejected' ? (
+                              <>
+                                <button
+                                  onClick={() => navigate(`/client/my-contract/${bid._id}`)} 
+                                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
+                                >
+                                  Resend Contract
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => navigate(`/client/my-contract/${bid._id}`)} 
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                              >
+                                View Contract
+                              </button>
+                            )}
+                          </div>
                         )}
+
                         </div>
                       )}
                       <button

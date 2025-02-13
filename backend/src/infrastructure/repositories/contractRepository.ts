@@ -11,6 +11,9 @@ export const ContractRepository = {
     },
     updateContract: async(bidId: string, updates: IContract) => {
         return await ContractModel.findOneAndUpdate({bidId},updates,{new: true})
+    },
+    updateContractStatus: async (bidId: string,status: string) => {
+        return await ContractModel.findOneAndUpdate({bidId},{status},{new:true})
     }
 
 }

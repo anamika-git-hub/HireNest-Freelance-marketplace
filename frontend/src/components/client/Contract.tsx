@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import axiosConfig from "../../service/axios";
 import * as Yup from 'yup';
 import toast from "react-hot-toast";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface ContractFormValues {
   title: string;
@@ -20,6 +20,7 @@ interface ContractFormValues {
 const ContractSection: React.FC = () => {
   const location = useLocation();
   const {bidId, taskId, freelancerId } = location.state;
+  const navigate = useNavigate();
   
   const initialMilestone = { 
     title: "", 
@@ -82,6 +83,7 @@ const ContractSection: React.FC = () => {
       });
 
       if (response.status === 200) {
+       navigate(`/client/my-contract/${bidId}`)
         toast.success('Offer sent successfully');
         resetForm();
       }
