@@ -209,30 +209,33 @@ const Header: React.FC = () => {
       </button>
               {/* Notification Dropdown */}
               {showDropdown && (
-  <div className="absolute right-0 mt-64 w-80 bg-white shadow-lg rounded-lg p-3 border border-gray-200 max-h-96 overflow-y-auto" ref={notificationMenuRef}>
-    <h3 className="text-gray-700 font-semibold mb-2">Notifications</h3>
-
-    <div className="">
-      {notifications.length > 0 ? (
-        notifications.map((notification, index) => (
-          <div key={index} className="p-3  items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
-            <NotificationItem 
-                key={index} 
-                notification={notification} 
-                role={role} 
-                handleNotificationClick = {handleNotificationClick}
-                index={index}
-              />
-            
-          </div>
-        ))
-      ) : (
-        <p className="text-center text-gray-500 py-2">No notifications</p>
-      )}
-
-    </div>
-  </div>
-)}
+                <div 
+                  className="absolute right-0 top-full mt-4 w-80 bg-white shadow-lg rounded-lg p-3 border border-gray-200 max-h-96 overflow-y-auto" 
+                  ref={notificationMenuRef}
+                  style={{
+                    maxHeight: 'calc(80vh - 100px)', 
+                    zIndex: 1000
+                  }}
+                >
+                  <h3 className="text-gray-700 font-semibold mb-2">Notifications</h3>
+                  <div className="space-y-2">
+                    {notifications.length > 0 ? (
+                      notifications.map((notification, index) => (
+                        <div key={index} className="p-3 items-start gap-3 border-b last:border-none hover:bg-gray-100 rounded-md">
+                          <NotificationItem 
+                            notification={notification} 
+                            role={role} 
+                            handleNotificationClick={handleNotificationClick}
+                            index={index}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-500 py-2">No notifications</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
             <button className="relative hover:text-blue-200">✉️</button>
             <div className="relative" ref={profileMenuRef}>
