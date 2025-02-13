@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
-import { ArrowLeft } from 'lucide-react';
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ArrowLeft, MoreVertical, Video, Search, X } from 'lucide-react';
 
 interface Message {
   receiverId?: string;
@@ -46,7 +47,47 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleClearChat = () => {
+    socket.emit('clear_chat', {
+      senderId: userId,
+      receiverId: contacts._id,
+      role
+    });
+    console.log('clear chat')
+  };
+
+  useEffect(() => {
+    socket.on('chat_cleared', (receiverId) => {
+      if (receiverId === contacts._id) {
+        setNewMessage('');
+      }
+    });
+    return () => {
+      socket.off('chat_cleared');
+    };
+  }, [contacts._id, socket]);
+  
+
+  const handleVideoCall = () => {
+    console.log('Starting video call with:', contacts.name);
+  };
+
+  const toggleSearch = () => {
+    setShowSearch(!showSearch);
+    if (!showSearch) {
+      setSearchQuery('');
+    }
+  };
+
+  const filteredMessages = searchQuery
+  ? messages.filter(msg => 
+      msg.text.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  : messages;
 
   const formatMessageDate = (dateString: string) => {
     const messageDate = new Date(dateString);
@@ -71,7 +112,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     }
   };
 
-  const groupedMessages = messages.reduce((groups: { [key: string]: Message[] }, message) => {
+  const groupedMessages = filteredMessages.reduce((groups: { [key: string]: Message[] }, message) => {
     const date = formatMessageDate(message.time);
     if (!groups[date]) {
       groups[date] = [];
@@ -161,9 +202,50 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           )}
           <h2 className="text-lg font-medium">{contacts.name}</h2>
         </div>
-        <button className="text-sm text-gray-500 hover:text-red-500">
-          Delete Conversation
-        </button>
+        <div className="flex items-center gap-4">
+          {showSearch && (
+            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1">
+              <input
+                type="text"
+                placeholder="Search messages..."
+                className="bg-transparent border-none focus:outline-none text-sm w-40"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button onClick={toggleSearch} className="ml-2">
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+          )}
+          <button onClick={handleVideoCall} className="text-gray-600 hover:text-gray-800">
+            <Video className="h-5 w-5" />
+          </button>
+         <DropdownMenu.Root>
+          <DropdownMenu.Trigger className="focus:outline-none">
+            <MoreVertical className="h-5 w-5 text-gray-600 hover:text-gray-800" />
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="bg-white shadow-md rounded-md p-2 text-sm"
+              align="end"
+            >
+              <DropdownMenu.Item
+                onClick={toggleSearch}
+                className="flex items-center cursor-pointer hover:bg-gray-100 rounded px-2 py-1"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Search
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onClick={handleClearChat}
+                className="flex items-center cursor-pointer hover:bg-gray-100 rounded px-2 py-1"
+              >
+                Clear chat
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+        </div>
       </div>
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
@@ -176,7 +258,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             {dateMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.type === 'received' ? 'justify-start' : 'justify-end'}`}>
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
+                  className={`max-w-xs px-4 py-2 rounded-lg  mb-2 ${
                     msg.type === 'received' ? 'bg-gray-100 text-gray-800' : 'bg-blue-500 text-white'
                   }`}
                 >
