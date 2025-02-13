@@ -30,7 +30,12 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedContactId }) => {
-  console.log('contac',contacts)
+  const sortedContacts = [...contacts].sort((a, b) => {
+    const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+    const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+    return dateB - dateA; 
+  });
+
   return (
     <div className="w-full lg:w-1/3 bg-white h-full border-r flex flex-col">
       <div className="p-4 border-b h-20">
@@ -41,15 +46,15 @@ const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedCo
         />
       </div>
       <ul className="flex-1 overflow-y-auto">
-        {contacts.map((contact, idx) => (
+        {sortedContacts.map((contact, idx) => (
           <li
-          key={idx}
-          className={`flex items-center p-4 hover:bg-gray-100 cursor-pointer ${
-            selectedContactId === contact._id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-          }`}
-          onClick={() => onSelectContact(contact)}
-        >
-             <div className="relative">
+            key={idx}
+            className={`flex items-center p-4 hover:bg-gray-100 cursor-pointer ${
+              selectedContactId === contact._id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+            }`}
+            onClick={() => onSelectContact(contact)}
+          >
+            <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
                 <img className="w-full h-full object-cover" src={contact.profileImage} alt="" />
               </div>
@@ -60,20 +65,14 @@ const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedCo
               )}
             </div>
             <div className="ml-4 flex-1">
-              <h4 className="font-medium text-gray-800">
-                 {contact.name}
-              </h4>
-              
+              <h4 className="font-medium text-gray-800">{contact.name}</h4>
               {contact.lastMessage && (
                 <p className="text-sm text-gray-500 truncate flex items-center gap-1">
-                  {/* Show single or double tick before the message */}
                   {contact.lastMessage.receiverId === contact._id && (
-                    <span className={`text-[11px] text-blue-500`}>
+                    <span className="text-[11px] text-blue-500">
                       {contact.lastMessage.isRead ? "✓✓" : "✓"}
                     </span>
                   )}
-
-                  {/* Show media type icon if available */}
                   {contact.lastMessage.mediaType && (
                     <span className="text-blue-500">
                       {contact.lastMessage.mediaType === "image" && "📷 Photo"}
@@ -82,23 +81,19 @@ const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedCo
                       {contact.lastMessage.mediaType === "file" && "📎 File"}
                     </span>
                   )}
-
-                  {/* Message text */}
                   {contact.lastMessage.text}
                 </p>
               )}
             </div>
-            {contact.lastMessage && (
+            {contact.lastMessage && contact.lastMessage.createdAt && (
               <div className="ml-2 flex flex-col items-end">
-                 { contact.lastMessage.createdAt && (
-                    <span className="text-xs text-gray-500">
-                    {new Date(contact.lastMessage.createdAt).toLocaleString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      hour12: true 
-                    })}
-                  </span> 
-                  )}
+                <span className="text-xs text-gray-500">
+                  {new Date(contact.lastMessage.createdAt).toLocaleString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </span>
               </div>
             )}
           </li>

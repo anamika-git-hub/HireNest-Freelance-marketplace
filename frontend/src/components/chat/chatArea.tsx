@@ -1,4 +1,4 @@
-import React , {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { ArrowLeft } from 'lucide-react';
 
@@ -35,23 +35,52 @@ interface ChatAreaProps {
   isMobileView: boolean;
 }
 
-const ChatArea: React.FC<ChatAreaProps> = ({ 
-  contacts, 
-  messages, 
-  userId, 
-  socket, 
+const ChatArea: React.FC<ChatAreaProps> = ({
+  contacts,
+  messages,
+  userId,
+  socket,
   role,
   onBack,
-  isMobileView 
+  isMobileView
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const formatMessageDate = (dateString: string) => {
+    const messageDate = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  console.log('mmmm',messages)
+    const messageDateDay = new Date(messageDate.getFullYear(), messageDate.getMonth(), messageDate.getDate());
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayDay = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+
+    if (messageDateDay.getTime() === todayDay.getTime()) {
+      return 'Today';
+    } else if (messageDateDay.getTime() === yesterdayDay.getTime()) {
+      return 'Yesterday';
+    } else {
+      return messageDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+  };
+
+  const groupedMessages = messages.reduce((groups: { [key: string]: Message[] }, message) => {
+    const date = formatMessageDate(message.time);
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(message);
+    return groups;
+  }, {});
+
   useEffect(() => {
-    // Mark messages as read when chat is opened or new messages arrive
     const unreadMessages = messages.filter(
       msg => msg.type === 'received' && !msg.isRead
     );
@@ -64,24 +93,20 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       });
     }
   }, [messages, contacts._id, userId, role, socket]);
-  
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      // You would typically upload this file to your server here
-      // and get back a URL to use in the message
       handleUpload(file);
     }
   };
 
   const handleUpload = async (file: File) => {
-    // This is a placeholder for your actual file upload logic
     try {
       const formData = new FormData();
       formData.append('file', file);
       
-      // Replace with your actual upload endpoint
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
@@ -89,7 +114,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       
       const data = await response.json();
       
-      // Send message with media
       sendMessage('', {
         mediaUrl: data.url,
         mediaType: getMediaType(file.type),
@@ -107,10 +131,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     return 'file';
   };
 
-  const sendMessage = (text: string = newMessage, mediaData?: { 
-    mediaUrl?: string; 
-    mediaType?: Message['mediaType']; 
-    fileName?: string 
+  const sendMessage = (text: string = newMessage, mediaData?: {
+    mediaUrl?: string;
+    mediaType?: Message['mediaType'];
+    fileName?: string
   }) => {
     if (text.trim() !== '' || mediaData?.mediaUrl) {
       const messageData: Message = {
@@ -142,59 +166,68 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         </button>
       </div>
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.type === 'received' ? 'justify-start' : 'justify-end'}`}>
-            <div
-              className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.type === 'received' ? 'bg-gray-100 text-gray-800' : 'bg-blue-500 text-white'
-              }`}
-            >
-              {msg.mediaUrl && (
-                <div className="mb-2">
-                  {msg.mediaType === 'image' && (
-                    <img src={msg.mediaUrl} alt="Shared image" className="rounded-lg max-w-full" />
+        {Object.entries(groupedMessages).map(([date, dateMessages]) => (
+          <div key={date}>
+            <div className="flex justify-center mb-4">
+              <span className="bg-gray-200 text-gray-600 text-xs px-4 py-1 rounded-full">
+                {date}
+              </span>
+            </div>
+            {dateMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.type === 'received' ? 'justify-start' : 'justify-end'}`}>
+                <div
+                  className={`max-w-xs px-4 py-2 rounded-lg ${
+                    msg.type === 'received' ? 'bg-gray-100 text-gray-800' : 'bg-blue-500 text-white'
+                  }`}
+                >
+                  {msg.mediaUrl && (
+                    <div className="mb-2">
+                      {msg.mediaType === 'image' && (
+                        <img src={msg.mediaUrl} alt="Shared image" className="rounded-lg max-w-full" />
+                      )}
+                      {msg.mediaType === 'video' && (
+                        <video controls className="rounded-lg max-w-full">
+                          <source src={msg.mediaUrl} type="video/mp4" />
+                        </video>
+                      )}
+                      {msg.mediaType === 'audio' && (
+                        <audio controls className="max-w-full">
+                          <source src={msg.mediaUrl} type="audio/mpeg" />
+                        </audio>
+                      )}
+                      {msg.mediaType === 'file' && (
+                        <a
+                          href={msg.mediaUrl}
+                          download={msg.fileName}
+                          className="flex items-center gap-2 text-blue-100 hover:text-blue-200"
+                        >
+                          📎 {msg.fileName}
+                        </a>
+                      )}
+                    </div>
                   )}
-                  {msg.mediaType === 'video' && (
-                    <video controls className="rounded-lg max-w-full">
-                      <source src={msg.mediaUrl} type="video/mp4" />
-                    </video>
-                  )}
-                  {msg.mediaType === 'audio' && (
-                    <audio controls className="max-w-full">
-                      <source src={msg.mediaUrl} type="audio/mpeg" />
-                    </audio>
-                  )}
-                  {msg.mediaType === 'file' && (
-                    <a 
-                      href={msg.mediaUrl} 
-                      download={msg.fileName}
-                      className="flex items-center gap-2 text-blue-100 hover:text-blue-200"
-                    >
-                      📎 {msg.fileName}
-                    </a>
-                  )}
-                </div>
-              )}
-              
-              <div className="relative pr-16"> {/* Add padding for time/status */}
-                <span className="text-sm mr-2">{msg.text}</span>
-                <div className="absolute bottom-0 gap-1 right-0 flex items-end">
-                <span className="text-[10px] opacity-75">
-                    {new Date(msg.time).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      hour12: true 
-                    })}
-                  </span>
+                  
+                  <div className="relative pr-16">
+                    <span className="text-sm mr-2">{msg.text}</span>
+                    <div className="absolute bottom-0 gap-1 right-0 flex items-end">
+                      <span className="text-[10px] opacity-75">
+                        {new Date(msg.time).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </span>
 
-                  {msg.type === 'sent' && (
-                    <span className={`text-[10px] ${msg.isRead ? 'text-white' : 'opacity-75'}`}>
-                      {msg.isRead ? '✓✓' : '✓'}
-                    </span>
-                  )}
+                      {msg.type === 'sent' && (
+                        <span className={`text-[10px] ${msg.isRead ? 'text-white' : 'opacity-75'}`}>
+                          {msg.isRead ? '✓✓' : '✓'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         ))}
       </div>
@@ -204,7 +237,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             <span className="text-sm text-gray-600">
               📎 {selectedFile.name}
             </span>
-            <button 
+            <button
               onClick={() => setSelectedFile(null)}
               className="text-red-500 hover:text-red-700"
             >
@@ -213,7 +246,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           </div>
         )}
         <div className="flex items-center space-x-2">
-          <button 
+          <button
             onClick={() => fileInputRef.current?.click()}
             className="p-2 text-gray-500 hover:text-gray-700"
           >
@@ -234,7 +267,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           />
-          <button 
+          <button
             className="px-4 py-2 bg-blue-500 text-white rounded-md"
             onClick={() => sendMessage()}
           >
