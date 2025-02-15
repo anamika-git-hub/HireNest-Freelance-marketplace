@@ -19,7 +19,7 @@ const ConfirmMessage: React.FC<ConfirmMessageProps> = ({ message, onConfirm, onC
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-blue-950 text-white rounded hover:bg-red-600"
+            className="px-4 py-2 bg-blue-950 text-white rounded hover:bg-blue-600"
             onClick={onConfirm}
           >
             Confirm

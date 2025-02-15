@@ -4,12 +4,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
+import ConfirmMessage from "../../components/shared/ConfirmMessage";
 
 interface Bid {
   _id: string; 
   rate: string;
   deliveryTime: number;
-  taskId:string;
+  taskId: string;
   timeUnit: string;
   bidderId: string;
   contractStatus: 'pending' | 'accepted' | 'rejected'; 
@@ -23,6 +24,12 @@ interface BidderProfile {
   tagline: string;
 }
 
+interface ConfirmAction {
+  bidId: string;
+  action: 'accept' | 'reject';
+  freelancerId?: string;
+}
+
 const BiddersList: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -30,6 +37,7 @@ const BiddersList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [freelancerProfiles, setFreelancerProfiles] = useState<BidderProfile[]>([]);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
 
@@ -51,7 +59,6 @@ const BiddersList: React.FC = () => {
           if (bid.status === 'accepted') {
             try {
               const contractResponse = await axiosConfig.get(`/users/contract/${bid._id}`);
-              
               return { ...bid, contractStatus: contractResponse.data.result.status };
             } catch {
               return { ...bid, contractStatus: null };
@@ -76,13 +83,14 @@ const BiddersList: React.FC = () => {
     }
   }, [id]);
 
-  console.log('kdkdkd',bids)
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
 
-  const handleBidStatusUpdate = async (bidId: string, status: 'accepted' | 'rejected', freelancerId?: string) => {
+    const { bidId, action, freelancerId } = confirmAction;
     try {
       setLoading(true);
 
-      if(status === 'accepted' && id) {
+      if (action === 'accept' && id) {
         const taskResponse = await axiosConfig.get(`/users/tasks/${id}`);
         const taskStatus = taskResponse.data.task.status;
 
@@ -92,18 +100,19 @@ const BiddersList: React.FC = () => {
           return;
         }
       }
+
       const response = await axiosConfig.patch(`/client/bid-status/${bidId}`, {
-        status,
+        status: action === 'accept' ? 'accepted' : 'rejected',
         taskId: id
       });
 
       if (response.status === 200) {
-        toast.success(`Bid ${status} successfully`);
+        toast.success(`Bid ${action}ed successfully`);
         
-        if (status === 'accepted' && freelancerId) {
+        if (action === 'accept' && freelancerId) {
           navigate('/client/send-contract', {
             state: {
-              bidId:bidId,
+              bidId: bidId,
               taskId: id,
               freelancerId: freelancerId,
             }
@@ -113,9 +122,10 @@ const BiddersList: React.FC = () => {
         await fetchBids();
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || `Failed to ${status} bid`);
+      toast.error(error.response?.data?.message || `Failed to ${action} bid`);
     } finally {
       setLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -138,6 +148,14 @@ const BiddersList: React.FC = () => {
 
   return (
     <div className="p-6 pt-24 bg-gray-100 min-h-screen">
+      {confirmAction && (
+        <ConfirmMessage
+          message={`Are you sure you want to ${confirmAction.action} this bid?`}
+          onConfirm={handleConfirmAction}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      
       <div className="bg-white rounded-lg shadow-md p-4">
         <div className="flex items-center text-blue-600 font-semibold mb-4">
           <FaUser className="mr-2"/>{freelancerProfiles.length} Bidders
@@ -180,13 +198,20 @@ const BiddersList: React.FC = () => {
                       {bid.status === 'pending' && (
                         <>
                           <button
-                            onClick={() => handleBidStatusUpdate(bid._id, 'accepted', freelancerProfile._id)}
+                            onClick={() => setConfirmAction({
+                              bidId: bid._id,
+                              action: 'accept',
+                              freelancerId: freelancerProfile._id
+                            })}
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                           >
                             Accept
                           </button>
                           <button
-                            onClick={() => handleBidStatusUpdate(bid._id, 'rejected')}
+                            onClick={() => setConfirmAction({
+                              bidId: bid._id,
+                              action: 'reject'
+                            })}
                             className="px-4 py-2 bg-gray-300 text-black rounded-md hover:bg-gray-400"
                           >
                             Reject
@@ -222,7 +247,6 @@ const BiddersList: React.FC = () => {
                             )}
                           </div>
                         )}
-
                         </div>
                       )}
                       <button

@@ -1,7 +1,8 @@
-import React,{useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import axiosConfig from '../../service/axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmMessage from '../../components/shared/ConfirmMessage';
 
 interface Milestone {
   title: string;
@@ -21,9 +22,16 @@ interface ContractDetail {
   status?: 'pending' | 'accepted' | 'rejected';  
 }
 
+interface ConfirmAction {
+  bidId: string;
+  action: 'accept' | 'reject';
+  taskId: string;
+}
+
 const ContractDetails: React.FC = () => {
   const [contract, setContract] = useState<ContractDetail | null>(null);
   const [showMilestones, setShowMilestones] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
@@ -37,23 +45,27 @@ const ContractDetails: React.FC = () => {
     }
 
     fetchContract();
-  },[id])
-  
-  const handleContractStatus = async (bidId: string, status: 'accepted' | 'rejected', taskId: string) => {
+  }, [id]);
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+
+    const { bidId, action, taskId } = confirmAction;
     try {
       const response = await axiosConfig.patch(`/freelancers/contract-status/${bidId}`, {
-        status,
+        status: action === 'accept' ? 'accepted' : 'rejected',
         taskId
       });
       if(response.status === 200) {
-        toast.success(`Contract ${status} successfully`);
-        // Update local contract state after successful status change
-        setContract(prev => prev ? {...prev, status} : null);
+        toast.success(`Contract ${action}ed successfully`);
+        setContract(prev => prev ? {...prev, status: action === 'accept' ? 'accepted' : 'rejected'} : null);
       }
     } catch (error) {
       toast.error('Failed to update contract status');
+    } finally {
+      setConfirmAction(null);
     }
-  }
+  };
 
   const sendMessage = async(taskId: string) => {
     const taskResponse = await axiosConfig.get(`/users/tasks/${taskId}`);
@@ -69,6 +81,14 @@ const ContractDetails: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gray-100 py-4 px-4">
+        {confirmAction && (
+          <ConfirmMessage
+            message={`Are you sure you want to ${confirmAction.action} this contract?`}
+            onConfirm={handleConfirmAction}
+            onCancel={() => setConfirmAction(null)}
+          />
+        )}
+
         <div className="min-h-screen pt-20 bg-white shadow-lg rounded-lg p-6 mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -86,18 +106,25 @@ const ContractDetails: React.FC = () => {
                 Message Client
               </button>
               
-              {/* Only show Accept/Reject buttons if contract is not rejected */}
-              {contract.status == 'pending' && (
+              {contract.status === 'pending' && (
                 <>
                   <button
                     className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
-                    onClick={() => handleContractStatus(contract.bidId, 'accepted', contract.taskId)}
+                    onClick={() => setConfirmAction({
+                      bidId: contract.bidId,
+                      action: 'accept',
+                      taskId: contract.taskId
+                    })}
                   >
                     Accept
                   </button>
                   <button
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
-                    onClick={() => handleContractStatus(contract.bidId, 'rejected', contract.taskId)}
+                    onClick={() => setConfirmAction({
+                      bidId: contract.bidId,
+                      action: 'reject',
+                      taskId: contract.taskId
+                    })}
                   >
                     Reject
                   </button>
@@ -106,19 +133,17 @@ const ContractDetails: React.FC = () => {
             </div>
           </div>
 
+          {/* Rest of the JSX remains the same */}
           <div className="mt-8 space-y-6">
-            {/* Budget Section */}
             <div className="text-xl font-semibold text-green-600">
               Total Budget: ${Number(contract.budget).toLocaleString()}
             </div>
 
-            {/* Description Section */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Project Description</h3>
               <p className="text-gray-700 mt-2 leading-relaxed">{contract.description}</p>
             </div>
 
-            {/* Milestones Section */}
             <div>
               <div
                 className="flex justify-between items-center cursor-pointer"
@@ -159,7 +184,6 @@ const ContractDetails: React.FC = () => {
               )}
             </div>
 
-            {/* Project Terms */}
             <div className="bg-blue-50 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4 text-blue-800">Project Terms</h3>
               <ul className="space-y-2 text-blue-700 list-disc list-inside">
