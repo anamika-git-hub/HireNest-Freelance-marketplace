@@ -1,65 +1,75 @@
-import { Next, Req, Res } from "../../infrastructure/types/serverPackageTypes"
+import { NextFunction, Request, Response } from 'express';
 import { JwtService } from "../../infrastructure/services/JwtService";
 import checkTokenBlacklist from "./TokenBlocklist";
-interface CustomRequest extends Req{
-    user?:{userId:string};
+
+interface CustomRequest extends Request {
+    user?: { userId: string };
 }
 
-export const checkAuth= (userRole:string) => {
-  return async(req: CustomRequest, res: Res, next: Next) => {
-    try {
-        const authHeader = req.headers['authorization'] as string;
-        const accessToken = authHeader.split(' ')[1];
-
-        let userData;
+export const checkAuth = (userRole: string) => {
+    return async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
-            // Try verifying access token
-            userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
-            if(userRole !== 'user'){
-              if (userData.role === userRole) {
-                req.user = { userId: userData.id };
-                return checkTokenBlacklist(req, res, next);
-              }
-            }else{
-              if(userData){
-                req.user = { userId: userData.id };
-                return checkTokenBlacklist(req, res, next);
-              }
+            const authHeader = req.headers['authorization'] as string;
+            if (!authHeader) {
+                res.status(401).send({ message: 'No authorization token provided' });
+                return;
             }
-           
-        } catch (error) {
-          if(error instanceof Error){
-            if (error.name === 'TokenExpiredError') {
-              // Handle token expiry
-              const refreshHeader = req.headers['refreshtoken'] as string;
-              const refreshToken = refreshHeader.split(' ')[1];
-              try {
-                  // Verify refresh token
-                  const refreshData = JwtService.verifyRefreshToken(refreshToken) as { id: string,role:string };
-                  if(userRole !== 'user'){
-                    if (refreshData.role === userRole) {
-                      req.user = { userId: refreshData.id };
-                      return checkTokenBlacklist(req, res, next);
+
+            const accessToken = authHeader.split(' ')[1];
+            try {
+                // Try verifying access token
+                const userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
+                
+                if (userRole !== 'user') {
+                    if (userData.role !== userRole) {
+                        res.status(403).json({ message: 'Insufficient permissions' });
+                        return;
                     }
-                  }else {
-                    if (refreshData) {
-                      req.user = { userId: refreshData.id };
-                      return checkTokenBlacklist(req, res, next);
-                  }
-                  }
-                 
-              } catch (refreshError) {
-                throw new Error('Refresh token expired. Please log in again.' )
-              }
-            } else {
-              throw new Error( 'Invalid token. Please log in again.' )
+                }
+                
+                req.user = { userId: userData.id };
+                return checkTokenBlacklist(req, res, next);
+                
+            } catch (error) {
+                if (error instanceof Error) {
+                    if (error.name === 'TokenExpiredError') {
+                        // Handle token expiry
+                        const refreshHeader = req.headers['refreshtoken'] as string;
+                        if (!refreshHeader) {
+                            res.status(401).json({ message: 'Session expired. Please log in again.' });
+                            return;
+                        }
+
+                        const refreshToken = refreshHeader.split(' ')[1];
+                        try {
+                            // Verify refresh token
+                            const refreshData = JwtService.verifyRefreshToken(refreshToken) as { id: string, role: string };
+                            
+                            if (userRole !== 'user') {
+                                if (refreshData.role !== userRole) {
+                                    res.status(403).json({ message: 'Insufficient permissions' });
+                                    return;
+                                }
+                            }
+                            
+                            req.user = { userId: refreshData.id };
+                            return checkTokenBlacklist(req, res, next);
+                            
+                        } catch (refreshError) {
+                            res.status(401).json({ message: 'Session expired. Please log in again.' });
+                            return;
+                        }
+                    } else {
+                        res.status(401).json({ message: 'Invalid token. Please log in again.' });
+                        return;
+                    }
+                }
             }
-          }  
+        } catch (error) {
+            // Handle unexpected errors
+            console.error('Auth middleware error:', error);
+            res.status(500).json({ message: 'Internal server error' });
+            return;
         }
-    } catch (error) {
-      throw new Error( 'Internal Server Error')
-    }
-  }
+    };
 };
-
-

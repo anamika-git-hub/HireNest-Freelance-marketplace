@@ -8,11 +8,14 @@ const axiosConfig  = axios.create({
     baseURL: process.env.BASE_URL ||"http://localhost:5000/api/",
     headers: {
         "Content-Type": 'application/json',
-    }
+    },
+    validateStatus: null
 })
-
+console.log('Setting up request interceptor');
 axiosConfig.interceptors.request.use(
     (config) => {
+
+        console.log('Request interceptor running', config);
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
@@ -32,8 +35,18 @@ axiosConfig.interceptors.request.use(
 )
 
 axiosConfig.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log('Response interceptor success:', response);
+        return response;
+    },
+    
     async (error) => {
+        console.log('Response interceptor error:', {
+            status: error.response?.status,
+            message: error.response?.data?.message,
+            config: error.config
+        });
+
         if (error.response && error.response.status === 403) {
             toast.error('Your account has been blocked by the admin.');
             store.dispatch(logoutUser());
