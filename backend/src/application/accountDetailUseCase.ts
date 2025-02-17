@@ -2,64 +2,107 @@
 import { AccountDetailRepository } from "../infrastructure/repositories/accountDetail";
 import { IUserDetail } from "../entities/UserDetail";
 import cloudinaryV2 from "../utils/cloudinary";
+import { uploadToS3 } from "../utils/uploader";
 import { UserRepository } from "../infrastructure/repositories/UserRepository";
 
 export const AccountDetailUseCase = {
-    setUpProfile: async (data:IUserDetail, files:{[key: string]: Express.Multer.File[]}) => {
+    setUpProfile: async (data: IUserDetail, files: { [key: string]: Express.Multer.File[] }) => {
         try {
-            const uploadToCloudinary = async (filePath:string) => {
-                const result = await cloudinaryV2.uploader.upload(filePath, {
-                    folder: 'Profiles',
-                });
-                return result.secure_url;
+            const uploadImage = async (file: Express.Multer.File, folderName: string) => {
+                try {
+                    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                    return await uploadToS3(
+                        file.buffer,
+                        `${folderName}/${uniqueFileName}`
+                    );
+                } catch (error) {
+                    console.error(`Error uploading to S3:`, error);
+                    throw new Error(`Failed to upload file to S3`);
+                }
             };
-            const profileImageUrl = files.profileImage ? await uploadToCloudinary(files.profileImage[0].path) : null;
-            const idFrontImageUrl = files.idFrontImage ? await uploadToCloudinary(files.idFrontImage[0].path) : null;
-            const idBackImageUrl = files.idBackImage ? await uploadToCloudinary(files.idBackImage[0].path) : null;
-            
-
-            const profileData = {
-                ...data,
-                profileImage: profileImageUrl,
-                idFrontImage: idFrontImageUrl,
-                idBackImage: idBackImageUrl,
-            };
-            return await AccountDetailRepository.createProfile(profileData)
+    
+            // Upload files to S3 if they exist
+            const profileImageUrl = files.profileImage ? 
+                await uploadImage(files.profileImage[0], 'profileImages') : null;
+                
+            const idFrontImageUrl = files.idFrontImage ? 
+                await uploadImage(files.idFrontImage[0], 'idImages') : null;
+                
+            const idBackImageUrl = files.idBackImage ? 
+                await uploadImage(files.idBackImage[0], 'idImages') : null;
+    
+                const profileData = {
+                    ...data,
+                    profileImage: profileImageUrl?.Location ?? null,
+                    idFrontImage: idFrontImageUrl?.Location ?? null,
+                    idBackImage: idBackImageUrl?.Location ?? null,
+                };
+    
+            return await AccountDetailRepository.createProfile(profileData);
             
         } catch (error) {
-            if(error instanceof Error){
-                throw new Error (`Failed to set up profile: ${error.message}`);
-            }else {
-                throw new Error (`Failed to set up profile due to an unknown error`);
-            }  
+            console.error('Profile setup error:', error);
+            if (error instanceof Error) {
+                throw new Error(`Failed to set up profile: ${error.message}`);
+            } else {
+                throw new Error(`Failed to set up profile due to an unknown error`);
+            }
         }
     },
-
-    updateProfile: async (userId:string, updates:IUserDetail, files: {[key: string]: Express.Multer.File[]}) => {
+    updateProfile: async (
+        userId: string, 
+        updates: IUserDetail, 
+        files: { [key: string]: Express.Multer.File[] }
+    ) => {
         try {
-            const uploadToCloudinary = async (filePath: string) => {
-                const result = await cloudinaryV2.uploader.upload(filePath,{
-                    folder: 'Profiles'
-                });
-                return result.secure_url;
+            const uploadImage = async (file: Express.Multer.File, folderName: string) => {
+                try {
+                    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                    return await uploadToS3(
+                        file.buffer,
+                        `${folderName}/${uniqueFileName}`
+                    );
+                } catch (error) {
+                    console.error(`Error uploading to S3:`, error);
+                    throw new Error(`Failed to upload file to S3`);
+                }
             };
-
+    
+            // Keep existing images if no new files are uploaded
             let profileImageUrl = updates.profileImage;
-
+            let idFrontImageUrl = updates.idFrontImage;
+            let idBackImageUrl = updates.idBackImage;
+    
+            // Upload new images if they exist in files
             if (files.profileImage) {
-                profileImageUrl = await uploadToCloudinary(files.profileImage[0].path);
+                const result = await uploadImage(files.profileImage[0], 'profileImages');
+                profileImageUrl = result?.Location ?? null;
             }
-            const updatedProfileData = {
+    
+            if (files.idFrontImage) {
+                const result = await uploadImage(files.idFrontImage[0], 'idImages');
+                idFrontImageUrl = result?.Location ?? null;
+            }
+    
+            if (files.idBackImage) {
+                const result = await uploadImage(files.idBackImage[0], 'idImages');
+                idBackImageUrl = result?.Location ?? null;
+            }
+    
+            const updatedProfileData: IUserDetail = {
                 ...updates,
                 profileImage: profileImageUrl,
-
-            }
+                idFrontImage: idFrontImageUrl,
+                idBackImage: idBackImageUrl
+            };
+    
             return await AccountDetailRepository.updateProfile(userId, updatedProfileData);
         } catch (error) {
-            if(error instanceof Error){
-                throw new Error(`Failed to update profile: ${error.message}`)
-            }else {
-                throw new Error(`Failed to update profile due to an unknown error`)
+            console.error('Profile update error:', error);
+            if (error instanceof Error) {
+                throw new Error(`Failed to update profile: ${error.message}`);
+            } else {
+                throw new Error(`Failed to update profile due to an unknown error`);
             }
         }
     },

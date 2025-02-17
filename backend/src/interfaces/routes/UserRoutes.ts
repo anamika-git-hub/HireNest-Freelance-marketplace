@@ -12,6 +12,7 @@ import { CategoryController } from '../controllers/categoryController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
+import { uploader,compressionMiddleware } from '../../utils/uploader';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -25,10 +26,9 @@ router.post('/validate-password/:id',UserController.validatePassword);
 router.post('/forgot-password',UserController.forgotPassword);
 router.post('/reset-password',UserController.resetPassword);
 
-router.get('/categories',checkAuth('user'),CategoryController.getAllCategories);
-
-router.post('/setup-account', uploadProfileImages, AccountDetailController.setUpAccount);
-router.put ('/update-account',uploadProfileImages,checkAuth('user'), AccountDetailController.updateAccount);
+router.get('/categories',CategoryController.getAllCategories);
+router.post('/setup-account',uploader,compressionMiddleware,AccountDetailController.setUpAccount);
+router.put ('/update-account',uploader,compressionMiddleware,checkAuth('user'), AccountDetailController.updateAccount);
 router.get('/account-detail',checkAuth('user'),AccountDetailController.getAccountDetail);
 router.post('/update-role',checkAuth('user'),UserController.updateRole);
 
