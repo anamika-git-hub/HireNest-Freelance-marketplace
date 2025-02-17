@@ -17,6 +17,7 @@ import Contact from '../pages/shared/contact';
 import Notifications from '../pages/shared/notification';
 import Chat from '../components/chat/chatPage';
 import MyAccount from '../pages/shared/MyAccount';
+import NotFoundPage from '../pages/shared/404';
 
 const SharedRoutes = () => (
   <Routes>
@@ -31,6 +32,7 @@ const SharedRoutes = () => (
     <Route path="/dashboard" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><Dashboard /></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/about" element={<LayoutWrapper><About/></LayoutWrapper>} />
     <Route path="/contact" element={<LayoutWrapper><Contact/></LayoutWrapper>} />
+    <Route path="/404" element={<LayoutWrapper><NotFoundPage/></LayoutWrapper>} />
     <Route path="/messages" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><Chat/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/notification" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><Notifications/></UserRoleProvider></UserPrivateRoute>} />
   </Routes>
