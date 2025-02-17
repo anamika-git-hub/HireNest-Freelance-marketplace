@@ -1,4 +1,5 @@
 export interface FilterCriteria {
+    _id?:{$in:string[]};
     $or?: { [key: string]: { $regex: string; $options: string } }[];
     experience?: { $gte?: string; $lte?: string };
     skills?: { $all: string[] };

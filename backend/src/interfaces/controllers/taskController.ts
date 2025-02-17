@@ -49,6 +49,8 @@ export const TaskController = {
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const sortOption = req.query.sortOption as string || "Relevance";
             const searchTerm = req.query.searchTerm as string || ""; 
+
+        const bookmarkedTaskIds = req.query.bookmarkedTaskIds as string[] | undefined;
     
             const category = req.query.category as string | undefined;
             const skills = req.query.skills as string[] | undefined; 
@@ -79,11 +81,15 @@ export const TaskController = {
             if (searchTerm && searchTerm.trim()) {
                 filters.projectName = { $regex: searchTerm, $options: "i" } 
             }
+
+            if (bookmarkedTaskIds) {
+                filters._id = { $in: bookmarkedTaskIds };
+            }
             // Fetch tasks and count
             const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
             const totalTasks = await TaskUseCase.getTasksCount(filters);
             const totalPages = Math.ceil(totalTasks / limit);
-    
+            
             res.status(200).json({ data: tasks, totalPages, message: 'Tasks retrieved successfully' });
         } catch (error) {
             next(error);
