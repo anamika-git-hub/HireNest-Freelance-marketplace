@@ -7,6 +7,7 @@ import { OtpService } from '../infrastructure/services/OtpService';
 import { encrypt ,decrypt} from '../utils/hashHelper';
 import { forgotPassword } from '../infrastructure/services/EmailService';
 import { NotificationRepository } from '../infrastructure/repositories/notificationRepository';
+import { FilterCriteria } from '../entities/filter';
 
 
 export const userUseCase = {
@@ -124,9 +125,13 @@ export const userUseCase = {
           }
           return {updatedUser}
     },
-    getNotification: async(userId:string) => {
-        const result = await NotificationRepository.getNotification(userId);
-        return result
+    getNotification: async (userId: string, filters?: FilterCriteria, skip?: number, limit?: number) => {
+        const result = await NotificationRepository.getNotification(userId, filters, skip, limit);
+        return result;
+    },
+    
+    getNotificationCount: async (userId: string, filters?: FilterCriteria) => {
+        return await NotificationRepository.getNotificationCount(userId, filters);
     },
     notificationRead: async(notificationId:string) => {
         const result = await NotificationRepository.notificationRead(notificationId);

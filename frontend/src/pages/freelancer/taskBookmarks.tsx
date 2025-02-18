@@ -30,7 +30,7 @@ const TaskBookmarks: React.FC = () => {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
-    const ITEMS_PER_PAGE = 3;
+    const ITEMS_PER_PAGE = 4;
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -210,21 +210,47 @@ useEffect(() => {
         <FaChevronLeft className="w-4 h-4" />
     </button>
 
-    {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map(
-        (page) => (
-            <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                    page === currentPage
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-                {page}
-            </button>
-        )
-    )}
+    {Array.from({ length: totalPages || 1 }, (_, i) => i + 1)
+        .filter(pageNumber => {
+            if (pageNumber === 1 || pageNumber === totalPages) return true;
+            if (Math.abs(pageNumber - currentPage) <= 2) return true;
+            return false;
+        })
+        .map((page, index, array) => {
+            if (index > 0 && array[index] - array[index - 1] > 1) {
+                return (
+                    <React.Fragment key={`ellipsis-${page}`}>
+                        <span className="w-8 h-8 flex items-center justify-center text-gray-700">
+                            ...
+                        </span>
+                        <button
+                            onClick={() => handlePageChange(page)}
+                            className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                page === currentPage
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                        >
+                            {page}
+                        </button>
+                    </React.Fragment>
+                );
+            }
+
+            return (
+                <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                        page === currentPage
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                >
+                    {page}
+                </button>
+            );
+        })}
 
     <button
         onClick={() => handlePageChange(currentPage + 1)}

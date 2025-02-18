@@ -1,5 +1,6 @@
 import { Req, Res, Next } from "../../infrastructure/types/serverPackageTypes";
 import { userUseCase } from "../../application/userUseCase";
+import { FilterCriteria } from "../../entities/filter";
 
 
 interface CustomRequest extends Req {
@@ -98,14 +99,30 @@ export const UserController = {
             next(error)
         }
     },
-    getNotification:async (req: CustomRequest, res: Res, next: Next) => {
+    getNotification: async (req: CustomRequest, res: Res, next: Next) => {
         try {
-            
-            const userId = req.user?.userId || '';
-            const result = await userUseCase.getNotification(userId)
-            res.status(200).json(result)
+            const page = parseInt(req.query.page as string, 10) || 1;
+            const limit = parseInt(req.query.limit as string, 10) || 10;
+            const searchTerm = req.query.searchTerm as string || "";
+            const role = req.query.role as string || "";
+            const skip = (page - 1) * limit;
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new Error('User not found');
+            }
+    
+            const filters: FilterCriteria = {};
+            if (searchTerm && searchTerm.trim()) {
+                filters.text = { $regex: searchTerm, $options: "i" };
+            }
+            if (role) filters.role = role;
+    
+            const result = await userUseCase.getNotification(userId, filters, skip, limit);
+            const totalNotifications = await userUseCase.getNotificationCount(userId, filters);
+            const totalPages = Math.ceil(totalNotifications / limit);
+            res.status(200).json({ result, totalPages });
         } catch (error) {
-          next(error)
+            next(error);
         }
     },
 

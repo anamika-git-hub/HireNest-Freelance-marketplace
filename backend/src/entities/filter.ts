@@ -1,4 +1,5 @@
 export interface FilterCriteria {
+    role?: string;
     _id?:{$in:string[]};
     $or?: { [key: string]: { $regex: string; $options: string } }[];
     experience?: { $gte?: string; $lte?: string };
@@ -9,5 +10,6 @@ export interface FilterCriteria {
     maxRate?: { $lte?: number };
     timeline?: { $gt?: string }; 
     projectName?: { $regex: string; $options: string }; 
+    text?: { $regex: string; $options: string }; 
   }
   

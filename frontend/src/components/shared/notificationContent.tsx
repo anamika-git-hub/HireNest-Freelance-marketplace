@@ -20,9 +20,7 @@ interface NotificationItemProps {
 
 const NotificationContent: React.FC<NotificationItemProps> = ({ notification, role ,handleNotificationClick, index}) => {
   const handleClick = () => {
-    console.log('111111')
     if (handleNotificationClick) {
-      console.log('222222222222')
       handleNotificationClick(notification._id,index);
     }
 };
