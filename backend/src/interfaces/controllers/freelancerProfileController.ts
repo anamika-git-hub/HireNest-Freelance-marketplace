@@ -40,6 +40,7 @@ export const FreelancerProfileController = {
             const experience = req.query.experience as string | undefined;
             const skills = req.query.skills as string[] | undefined; 
             const priceRange = req.query.priceRange as { min: string; max: string } | undefined;
+            const bookmarkedFreelancerIds = req.query.bookmarkedFreelancerIds as string[] | undefined;
             const skip = (page - 1) * limit;
 
             let sortCriteria: { [key: string]: 1 | -1 } = {};
@@ -54,6 +55,10 @@ export const FreelancerProfileController = {
                     { name: { $regex: searchTerm, $options: "i" } }, 
                     { tagline : { $regex: searchTerm, $options: "i"} },
                 ];
+            }
+
+            if (bookmarkedFreelancerIds) {
+                filters._id = { $in: bookmarkedFreelancerIds };
             }
              if (experience) {
                 const experienceMatch = experience.match(/^(\d+)(?:\+)?(?:-(\d+))?/);
@@ -80,7 +85,8 @@ export const FreelancerProfileController = {
             const freelancers = await FreelancerProfileUseCase.getFreelancers({filters,sortCriteria,skip,limit});
 
             const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(filters);
-            const totalPages = Math.ceil(totalFreelancers/limit)
+            const totalPages = Math.ceil(totalFreelancers/limit);
+            console.log('ffff',freelancers.length, totalFreelancers)
             res.status(200).json({data:freelancers,totalPages,message: 'Listed freelancers successfully'})
         } catch (error) {
             next(error);
