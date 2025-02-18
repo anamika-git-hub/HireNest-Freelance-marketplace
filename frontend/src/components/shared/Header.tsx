@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { logoutUser } from '../../store/userSlice';
 import axiosConfig from '../../service/axios';
 import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
-import { MdDashboard,MdWork,MdGavel,MdSync } from "react-icons/md";
+import { MdDashboard} from "react-icons/md";
 import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { useUserRole } from '../../context/userRoleContext';
@@ -27,9 +27,11 @@ const role = localStorage.getItem('role') || 'guest';
 const notificationSocket = io('http://localhost:5000/notifications', {
   query: { userId ,role},
 });
+interface HeaderProps {
+  onLogout?: () => void;
+}
 
-
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [role,setRole] = useState(localStorage.getItem('role') || 'guest')
@@ -148,16 +150,6 @@ const Header: React.FC = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('role');
-    dispatch(logoutUser())
-    setRole('guest');
-    navigate('/login');
-    
-  };
 
   const handleNotificationClick = async(notificationId?:string,index?: number) => {
     console.log('33',notificationId,index)
@@ -286,7 +278,7 @@ const Header: React.FC = () => {
         <FaCog className="mr-3 text-gray-600" /> Settings
       </button>
       <button
-        onClick={handleLogout}
+        onClick={onLogout}
         className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
       >
         <FaSignOutAlt className="mr-3" /> Logout
