@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaTimes, FaSearch } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 import ConfirmMessage from "../../components/shared/ConfirmMessage";
 import { BidValidationSchema } from "../../components/Schemas/bidValidationSchema";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface Bid {
   _id: string;
   rate: number;
   deliveryTime: number;
-  taskId: { _id: string, projectName: string, rateType: string , minRate: number, maxRate: number };
+  taskId: { _id: string; projectName: string; rateType: string; minRate: number; maxRate: number };
   timeUnit: string;
   createdAt: Date;
   status: "pending" | "accepted" | "rejected";
@@ -26,13 +27,18 @@ interface FormValues {
 
 const ActiveBids: React.FC = () => {
   const [bids, setBids] = useState<Bid[]>([]);
+  const [filteredBids, setFilteredBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [selectedBid, setSelectedBid] = useState<Bid | null>(null); 
+  const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
+  const ITEMS_PER_PAGE = 4;
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -42,6 +48,7 @@ const ActiveBids: React.FC = () => {
         .get(`/users/bid/${userId}`)
         .then((response) => {
           setBids(response.data.bid);
+          setFilteredBids(response.data.bid);
           setLoading(false);
         })
         .catch((err) => {
@@ -53,6 +60,52 @@ const ActiveBids: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    let result = [...bids];
+    
+    // Apply status filter
+    if (activeFilter !== "all") {
+      result = result.filter(bid => bid.status === activeFilter);
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+      result = result.filter(bid => 
+        bid.taskId.projectName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    setFilteredBids(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, activeFilter, bids]);
+
+  const totalPages = Math.ceil(filteredBids.length / ITEMS_PER_PAGE);
+  const currentBids = filteredBids.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
+
+  const FilterButton: React.FC<{
+    filter: "all" | "pending" | "accepted" | "rejected";
+    label: string;
+  }> = ({ filter, label }) => (
+    <button
+      onClick={() => setActiveFilter(filter)}
+      className={`px-4 py-2 rounded-md transition-colors ${
+        activeFilter === filter
+          ? "bg-blue-500 text-white"
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   const deleteBid = (bidId: string) => {
     setConfirmDelete(bidId);
@@ -119,74 +172,185 @@ const ActiveBids: React.FC = () => {
   }
 
   return (
-    <div className="p-6 pt-24 bg-gray-100 min-h-screen select-none">
+    <div className="p-4 pt-24 bg-gray-100 min-h-screen select-none">
+       <div className="max-w-6xl mx-auto space-y-6">
+
+          {/* Bids List */}
       <div className="bg-white rounded-lg shadow-md p-4 max-w-6xl mx-auto">
         <div className="flex items-center text-blue-600 font-semibold mb-4">
           <FaEdit className="mr-2"/> Bids List
         </div>
-        <ul>
-          {bids.map((bid, index) => (
-            <li
-              key={index}
-              className="flex flex-col md:flex-row justify-between items-start md:items-center border-b last:border-b-0 py-4 space-y-4 md:space-y-0"
-            >
-              <div className="w-full md:w-auto">
-                <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
-                  <h2 className="text-lg font-medium">{bid.taskId.projectName}</h2>
-                </Link>
-                <div className="flex items-center space-x-2 mt-2">
-                {bid.status === 'pending' && (
-                  <>
-                  <button
-                    onClick={() => handleEditClick(bid)}
-                    className="flex items-center bg-black text-white px-3 py-1 rounded-md hover:bg-gray-800"
-                  >
-                    <FaEdit className="mr-1" /> Edit
-                  </button>
-                  
-                  </>
-                   )}
+         <div className="flex items-center justify-between">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            <FilterButton filter="all" label="All Bids" />
+            <FilterButton filter="pending" label="Pending" />
+            <FilterButton filter="accepted" label="Accepted" />
+            <FilterButton filter="rejected" label="Rejected" />
+          </div>
+          <div className="relative w-1/3 mb-2">
+            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search bids..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          </div>
+        {currentBids.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              {searchTerm ? "No bids match your search" : "No bids found"}
+            </div>
+          ) : (
+            <ul className="space-y-4">
+            {currentBids.map((bid, index) => (
+              <li
+                key={index}
+                className="bg-white rounded-lg shadow-sm border border-gray-100 p-2 hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <Link 
+                        to={`/freelancer/task-detail/${bid.taskId._id}`}
+                        className="group"
+                      >
+                        <h2 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                          {bid.taskId.projectName}
+                        </h2>
+                      </Link>
+                      
+                      <div className="flex items-center gap-2">
+                        {bid.status === 'pending' && (
+                          <button
+                            onClick={() => handleEditClick(bid)}
+                            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                            title="Edit bid"
+                          >
+                            <FaEdit className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteBid(bid._id)}
+                          className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                          title="Delete bid"
+                        >
+                          <FaTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+      
                     {bid.status !== 'pending' && (
-                        <div className="flex items-center gap-2">
-                        <span className={`px-4 py-2 rounded-md ${
-                          bid.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                      <div className="mt-3 flex items-center gap-3">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                            bid.status === 'accepted'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
                           {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
                         </span>
-
+                        
                         {bid.status === 'accepted' && (
                           <button
-                            onClick={() => navigate(`/freelancer/contract/${bid._id}`)} 
-                            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                            onClick={() => navigate(`/freelancer/contract/${bid._id}`)}
+                            className="inline-flex items-center px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors"
                           >
                             View Contract
                           </button>
                         )}
-                        </div>
-                      )}
-
-                      <button
-                    onClick={() => deleteBid(bid._id)}
-                    className="flex items-center bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
-                  >
-                    <FaTrash className="mr-1" /> Delete
-                  </button>
+                      </div>
+                    )}
+                  </div>
+      
+                  <div className="flex items-center gap-6 bg-gray-50 px-6 py-3 rounded-lg">
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-gray-800">${bid.rate}</p>
+                      <p className="text-sm text-gray-500">{bid.taskId.rateType} Rate</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-gray-800">{bid.deliveryTime}</p>
+                      <p className="text-sm text-gray-500">{bid.timeUnit}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-gray-100 py-4 rounded-md flex justify-evenly w-full md:w-1/4">
-                <div className="text-center">
-                  <p className="text-lg font-medium">${bid.rate}</p>
-                  <p className="text-sm text-gray-500">{bid.taskId.rateType} Rate</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-medium">{bid.deliveryTime}</p>
-                  <p className="text-sm text-gray-500">{bid.timeUnit}</p>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+         )}
       </div>
+
+      {filteredBids.length > ITEMS_PER_PAGE && (
+          <div className="flex justify-center items-center mt-6 space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                currentPage === 1
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <FaChevronLeft className="w-4 h-4" />
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(pageNumber => {
+                if (pageNumber === 1 || pageNumber === totalPages) return true;
+                if (Math.abs(pageNumber - currentPage) <= 2) return true;
+                return false;
+              })
+              .map((page, index, array) => {
+                if (index > 0 && array[index] - array[index - 1] > 1) {
+                  return (
+                    <React.Fragment key={`ellipsis-${page}`}>
+                      <span className="w-8 h-8 flex items-center justify-center text-gray-700">
+                        ...
+                      </span>
+                      <button
+                        onClick={() => handlePageChange(page)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                          page === currentPage
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  );
+                }
+
+                return (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                      page === currentPage
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                currentPage === totalPages
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <FaChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+           )}
   
       {showModal && selectedBid && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
@@ -275,6 +439,7 @@ const ActiveBids: React.FC = () => {
           onCancel={() => setConfirmDelete(null)}
         />
       }
+      </div>
     </div>
   );  
 };
