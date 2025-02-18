@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUser, FaTrash } from "react-icons/fa";
+import { FaUser, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
@@ -23,10 +23,16 @@ interface ConfirmAction {
 
 const RequestList: React.FC = () => {
     const navigate = useNavigate();
-    const [request, setRequest] = useState<Request[]>([]);
+    const [requests, setRequests] = useState<Request[]>([]);
+    const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [activeFilter, setActiveFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
+    const ITEMS_PER_PAGE = 4;
+
     const userId = localStorage.getItem('userId');
     const role = localStorage.getItem('role');
 
@@ -34,12 +40,11 @@ const RequestList: React.FC = () => {
         try {
             const response = await axiosConfig.get(`/freelancers/freelancer-request`);
             const fetchedRequests = response.data.requests;
-            setRequest(fetchedRequests);
+            setRequests(fetchedRequests);
+            setFilteredRequests(fetchedRequests);
             setLoading(false);
         } catch (err) {
             setError("Failed to load requests. Please try again later.");
-            setLoading(false);
-        } finally {
             setLoading(false);
         }
     };
@@ -47,6 +52,53 @@ const RequestList: React.FC = () => {
     useEffect(() => {
         fetchRequests();
     }, []);
+
+    useEffect(() => {
+        let result = [...requests];
+        
+        // Apply status filter
+        if (activeFilter !== "all") {
+            result = result.filter(request => request.status === activeFilter);
+        }
+        
+        // Apply search filter
+        if (searchTerm) {
+            result = result.filter(request => 
+                request.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                request.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        
+        setFilteredRequests(result);
+        setCurrentPage(1); // Reset to first page when filters change
+    }, [searchTerm, activeFilter, requests]);
+
+    const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
+    const currentRequests = filteredRequests.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        window.scrollTo(0, 0);
+    };
+
+    const FilterButton: React.FC<{
+        filter: "all" | "pending" | "accepted" | "rejected";
+        label: string;
+    }> = ({ filter, label }) => (
+        <button
+            onClick={() => setActiveFilter(filter)}
+            className={`px-4 py-2 rounded-md transition-colors ${
+                activeFilter === filter
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+        >
+            {label}
+        </button>
+    );
 
     const handleConfirmAction = async () => {
         if (!confirmAction) return;
@@ -99,16 +151,35 @@ const RequestList: React.FC = () => {
 
             <div className="bg-white rounded-lg shadow-md p-4">
                 <div className="flex items-center text-blue-600 font-semibold mb-4">
-                    <FaUser className="mr-2" />{request.length} Requests
+                    <FaUser className="mr-2" />{filteredRequests.length} Requests
                 </div>
 
-                <ul>
-                    {request.map((request, index) => {
-                        if (!request) return (
-                            <p key="no-requests">There is no requests yet</p>
-                        );
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                        <FilterButton filter="all" label="All Requests" />
+                        <FilterButton filter="pending" label="Pending" />
+                        <FilterButton filter="accepted" label="Accepted" />
+                        <FilterButton filter="rejected" label="Rejected" />
+                    </div>
+                    <div className="relative w-1/3">
+                        <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search requests..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                </div>
 
-                        return (
+                {currentRequests.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        {searchTerm ? "No requests match your search" : "No requests found"}
+                    </div>
+                ) : (
+                    <ul>
+                        {currentRequests.map((request) => (
                             <li
                                 key={request._id}
                                 className="flex items-center justify-between p-4 border-b last:border-0"
@@ -162,9 +233,79 @@ const RequestList: React.FC = () => {
                                     </div>
                                 </div>
                             </li>
-                        );
-                    })}
-                </ul>
+                        ))}
+                    </ul>
+                )}
+
+                {filteredRequests.length > ITEMS_PER_PAGE && (
+                    <div className="flex justify-center items-center mt-6 space-x-2">
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                currentPage === 1
+                                    ? "text-gray-400 cursor-not-allowed"
+                                    : "text-gray-700 hover:bg-gray-200"
+                            }`}
+                        >
+                            <FaChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(pageNumber => {
+                                if (pageNumber === 1 || pageNumber === totalPages) return true;
+                                if (Math.abs(pageNumber - currentPage) <= 2) return true;
+                                return false;
+                            })
+                            .map((page, index, array) => {
+                                if (index > 0 && array[index] - array[index - 1] > 1) {
+                                    return (
+                                        <React.Fragment key={`ellipsis-${page}`}>
+                                            <span className="w-8 h-8 flex items-center justify-center text-gray-700">
+                                                ...
+                                            </span>
+                                            <button
+                                                onClick={() => handlePageChange(page)}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                                    page === currentPage
+                                                        ? "bg-blue-500 text-white"
+                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        </React.Fragment>
+                                    );
+                                }
+
+                                return (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                            page === currentPage
+                                                ? "bg-blue-500 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            })}
+
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                currentPage === totalPages
+                                    ? "text-gray-400 cursor-not-allowed"
+                                    : "text-gray-700 hover:bg-gray-200"
+                            }`}
+                        >
+                            <FaChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
