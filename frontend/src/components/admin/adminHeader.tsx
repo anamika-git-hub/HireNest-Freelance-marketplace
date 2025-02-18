@@ -25,6 +25,8 @@ const AdminHeader: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     dispatch(logoutAdmin()); 
     localStorage.removeItem("role"); 
     navigate("/admin/login");

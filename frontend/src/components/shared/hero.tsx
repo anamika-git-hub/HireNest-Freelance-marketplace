@@ -13,12 +13,12 @@ const HeroSection = () => {
                 Working for your success
               </div>
               <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-                Hire The best <br />
-                Freelancers in the <br />
+              Hire experts or<br />
+               be hired for any job in the <br />
                 <span className="text-blue-600">Tech Industry</span>
               </h1>
               <p className="text-gray-600 mb-6">
-                Huge community of designers, developers, and creatives ready for your project.
+              Thousands of small businesses use HireNest to turn their ideas into reality.
               </p>
               <div className="flex flex-col lg:flex-row items-center gap-4">
                 <a

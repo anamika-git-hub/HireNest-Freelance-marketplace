@@ -143,7 +143,7 @@ const MyProfile: React.FC = () => {
   >
     {({ isSubmitting, setFieldValue, values }) => (
     <Form className="p-6 md:p-10 bg-white rounded-lg shadow-lg">
-      <div className="space-y-6">
+      <div className="h-[calc(100vh-6rem)] overflow-y-auto space-y-6 pt-16">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mb-6">My Profile</h3>
           <div className="flex flex-col md:flex-row md:items-start md:space-x-6 space-y-6 md:space-y-0">

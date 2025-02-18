@@ -150,6 +150,8 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('role');
     dispatch(logoutUser())
     setRole('guest');
