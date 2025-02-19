@@ -68,7 +68,7 @@ const MyContract: React.FC = () => {
           const { budget } = this.parent;
           
           if (!milestones || !budget) {
-            return true; // Let the required validators handle empty values
+            return true; 
           }
     
           const totalMilestoneCost = milestones.reduce(
@@ -88,7 +88,6 @@ const MyContract: React.FC = () => {
         const response = await axiosConfig.get(`/users/contract/${id}`);
         const contractData = response.data.result;
         
-        // Ensure all numeric values are converted to strings
         setContract({
           title: contractData.title || "",
           description: contractData.description || "",
@@ -144,8 +143,8 @@ const MyContract: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="mx-auto p-10 pt-20 bg-white rounded-lg shadow-lg">
+    <div className="h-full bg-gray-100 py-10 px-4">
+      <div className="h-[calc(100vh-6rem)] overflow-y-auto mx-auto p-10 pt-20 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">Send Offer</h2>
         <p className="text-sm text-gray-600 mb-6">
           * A small percentage of the total payment will be taken as an admin commission.

@@ -1,6 +1,7 @@
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
 import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { IContract } from "../entities/contract";
+import { FilterCriteria } from "../entities/filter";
 
 export const ContractUseCase = {
     createContract : async(data:IContract)=>{
@@ -19,5 +20,8 @@ export const ContractUseCase = {
             await TaskRepository.updateTaskStatus(taskId, 'pending');
         }
         return await ContractRepository.updateContractStatus(bidId,status);
+    },
+    getAllContracts: async (filters:FilterCriteria) => {
+        return await ContractRepository.getAllContracts(filters);
     }
 }

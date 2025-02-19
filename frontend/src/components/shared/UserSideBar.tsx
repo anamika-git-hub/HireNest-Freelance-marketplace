@@ -11,7 +11,8 @@ import {
   FaUser,
   FaGavel,
   FaBars,
-  FaChevronDown
+  FaChevronDown,
+  FaClipboardList,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import Header from "./Header";
@@ -158,6 +159,27 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
+  const renderContract = () => {
+    return userRole === "freelancer" ? (
+      <NavLink
+        to="/freelancer/freelancer-contract-list"
+        className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+      >
+        <FaClipboardList className="mr-3" />
+        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Live Contracts</span>
+      </NavLink>
+    ) : (
+      <NavLink
+        to="/client/client-contract-list"
+        className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
+      >
+        <FaClipboardList className="mr-3" />
+        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Live Contracts</span>
+      </NavLink>
+    );
+  };
+
+
   const renderBookmarksLink = () => {
     return userRole === "freelancer" ? (
       <NavLink
@@ -219,6 +241,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               Organize and Manage
             </div>
             {renderOrganizeAndManageLinks()}
+            {renderContract()}
             <div className={`px-4 py-2 mt-4 text-gray-500 uppercase text-sm ${!sidebarOpen && "hidden lg:block"}`}>
               Account
             </div>

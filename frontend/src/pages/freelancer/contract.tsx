@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import axiosConfig from '../../service/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConfirmMessage from '../../components/shared/ConfirmMessage';
+import { FaChevronDown } from 'react-icons/fa';
 
 interface Milestone {
   title: string;
@@ -80,7 +81,7 @@ const ContractDetails: React.FC = () => {
   if (!contract) return <div>No Contract found</div>;
   
   return (
-    <div className="min-h-screen bg-gray-100 py-4 px-4">
+    <div className=" bg-gray-100 py-4 px-4">
         {confirmAction && (
           <ConfirmMessage
             message={`Are you sure you want to ${confirmAction.action} this contract?`}
@@ -89,7 +90,7 @@ const ContractDetails: React.FC = () => {
           />
         )}
 
-        <div className="min-h-screen pt-20 bg-white shadow-lg rounded-lg p-6 mx-auto">
+        <div className="h-[calc(100vh-6rem)] overflow-y-auto pt-20 bg-white shadow-lg rounded-lg p-6 mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{contract.title}</h2>
@@ -146,13 +147,11 @@ const ContractDetails: React.FC = () => {
 
             <div>
               <div
-                className="flex justify-between items-center cursor-pointer"
+                className="flex items-center cursor-pointer"
                 onClick={() => setShowMilestones(!showMilestones)}
               >
-                <h3 className="text-lg font-semibold text-gray-900">Project Milestones</h3>
-                <span className="text-xl text-gray-900">
-                  {showMilestones ? 'ᐱ' : 'ᐯ'}
-                </span>
+                <span className="text-lg mr-2 font-semibold text-gray-900">Project Milestones</span>
+                <FaChevronDown className={`transition-transform duration-200 mt-1 ${showMilestones ? 'rotate-180' : ''}`} />
               </div>
 
               {showMilestones && (

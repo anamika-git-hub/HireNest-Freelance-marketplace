@@ -12,7 +12,6 @@ const ContractSchema = new Schema<IContract>(
             type: mongoose.Schema.Types.ObjectId,
             ref:"TaskSubmission",
             default: null
-
         },
         freelancerId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -35,12 +34,32 @@ const ContractSchema = new Schema<IContract>(
             enum: ["pending", "accepted", "rejected"],
             default: "pending",
         },
+        startDate: {
+            type: Date,
+            default: null
+        },
         milestones: [
             {
-                title:String,
-                description: String,
-                dueDate: Date,
-                cost: Number,
+                title: {
+                    type: String,
+                    required: true
+                },
+                description: {
+                    type: String
+                },
+                dueDate: {
+                    type: Date,
+                    required: true
+                },
+                cost: {
+                    type: Number,
+                    required: true
+                },
+                status: {
+                    type: String,
+                    enum: ["active", "unpaid", "completed"], 
+                    default: "unpaid"
+                }
             }
         ]
     },{timestamps:true}

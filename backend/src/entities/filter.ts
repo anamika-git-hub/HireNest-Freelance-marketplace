@@ -1,4 +1,7 @@
 export interface FilterCriteria {
+    taskId?:{$in:string[]};
+    bidId?:{$in:string[]}
+    status?:string;
     role?: string;
     _id?:{$in:string[]};
     $or?: { [key: string]: { $regex: string; $options: string } }[];

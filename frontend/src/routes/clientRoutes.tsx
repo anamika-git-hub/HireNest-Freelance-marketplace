@@ -14,6 +14,8 @@ import FreelancerBookmarks from '../pages/clients/freelancerBookamark';
 import FreelancerList from '../pages/freelancer/freelancerList';
 import FreelancerDetail from '../pages/freelancer/freelancerDetail';
 import MyContract from '../pages/clients/myContract';
+import ClientContractDetails from '../pages/clients/WorkContract';
+import ClientContractsList from '../pages/clients/liveContracts';
 
 const ClientRoutes = () => (
   <Routes>
@@ -27,7 +29,8 @@ const ClientRoutes = () => (
     <Route path="/freelancer-bookmarks" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><FreelancerBookmarks/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/send-contract" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><ContractSection/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/my-contract/:id" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><MyContract/></UserRoleProvider></UserPrivateRoute>} />
-    
+    <Route path="/client-contract/:id" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><ClientContractDetails/></UserRoleProvider></UserPrivateRoute>} />
+    <Route path="/client-contract-list" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><ClientContractsList/></UserRoleProvider></UserPrivateRoute>} />
   </Routes>
 );
 

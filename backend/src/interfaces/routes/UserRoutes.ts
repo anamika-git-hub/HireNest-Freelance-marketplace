@@ -13,6 +13,7 @@ import { FreelancerProfileController } from '../controllers/freelancerProfileCon
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
 import { uploader,compressionMiddleware } from '../../utils/uploader';
+import { PaymentController } from '../controllers/PaymentController';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -51,4 +52,8 @@ router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead
 
 
 router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
+router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);
+
+router.post("/webhook",checkAuth('user'),PaymentController.createWebhook);
+router.post('/release-escrow',checkAuth('user'),PaymentController.releaseEscrow);
 export default router;

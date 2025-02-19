@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors'; 
 import { Config } from './config/config';
@@ -14,6 +14,11 @@ import { ChatModel } from './infrastructure/models/ChatModel';
 import { FreelancerProfileRepository } from './infrastructure/repositories/FreelancerProfileRepository';
 import { AccountDetailRepository } from './infrastructure/repositories/accountDetail';
 import { IMessage } from './entities/Message';
+import Stripe from 'stripe';
+
+export const stripe = new Stripe(Config.STRIPE_SECRET_KEY as string, {
+  apiVersion:'2025-01-27.acacia'
+})
 
 const port = Config.PORT ;
 const app = express();
@@ -69,7 +74,6 @@ export const sendNotification = (userId: string, notification: any) => {
   }
 };
 
-
 //------------------Chat----------------///
 
 const socketConnection = new Map<string, string>();
@@ -90,6 +94,7 @@ io.on('connection',async(socket) => {
       console.log(`User connected: ${userId} with socket ID: ${socket.id}`);
     }
 
+    //----------------get message-----------------------------//
     socket.on('get_messages', async ({ senderId, receiverId, role }) => {
         try {
           if(role === 'freelancer'){
@@ -115,7 +120,7 @@ io.on('connection',async(socket) => {
             receiverId: msg.receiverId,
             text: msg.text,
             type: msg.type,
-            time: msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown Time',
+            time: msg.createdAt,
             isRead: msg.isRead
           }));
           socket.emit('message_history', messages);
@@ -123,6 +128,34 @@ io.on('connection',async(socket) => {
           console.error('Error fetching messages:', error);
         }
       });
+     //-----------------------clear chat------------------------//
+
+      socket.on('clear_chat', async ({ senderId, receiverId, role }) => {
+        try {
+          if (role === 'freelancer') {
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(senderId);
+            senderId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          } else if (role === 'client') {
+            const accountDetail = await AccountDetailRepository.findUserDetailsById(senderId);
+            senderId = accountDetail ? accountDetail._id.toString() : null;
+          }
+      
+          const chat = await ChatModel.findOne({
+            participants: { $all: [senderId, receiverId] }
+          });
+      
+          if (chat) {
+            chat.messages = []; 
+            await chat.save();  
+          }
+      
+          socket.emit('chat_cleared', receiverId);
+        } catch (error) {
+          console.error('Error clearing chat:', error);
+        }
+      });
+      
+      //--------------mark message read ---------------------------//
        
       socket.on('mark_messages_read', async (data) => {
         try {
@@ -143,13 +176,11 @@ io.on('connection',async(socket) => {
             return;
           }
       
-          // Find the chat between these users
           const chat = await ChatModel.findOne({
             participants: { $all: [adjustedSenderId, receiverId] },
           });
       
           if (chat) {
-            // Update all unread messages where the current user is the receiver
             await MessageModel.updateMany(
               {
                 _id: { $in: chat.messages },
@@ -161,7 +192,6 @@ io.on('connection',async(socket) => {
               }
             );
       
-            // Emit an event to both users to update the read status in their UI
             const socketId = socketConnection.get(receiverId);
             const receiveId = socketConnection.get(adjustedSenderId);
       
@@ -183,6 +213,7 @@ io.on('connection',async(socket) => {
         }
       });
 
+      //------------------------send message----------------------------//
 
       socket.on('send_message', async (data) => {
         try {
@@ -244,6 +275,14 @@ io.on('connection',async(socket) => {
         console.log('A user disconnected:', socket.id);        
     })    
 })
+
+const errorHandler:ErrorRequestHandler =(err, req, res, next) => {
+  console.error(err.stack); // Log the error for debugging
+  res.status(500).json({ message: err.message || 'Internal Server Error' });
+};
+
+app.use(errorHandler)
+
 
 mongoose 
 .connect(Config.DB_URI as string)

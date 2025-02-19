@@ -8,6 +8,7 @@ import { uploadTaskFiles } from '../middlewares/uploadFileImages';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
+import { PaymentController } from '../controllers/PaymentController';
 
 const router = express.Router();
 
@@ -31,5 +32,8 @@ router.get("/request/:id",checkAuth('client'), RequestController.getRequestById)
 
 router.post("/create-contract",checkAuth('client'),ContractController.createContract);
 router.patch("/bid-status/:id",checkAuth('client'),BidController.BidStatusUpdate);
-router.put("/update-contract/:id",checkAuth('client'),ContractController.updateContract)
+router.put("/update-contract/:id",checkAuth('client'),ContractController.updateContract);
+
+router.post("/create-payment-intent",checkAuth('client'),PaymentController.createPaymentIntent);
+
 export default router;
