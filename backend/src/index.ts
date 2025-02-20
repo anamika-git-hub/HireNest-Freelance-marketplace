@@ -257,6 +257,7 @@ io.on('connection',async(socket) => {
             text,
             type,
             time,
+            createdAt:new Date(),
             isRead: false, 
           });
           await message.save();

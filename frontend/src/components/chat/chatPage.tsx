@@ -1,3 +1,4 @@
+// Chat.tsx
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './chatArea';
@@ -26,7 +27,7 @@ interface Message {
   senderId?: string;
   type: 'sent' | 'received';
   text: string;
-  time: string;
+  time: Date;
   createdAt?: Date;
   isRead?: boolean;
   mediaUrl?: string;
@@ -43,6 +44,14 @@ const Chat: React.FC = () => {
   const [showChat, setShowChat] = useState(false);
   const role = localStorage.getItem('role') || '';
   const userId = localStorage.getItem('userId') || '';
+
+  const sortContacts = (contactsList: Contacts[]): Contacts[] => {
+    return [...contactsList].sort((a, b) => {
+      const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -65,8 +74,6 @@ const Chat: React.FC = () => {
           }
         });
 
-        console.log('ressss',response.data)
-
         const contactList: Contacts[] = response.data.map((receiver: Contacts) => ({
           _id: receiver._id,
           name: receiver.name,
@@ -75,7 +82,7 @@ const Chat: React.FC = () => {
           lastMessage: receiver.lastMessage,
           unreadCount: receiver.unreadCount,
         }));
-        setContacts(contactList);
+        setContacts(sortContacts(contactList));
 
         if (contactList.length > 0) {
           const firstContact = contactList[0];
@@ -91,8 +98,6 @@ const Chat: React.FC = () => {
   }, [role, userId]);
 
   useEffect(() => {
-    // ... existing socket event listeners ...
-
     socket.on('messages_marked_read', ({ chatId, readBy }) => {
       setMessages(prevMessages => 
         prevMessages.map(msg => {
@@ -102,13 +107,48 @@ const Chat: React.FC = () => {
           return msg;
         })
       );
+
+      setContacts(prevContacts =>
+        prevContacts.map(contact => {
+          if (contact._id === readBy && contact.lastMessage) {
+            return {
+              ...contact,
+              lastMessage: { ...contact.lastMessage, isRead: true },
+              unreadCount: 0
+            };
+          }
+          return contact;
+        })
+      );
+    });
+
+    socket.on('receive_message', (data: Message) => {
+      const messageWithTimestamp = {
+        ...data,
+        createdAt: data.createdAt || new Date(),
+        isRead: false,
+      };
+
+      setContacts(prevContacts => {
+        const updatedContacts = prevContacts.map(contact => {
+          if (contact._id === (data.senderId === userId ? data.receiverId : data.senderId)) {
+            return {
+              ...contact,
+              lastMessage: messageWithTimestamp,
+              unreadCount: data.senderId === userId ? contact.unreadCount : contact.unreadCount + 1
+            };
+          }
+          return contact;
+        });
+        return sortContacts(updatedContacts);
+      });
     });
 
     return () => {
-      // ... existing cleanup ...
       socket.off('messages_marked_read');
+      socket.off('receive_message');
     };
-  }, [socket]);
+  }, [userId]);
 
   const initializeChat = (contactId: string) => {
     socket.off('message_history');
@@ -119,7 +159,7 @@ const Chat: React.FC = () => {
       const updatedHistory = history.map((msg) => ({
         type: msg.receiverId === contactId ? 'sent' : 'received',
         text: msg.text,
-        time: msg.time ,
+        time: msg.time,
         isRead: msg.isRead,
       })) as Message[];
 
@@ -130,11 +170,15 @@ const Chat: React.FC = () => {
       const formattedMessage: Message = {
         type: data.receiverId === contactId ? 'sent' : 'received',
         text: data.text,
-        time: data.time ,
+        time: new Date(),
         isRead: data.isRead,
       };
       setMessages((prevMessages) => [...prevMessages, formattedMessage]);
     });
+
+    if (contactId) {
+      socket.emit('mark_messages_read', { senderId: userId, receiverId: contactId });
+    }
 
     return () => {
       socket.off('message_history');
@@ -157,7 +201,7 @@ const Chat: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
-       {(!isMobileView || (isMobileView && !showChat)) && (
+      {(!isMobileView || (isMobileView && !showChat)) && (
         <Sidebar 
           contacts={contacts} 
           onSelectContact={handleContactSelect} 
@@ -174,6 +218,7 @@ const Chat: React.FC = () => {
           role={role}
           onBack={handleBackToContacts}
           isMobileView={isMobileView}
+          setContacts={setContacts}
         />
       )}
     </div>

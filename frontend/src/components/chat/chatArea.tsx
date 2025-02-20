@@ -8,7 +8,8 @@ interface Message {
   senderId?: string;
   type: 'sent' | 'received';
   text: string;
-  time: string;
+  time: Date;
+  createdAt?:Date;
   isRead?: boolean;
   mediaUrl?: string;
   mediaType?: 'image' | 'video' | 'audio' | 'file';
@@ -34,6 +35,7 @@ interface ChatAreaProps {
   role: string;
   onBack: () => void;
   isMobileView: boolean;
+  setContacts: React.Dispatch<React.SetStateAction<Contacts[]>>;
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({
@@ -43,7 +45,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   socket,
   role,
   onBack,
-  isMobileView
+  isMobileView,
+  setContacts
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
@@ -89,7 +92,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     )
   : messages;
 
-  const formatMessageDate = (dateString: string) => {
+  const formatMessageDate = (dateString: Date) => {
     const messageDate = new Date(dateString);
     const today = new Date();
     const yesterday = new Date(today);
@@ -181,11 +184,33 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       const messageData: Message = {
         type: 'sent',
         text: text.trim(),
-        time: new Date().toLocaleString(),
+        time: new Date(),
+        createdAt: new Date(),
         isRead: false,
+        senderId: userId,   
+      receiverId: contacts._id,
         ...mediaData
       };
       socket.emit('send_message', { ...messageData, senderId: userId, receiverId: contacts._id, role });
+      setContacts(prevContacts => {
+        const updatedContacts = prevContacts.map(contact => {
+          if (contact._id === contacts._id) {
+            return {
+              ...contact,
+              lastMessage: {
+                ...messageData,
+                isRead: false
+              }
+            };
+          }
+          return contact;
+        });
+        return updatedContacts.sort((a, b) => {
+          const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+          const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      });
       setNewMessage('');
       setSelectedFile(null);
     }

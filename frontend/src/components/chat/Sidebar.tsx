@@ -5,7 +5,7 @@ interface Message {
   senderId?: string;
   type: 'sent' | 'received';
   text: string;
-  time: string;
+  time: Date;
   createdAt?: Date;
   isRead?: boolean;
   mediaUrl?: string;
@@ -30,12 +30,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedContactId }) => {
-  const sortedContacts = [...contacts].sort((a, b) => {
-    const dateA = a.lastMessage?.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
-    const dateB = b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
-    return dateB - dateA; 
-  });
-
+ console.log('kfkfkfk',contacts)
   return (
     <div className="w-full lg:w-1/3 bg-white h-full border-r flex flex-col">
       <div className="p-4 border-b h-20">
@@ -46,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedCo
         />
       </div>
       <ul className="flex-1 overflow-y-auto">
-        {sortedContacts.map((contact, idx) => (
+        {contacts.map((contact, idx) => (
           <li
             key={idx}
             className={`flex items-center p-4 hover:bg-gray-100 cursor-pointer ${
