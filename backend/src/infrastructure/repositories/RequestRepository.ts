@@ -45,7 +45,7 @@ export const RequestRepository = {
 
     getRequestByUserId: async (id: string) => {
         try {
-            const request = await RequestModel.find({requesterId:id}).populate("freelancerId");
+            const request = await RequestModel.find({requesterId:id})
             if (!request) throw new Error("Request not found");
             return request;
         } catch (error) {
