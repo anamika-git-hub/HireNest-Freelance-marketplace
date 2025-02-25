@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import VideoCall from '../shared/videoCall';
 import { ArrowLeft, MoreVertical, Video, Search, X } from 'lucide-react';
+import axiosConfig from '../../service/axios';
 
 interface Message {
   receiverId?: string;
@@ -52,7 +55,9 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showVideoCall, setShowVideoCall] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleClearChat = () => {
     socket.emit('clear_chat', {
@@ -74,10 +79,44 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     };
   }, [contacts._id, socket]);
   
-
-  const handleVideoCall = () => {
-    console.log('Starting video call with:', contacts.name);
+const handleVideoCall = () => {
+  console.log('Starting video call with:', contacts.name);
+  const initiateCall = async () => {
+    try {
+      let adjustedUserId = userId;
+      
+      if (role === 'freelancer') {
+        const response = await axiosConfig(`/users/freelancer-profile/${userId}`);
+        const data = await response.data;
+        if (data && data._id) {
+          adjustedUserId = data._id;
+        }
+      } else if (role === 'client') {
+        const response = await axiosConfig(`/users/account-detail`);
+        const data = await response.data.userDetails;
+        if (data && data._id) {
+          adjustedUserId = data._id;
+        }
+      }
+      const sortedIds = [adjustedUserId, contacts._id].sort().join('-');
+      const roomID = `room-${sortedIds}`;
+      
+      // Emit event to notify the other user
+      socket.emit('call_initiated', {
+        roomID,
+        callerId: userId, 
+        callerName: 'You', 
+        receiverId: contacts._id,
+        role 
+      })
+      navigate(`/video-call?roomID=${roomID}`);
+    } catch (error) {
+      console.error('Error initiating call:', error);
+    }
   };
+  
+  initiateCall();
+};
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
@@ -188,7 +227,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         createdAt: new Date(),
         isRead: false,
         senderId: userId,   
-      receiverId: contacts._id,
+        receiverId: contacts._id,
         ...mediaData
       };
       socket.emit('send_message', { ...messageData, senderId: userId, receiverId: contacts._id, role });

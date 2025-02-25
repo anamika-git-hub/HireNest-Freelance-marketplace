@@ -18,6 +18,14 @@ import Notifications from '../pages/shared/notification';
 import Chat from '../components/chat/chatPage';
 import MyAccount from '../pages/shared/MyAccount';
 import NotFoundPage from '../pages/shared/404';
+import App from '../components/chat/videoChat';
+import VideoCall from '../components/shared/videoCall';
+import { io } from 'socket.io-client';
+const userId = localStorage.getItem('userId') as string;
+const role = localStorage.getItem('role');
+const socket = io('http://localhost:5000', {
+  query: { userId, role },
+});
 
 const SharedRoutes = () => (
   <Routes>
@@ -35,6 +43,17 @@ const SharedRoutes = () => (
     <Route path="/404" element={<LayoutWrapper><NotFoundPage/></LayoutWrapper>} />
     <Route path="/messages" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><Chat/></UserRoleProvider></UserPrivateRoute>} />
     <Route path="/notification" element={<UserPrivateRoute><UserRoleProvider showSidebar={true}><Notifications/></UserRoleProvider></UserPrivateRoute>} />
+    <Route 
+  path="/video-call" 
+  element={
+    <UserPrivateRoute>
+      <UserRoleProvider showSidebar={false}>
+        <VideoCall socket={socket} userId={userId} />
+      </UserRoleProvider>
+    </UserPrivateRoute>
+  } 
+/>
+    
   </Routes>
 );
 

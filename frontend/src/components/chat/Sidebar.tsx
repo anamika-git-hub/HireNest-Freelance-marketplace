@@ -30,7 +30,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ contacts, onSelectContact, selectedContactId }) => {
- console.log('kfkfkfk',contacts)
   return (
     <div className="w-full lg:w-1/3 bg-white h-full border-r flex flex-col">
       <div className="p-4 border-b h-20">
