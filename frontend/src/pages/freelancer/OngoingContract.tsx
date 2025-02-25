@@ -28,6 +28,7 @@ interface ContractDetail {
   taskId: string;
   clientId: string;
   clientName: string;
+  freelancerId: string;
   title: string;
   budget: string;
   description: string;
@@ -66,18 +67,27 @@ const FreelancerContractDetails: React.FC = () => {
 
   const handleMarkCompleted = async (milestoneId: string) => {
     try {
-    setContract(prev => prev?{
-      ...prev,
-      milestones: prev.milestones.map(milestone =>
-        milestone._id === milestoneId
-          ? { ...milestone, status: 'completed' }
-          : milestone
-      ),
-    }: null);
-    toast.success('Milestone marked as completed');
-    } catch (error) {
+      const response = await axiosConfig.post('/users/release-escrow',{
+        contractId: id,
+        milestoneId: milestoneId,
+        freelancerId: contract?.freelancerId,
+      })
+      if(response.status === 200){
+        setContract(prev => prev?{
+          ...prev,
+          milestones: prev.milestones.map(milestone =>
+            milestone._id === milestoneId
+              ? { ...milestone, status: 'completed' }
+              : milestone
+          ),
+        }: null);
+        toast.success('Milestone marked as completed');
+       
+      }
+     } catch (error) {
         toast.error('please try again later')
     }
+  
   };
 
   const downloadInvoice = (paymentId: string) => {

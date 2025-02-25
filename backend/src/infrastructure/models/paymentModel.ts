@@ -9,7 +9,8 @@ const PaymentSchema = new Schema<IMilestonePayment>(
     },
     amount: {
         type: Number,
-        required: true
+        required: true,
+        min:0
     },
     contractId: {
         type: String,
@@ -17,22 +18,32 @@ const PaymentSchema = new Schema<IMilestonePayment>(
     },
     platformFee: {
         type: Number,
-        required: true
+        required: true,
+        min:0
     },
     status: {
         type: String,
         required: true,
-        enum: ['held','released'],
-        default:'held',
+        enum: ['pending','held','released','failed'],
+        default:'pending',
     },
     freelancerId: {
         type: String,
-        required: false
+        required: true
     },
     releasedAt: {
         type: Date,
-        required: false
-    }
+    },
+    stripePaymentIntentId: {
+        type:String,
+        required: true,
+        unique: true
+    },
+    transactionHistory: [{
+        status: String,
+        timestamp: Date,
+        note:String,
+    }]
   },{timestamps:true}
 );
 

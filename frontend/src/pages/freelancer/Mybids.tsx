@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { FaEdit, FaTrash, FaTimes, FaSearch } from "react-icons/fa";
+import { FaEdit, FaTrash, FaTimes, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";
 import ConfirmMessage from "../../components/shared/ConfirmMessage";
 import { BidValidationSchema } from "../../components/Schemas/bidValidationSchema";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface Bid {
   _id: string;
@@ -64,12 +63,10 @@ const ActiveBids: React.FC = () => {
   useEffect(() => {
     let result = [...bids];
     
-    // Apply status filter
     if (activeFilter !== "all") {
       result = result.filter(bid => bid.status === activeFilter);
     }
     
-    // Apply search filter
     if (searchTerm) {
       result = result.filter(bid => 
         bid.taskId.projectName.toLowerCase().includes(searchTerm.toLowerCase())

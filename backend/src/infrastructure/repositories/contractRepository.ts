@@ -2,7 +2,8 @@ import { ContractModel } from "../models/ContractModel";
 import { IContract } from "../../entities/contract";
 import { FilterCriteria } from "../../entities/filter";
 import { IMilestonePayment } from "../../entities/milestonePayment";
-import { PaymentModel } from "../models/escrowModel";
+import { PaymentModel } from "../models/paymentModel";
+import mongoose from "mongoose";
 
 export const ContractRepository = {
     createContract: async(data:IContract) =>{
@@ -34,7 +35,7 @@ export const ContractRepository = {
     getAllContracts: async (filters:FilterCriteria) => {
         return await ContractModel.find({...filters});
     },
-    updateMilestoneStatus: async (contractId:string,milestoneId:string, status: string) => {
+    updateMilestoneStatus: async (contractId:string,milestoneId:string, status: string, session: any) => {
         return await ContractModel.findOneAndUpdate({
             _id:contractId,
             'milestones._id':milestoneId
@@ -44,35 +45,6 @@ export const ContractRepository = {
         },{new:true}
     )
     },
-    createEscrowRecord: async (data:IMilestonePayment) =>{
-        const escrow = new PaymentModel({
-            ...data,
-            status:'held'
-        })
-        return await escrow.save();
-    },
-    getEscrowRecord: async(milestoneId:string) => {
-        const escrowRecord = await PaymentModel.findOne({
-            milestoneId,
-            status:'held'
-        });
-        if(!escrowRecord){
-            throw new Error('Escrow record not found')
-        }
-        return escrowRecord;
-
-    },
-    updateEscrowStatus: async (milestoneId: string, status: string)=> {
-        return await PaymentModel.findOneAndUpdate(
-            {milestoneId},
-            {
-                $set: {
-                    status,
-                    ...(status === 'released' ? { releasedAt: new Date()}: {})
-                }
-            },
-            {new: true}
-        );
-    }
+   
 
 }

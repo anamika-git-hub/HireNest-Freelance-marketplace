@@ -35,5 +35,6 @@ router.patch("/bid-status/:id",checkAuth('client'),BidController.BidStatusUpdate
 router.put("/update-contract/:id",checkAuth('client'),ContractController.updateContract);
 
 router.post("/create-payment-intent",checkAuth('client'),PaymentController.createPaymentIntent);
+router.post("/webhook", express.raw({type: 'application/json'}), PaymentController.createWebhook);
 
 export default router;

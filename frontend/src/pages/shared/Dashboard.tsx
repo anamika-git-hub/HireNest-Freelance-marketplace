@@ -298,7 +298,7 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
              <ul className="mt-4 divide-y divide-gray-200">
-                      {notifications.slice(0,4).map((notification,index)=>(
+                      {/* {notifications.slice(0,4).map((notification,index)=>(
                         <li
                                 key={index}
                                  className="flex items-start py-2">
@@ -308,7 +308,7 @@ const Dashboard: React.FC = () => {
                                   {notification.text}
                                 </p>
                                 </li>
-                              ))}
+                              ))} */}
                             </ul>
           </div>
         </div>

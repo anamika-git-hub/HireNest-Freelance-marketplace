@@ -1,57 +1,182 @@
+import mongoose from "mongoose";
 import { stripe } from "..";
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
+import { Paymentrepository } from "../infrastructure/repositories/paymentRepository";
+import Stripe from "stripe";
 
 export const PaymentUseCase = {
- createPaymentIntent: async (amount: number, milestoneId: string, contractId: string) => {
-    const totalAmount = amount * 100;
-    const platformFee = totalAmount * 0.10;
-    const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmount,
-        currency: 'usd',
-        automatic_payment_methods: {
-            enabled: true,
-        },
-        metadata: {
-            milestoneId,
-            contractId,
-            platformFee,
-        }
-    });
-    return {clientSecret:paymentIntent.client_secret,paymentIntentId:paymentIntent.id}
- },
- createWebhook: async (sig:string,endpointSecret: string,event: any) => {
-    if(event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
-        const {milestoneId,contractId, platformFee} = paymentIntent.metadata;
-
-        await ContractRepository.updateMilestoneStatus(contractId,milestoneId,'active');
-        await ContractRepository.createEscrowRecord({
-            milestoneId,
-        contractId,
-        amount: paymentIntent.amount,
-        platformFee,
-        status: 'held'
-        });
+    createPaymentIntent: async (amount: number, milestoneId: string, contractId: string, freelancerId: string) => {
+        if (amount <= 0) throw new Error('Invalid amount');
         
+        const totalAmount = Math.round(amount * 100);
+        const platformFee = Math.round(totalAmount * 0.10);
+        
+        try {
+            const paymentIntentData: Stripe.PaymentIntentCreateParams = {
+                amount: totalAmount,
+                currency: 'usd',
+                automatic_payment_methods: { enabled: true },
+                metadata: {
+                    milestoneId,
+                    contractId,
+                    platformFee: platformFee.toString(),
+                    freelancerId
+                }
+            };
+    
+            let paymentIntent;
+            try {
+                paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+            } catch (stripeError:any) {
+                throw new Error(`Stripe error: ${stripeError.message}`);
+            }
+    
+            try {
+                await Paymentrepository.createEscrowRecord({
+                    milestoneId,
+                    contractId,
+                    amount: totalAmount,
+                    platformFee,
+                    status: 'pending',
+                    freelancerId,
+                    stripePaymentIntentId: paymentIntent.id,
+                    transactionHistory: [{
+                        status: 'pending',
+                        timestamp: new Date(),
+                        note: 'Payment initiated'
+                    }]
+                });
+            } catch (dbError:any) {
+                await stripe.paymentIntents.cancel(paymentIntent.id);
+                throw new Error(`Database error: ${dbError.message}`);
+            }
+    
+            return {
+                clientSecret: paymentIntent.client_secret?.toString(),
+                paymentIntentId: paymentIntent.id
+            };
+    
+        } catch (error:any) {
+            throw new Error(error.message || 'Failed to initialize payment');
+        }
+    },
+ handleWebhook: async (event: any) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        await PaymentUseCase.handlePaymentSuccess(event.data.object,session);
+        break;
+      case 'payment_intent.payment_failed':
+        await PaymentUseCase.handlePaymentFailure(event.data.object,session);
+        break;
+      case 'transfer.succeeded':
+        await PaymentUseCase.handleTransferSuccess(event.data.object,session);
+        break;
+      case 'transfer.failed':
+        await PaymentUseCase.handleTransferFailure(event.data.object,session);
+        break;
     }
- },
+    await session.commitTransaction();
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+  },
+
+  handlePaymentSuccess: async (paymentIntent: any, session: any) => {
+    const { milestoneId, contractId } = paymentIntent.metadata;
+    
+    await ContractRepository.updateMilestoneStatus(
+      contractId,
+      milestoneId,
+      'active',
+      session
+    );
+
+    await Paymentrepository.updateEscrowStatus(
+      milestoneId,
+      'held',
+      session
+    );
+
+    // Add to transaction history
+    await Paymentrepository.updateTransactionHistory(paymentIntent.id,null,'held',session,'Payment successful, funds held in escrow')
+    
+  },
+
+  handlePaymentFailure: async (paymentIntent: any, session: any) => {
+    const { milestoneId } = paymentIntent.metadata;
+    
+    await Paymentrepository.updateEscrowStatus(
+      milestoneId,
+      'failed',
+      session
+    );
+    await Paymentrepository.updateTransactionHistory(paymentIntent.id,null,'failed',session,'Payment failed');
+  },
+  handleTransferSuccess: async (transfer: any, session: any) => {
+    const { milestoneId, contractId } = transfer.metadata;
+    
+    await ContractRepository.updateMilestoneStatus(
+      contractId,
+      milestoneId,
+      'completed',
+      session
+    );
+
+    await Paymentrepository.updateEscrowStatus(
+      milestoneId,
+      'released',
+      session
+    );
+    await Paymentrepository.updateTransactionHistory(null,milestoneId,'released',session,'Funds successfully transferred to freelancer');
+    
+  },
+
+  handleTransferFailure: async (transfer: any, session: any) => {
+    const { milestoneId } = transfer.metadata;
+    await Paymentrepository.updateTransactionHistory(null,milestoneId,'transfer_failed',session,'Failed to transfer funds to freelancer');
+
+    // You might want to implement retry logic or notify admin
+    // TODO: Implement retry mechanism or admin notification
+  },
 
  releaseEscrow: async(contractId: string,milestoneId: string, freelancerId: string) => {
-    const escrowRecord = await ContractRepository.getEscrowRecord(milestoneId);
+    const escrowRecord = await Paymentrepository.getEscrowRecord(milestoneId);
     if(escrowRecord.status !== 'held'){
         throw new Error('Funds not in escrow');
     }
-
+    const transferAmount = Math.floor(escrowRecord.amount*0.9);
+   console.log('fkfkfkfk',transferAmount)
     const transfer = await stripe.transfers.create({
-        amount:Math.floor(escrowRecord.amount*0.9),
+        amount:transferAmount,
         currency:'usd',
         destination: freelancerId,
         description:`Payment for milestone ${milestoneId}`,
+        metadata: {
+            milestoneId,
+            contractId,
+            escrowRecord:escrowRecord._id.toString()
+        }
     });
-
-    await ContractRepository.updateMilestoneStatus(contractId,milestoneId,'completed');
-    await ContractRepository.updateEscrowStatus(milestoneId,'released');
-    
-
+    console.log('dkdkdk',transfer)
+    await Paymentrepository.runTransaction(async(session) => {
+        await ContractRepository.updateMilestoneStatus(
+            contractId,
+            milestoneId,
+            'completed',
+            session
+        );
+        await Paymentrepository.updateEscrowStatus(
+            milestoneId,
+            'released',
+            session
+        );
+    })
+    return transfer;
  }
 }

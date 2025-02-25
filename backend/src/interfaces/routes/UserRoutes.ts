@@ -54,6 +54,5 @@ router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead
 router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
 router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);
 
-router.post("/webhook",checkAuth('user'),PaymentController.createWebhook);
 router.post('/release-escrow',checkAuth('user'),PaymentController.releaseEscrow);
 export default router;

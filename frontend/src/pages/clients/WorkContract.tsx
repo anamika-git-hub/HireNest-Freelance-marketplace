@@ -3,6 +3,11 @@ import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaChevronDown } from 'react-icons/fa';
 import axiosConfig from '../../service/axios';
+import { loadStripe } from '@stripe/stripe-js';
+import {Elements,PaymentElement,useStripe,useElements} from '@stripe/react-stripe-js';
+import { XIcon } from 'lucide-react';
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!);
 
 interface Milestone {
   _id: string;
@@ -24,12 +29,159 @@ interface ContractDetail {
   status: 'ongoing' | 'completed' | 'accepted';
 }
 
+const PaymentForm: React.FC<{
+  clientSecret: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}> = ({ clientSecret, onSuccess, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.href,
+        },
+        redirect: 'if_required',
+      });
+
+      if (error) {
+        toast.error(error.message || 'Payment failed');
+      } else {
+        toast.success('Payment successful');
+        onSuccess();
+      }
+    } catch (err) {
+      toast.error('Payment processing failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-4">
+      <PaymentElement />
+      <div className="mt-4 flex gap-3">
+        <button
+          type="submit"
+          disabled={isProcessing}
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        >
+          {isProcessing ? 'Processing...' : 'Pay Now'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const PaymentModal: React.FC<{
+  milestone: Milestone;
+  contractId: string;
+  freelancerId: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}> = ({ milestone, contractId,freelancerId, onClose, onSuccess }) => {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  
+    useEffect(() => {
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, []);
+    useEffect(() => {
+    const initializePaymentIntent = async () => {
+      try {
+        const response = await axiosConfig.post('/client/create-payment-intent', {
+          amount: Number(milestone.cost),
+          milestoneId: milestone._id,
+          contractId,
+          freelancerId: freelancerId,
+        });
+        setClientSecret(response.data.clientSecret);
+      } catch (err) {
+        toast.error('Failed to initialize payment');
+        onClose();
+      }
+    };
+
+    initializePaymentIntent();
+  }, [milestone, contractId]);
+
+  if (!clientSecret) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black bg-opacity-50"></div>
+        <div className="relative bg-white p-6 rounded-lg">
+          <p>Initializing payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="relative bg-white p-6 rounded-lg w-full max-w-md">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold">Pay Milestone: {milestone.title}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <XIcon className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="mb-6">
+          <p className="text-gray-600">Amount: ${Number(milestone.cost).toLocaleString()}</p>
+          <p className="text-sm text-gray-500">
+            Platform fee (10%): ${(Number(milestone.cost) * 0.1).toLocaleString()}
+          </p>
+        </div>
+
+        {clientSecret && (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <PaymentForm
+              clientSecret={clientSecret}
+              onSuccess={() => {
+                onSuccess();
+                onClose();
+              }}
+              onCancel={onClose}
+            />
+          </Elements>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 const ClientContractDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [contract, setContract] = useState<ContractDetail | null>(null);
   const [showMilestones, setShowMilestones] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,22 +205,25 @@ const ClientContractDetails: React.FC = () => {
     }
   }, [id]);
 
-  const handlePayMilestone = async (milestoneId: string) => {
+  const handlePayMilestone = (milestone: Milestone) => {
+    setSelectedMilestone(milestone);
+  };
+
+  const handlePaymentSuccess = async () => {
     try {
-      // Add your payment API endpoint here
-      // await axiosConfig.post(`/payments/milestone/${milestoneId}`);
+      if(selectedMilestone){
+        setContract(prev => prev ? {
+          ...prev,
+          milestones: prev.milestones.map(m =>
+            m._id === selectedMilestone._id
+              ? { ...m, status: 'active' }
+              : m
+          ),
+        } : null);
+        
+        toast.success('Payment successful');
+      }
       
-      // Update local state after successful payment
-      setContract(prev => prev ? {
-        ...prev,
-        milestones: prev.milestones.map(milestone =>
-          milestone._id === milestoneId
-            ? { ...milestone, status: 'active' }
-            : milestone
-        ),
-      } : null);
-      
-      toast.success('Payment successful');
     } catch (err) {
       toast.error('Payment failed. Please try again.');
       console.error('Error processing payment:', err);
@@ -162,7 +317,7 @@ const ClientContractDetails: React.FC = () => {
                         )}
                         {milestone.status === 'unpaid' && (
                           <button
-                            onClick={() => handlePayMilestone(milestone._id)}
+                            onClick={() => handlePayMilestone(milestone)}
                             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
                           >
                             Pay Milestone
@@ -175,6 +330,16 @@ const ClientContractDetails: React.FC = () => {
               </div>
             )}
           </div>
+
+          {selectedMilestone && contract && (
+            <PaymentModal
+              milestone={selectedMilestone}
+              contractId={contract._id}
+              freelancerId={contract.freelancerId}
+              onClose={() => setSelectedMilestone(null)}
+              onSuccess={handlePaymentSuccess}
+            />
+          )}
 
           <div className="bg-blue-50 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-800">Project Terms</h3>
