@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
+
 export interface FilterCriteria {
-    taskId?:{$in:string[]};
-    bidId?:{$in:string[]}
+  taskId?: { $in: mongoose.Types.ObjectId[] };
+  bidId?: { $in: mongoose.Types.ObjectId[] };
     status?:string;
     role?: string;
     _id?:{$in:string[]};

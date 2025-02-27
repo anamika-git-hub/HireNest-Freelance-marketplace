@@ -97,7 +97,7 @@ notificationIo.on('connection', async (socket) => {
 });
 
 // Function to send notifications
-export const sendNotification = (userId: string, notification: any) => {
+export const sendNotification = (userId: any , notification: any) => {
   const socketId = notificationConnections.get(userId);
   if (socketId) {
     notificationIo.to(socketId).emit('new_notification', notification);

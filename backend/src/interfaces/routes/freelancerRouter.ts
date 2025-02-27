@@ -4,11 +4,11 @@ import { FreelancerProfileController } from '../controllers/freelancerProfileCon
 import { BidController} from '../controllers/bidController';
 import { TaskController } from '../controllers/taskController';
 import { RequestController } from '../controllers/requestController';
-import { uploadFreelancerImages } from '../middlewares/uploadFileImages';
+import { upload, uploadFreelancerImages } from '../middlewares/uploadFileImages';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
-
+import { milestoneUploader,compressionMiddleware } from '../../utils/uploader';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -26,5 +26,6 @@ router.delete("/delete-bid/:id",checkAuth('freelancer'), BidController.deleteBid
 router.patch("/request-status/:id", checkAuth('freelancer'),RequestController.requestStatusUpdate);
 
 router.patch("/contract-status/:id",checkAuth('freelancer'),ContractController.updateContractStatus);
+router.post('/submit-milestone',checkAuth('freelancer'),milestoneUploader,ContractController.submitMilestone);
 
 export default router;

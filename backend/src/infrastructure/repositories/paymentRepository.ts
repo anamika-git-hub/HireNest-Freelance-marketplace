@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose ,{ClientSession}from "mongoose";
 import { IMilestonePayment } from "../../entities/milestonePayment";
 import { PaymentModel } from "../models/paymentModel";
 
@@ -21,9 +21,8 @@ export const Paymentrepository = {
             throw new Error('Escrow record not found')
         }
         return escrowRecord;
-
     },
-    updateEscrowStatus: async (milestoneId: string, status: string, session: any)=> {
+    updateEscrowStatus: async (milestoneId: string, status: string, session?: ClientSession)=> {
         return await PaymentModel.findOneAndUpdate(
             {milestoneId},
             {
@@ -35,20 +34,21 @@ export const Paymentrepository = {
             {new: true}
         );
     },
-    runTransaction: async (operation: (session: any) => Promise<void>) => {
+    runTransaction:  async (callback: (session: ClientSession) => Promise<any>) => {
         const session = await mongoose.startSession();
         session.startTransaction();
-
+        
         try {
-            await operation(session);
-            await session.commitTransaction();
+          const result = await callback(session);
+          await session.commitTransaction();
+          return result;
         } catch (error) {
-            await session.abortTransaction();
-            throw error;
+          await session.abortTransaction();
+          throw error;
         } finally {
-            session.endSession();
+          session.endSession();
         }
-    },
+      },
     updateTransactionHistory: async (paymentIntentId:string |null,milestoneId:string | null,status:string,session:any,note:string)=> {
         await PaymentModel.findOneAndUpdate(
             {
@@ -64,7 +64,7 @@ export const Paymentrepository = {
                 }
               }
             },
-            { session }
+            { ...(session ? { session } : {})  }
           );
     }
 

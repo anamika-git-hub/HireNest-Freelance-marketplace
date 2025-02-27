@@ -33,8 +33,8 @@ export const PaymentController = {
         try {
             const {contractId,milestoneId,freelancerId} = req.body;
             console.log('rrrrrr',req.body)
-            await PaymentUseCase.releaseEscrow(contractId,milestoneId,freelancerId);
-            res.status(200).json({success:true})
+           const result = await PaymentUseCase.releaseEscrow(contractId,milestoneId,freelancerId);
+            res.status(200).json({success:true, result});
         } catch (error) {
             next(error)
         }

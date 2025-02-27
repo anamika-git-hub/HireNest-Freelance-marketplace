@@ -74,7 +74,7 @@ const FreelancerContractsList: React.FC = () => {
       .filter(m => m.status === 'completed' || m.status === 'paid')
       .reduce((sum, m) => sum + (Number(m.cost) * 0.9), 0) // Assuming 10% platform fee
       .toString();
-
+console.log('skskkskssk',contract,totalEarned,)
     // Calculate remaining amount
     const remainingAmount = (Number(contract.budget) - Number(totalEarned)).toString();
 
@@ -114,13 +114,14 @@ const FreelancerContractsList: React.FC = () => {
         setError(null);
         const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
         const bidIds = bidResponse.data.bid.map((bid:Bid) => bid._id);
-        const response = await axiosConfig.get("/users/contracts", {
+        console.log('biidd',bidIds)
+        const response =await axiosConfig.get("/users/contracts", {
           params: {
             bidIds: bidIds,
             status: 'accepted'
           }
         });
-
+         console.log('ffff',response)
         const processedContracts = response.data.contracts.map(processContract);
         setContracts(processedContracts);
         setIsLoading(false);

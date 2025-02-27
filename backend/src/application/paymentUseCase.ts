@@ -8,7 +8,7 @@ export const PaymentUseCase = {
     createPaymentIntent: async (amount: number, milestoneId: string, contractId: string, freelancerId: string) => {
         if (amount <= 0) throw new Error('Invalid amount');
         
-        const totalAmount = Math.round(amount * 100);
+        const totalAmount = Math.round(amount);
         const platformFee = Math.round(totalAmount * 0.10);
         
         try {
@@ -61,6 +61,7 @@ export const PaymentUseCase = {
         }
     },
  handleWebhook: async (event: any) => {
+  console.log('lllllllllllllll')
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -89,7 +90,7 @@ export const PaymentUseCase = {
 
   handlePaymentSuccess: async (paymentIntent: any, session: any) => {
     const { milestoneId, contractId } = paymentIntent.metadata;
-    
+    console.log('ddkdkdk')
     await ContractRepository.updateMilestoneStatus(
       contractId,
       milestoneId,
@@ -145,38 +146,63 @@ export const PaymentUseCase = {
     // TODO: Implement retry mechanism or admin notification
   },
 
- releaseEscrow: async(contractId: string,milestoneId: string, freelancerId: string) => {
-    const escrowRecord = await Paymentrepository.getEscrowRecord(milestoneId);
-    if(escrowRecord.status !== 'held'){
+   releaseEscrow: async (contractId: string, milestoneId: string, freelancerId: mongoose.Types.ObjectId) => {
+    try {
+      const escrowRecord = await Paymentrepository.getEscrowRecord(milestoneId);
+      if (!escrowRecord || escrowRecord.status !== 'held') {
         throw new Error('Funds not in escrow');
+      }
+      
+      const transferAmount = Math.floor(escrowRecord.amount * 0.9);
+      
+      const transactionId = `tx_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+      
+      const paymentDetails = {
+        id: `pay_${Date.now()}`,
+        amount: escrowRecord.amount.toString(),
+        paymentDate: new Date().toISOString(),
+        transactionId: transactionId,
+        platformFee: Math.floor(escrowRecord.amount * 0.1).toString(),
+        netAmount: transferAmount.toString()
+      };
+      
+      const updatedMilestone = await ContractRepository.updateMilestoneWithPayment(
+        contractId,
+        milestoneId,
+        'completed',
+        paymentDetails
+      );
+  
+      if (!updatedMilestone) {
+        throw new Error('Failed to update milestone');
+      }
+      
+      // Then update escrow status
+      const updatedEscrow = await Paymentrepository.updateEscrowStatus(
+        milestoneId,
+        'released'
+      );
+  
+      if (!updatedEscrow) {
+        // If escrow update fails, log the error but don't throw
+        // since the milestone is already updated
+        console.error('Warning: Milestone updated but escrow status update failed');
+      }
+  
+      // Add to transaction history
+      await Paymentrepository.updateTransactionHistory(
+        null, 
+        milestoneId, 
+        'released', 
+        null, 
+        `Payment of ${transferAmount} released to freelancer ID: ${freelancerId}`
+      );
+      
+      console.log('Payment details:', paymentDetails);
+      return { success: true, paymentDetails };
+    }catch (error) {
+      console.error('Error releasing escrow:', error);
+      throw error;
     }
-    const transferAmount = Math.floor(escrowRecord.amount*0.9);
-   console.log('fkfkfkfk',transferAmount)
-    const transfer = await stripe.transfers.create({
-        amount:transferAmount,
-        currency:'usd',
-        destination: freelancerId,
-        description:`Payment for milestone ${milestoneId}`,
-        metadata: {
-            milestoneId,
-            contractId,
-            escrowRecord:escrowRecord._id.toString()
-        }
-    });
-    console.log('dkdkdk',transfer)
-    await Paymentrepository.runTransaction(async(session) => {
-        await ContractRepository.updateMilestoneStatus(
-            contractId,
-            milestoneId,
-            'completed',
-            session
-        );
-        await Paymentrepository.updateEscrowStatus(
-            milestoneId,
-            'released',
-            session
-        );
-    })
-    return transfer;
- }
+  }
 }

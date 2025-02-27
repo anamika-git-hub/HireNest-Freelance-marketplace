@@ -62,7 +62,22 @@ export const uploader = multer({
     { name: 'idBackImage', maxCount: 1 }
   ]);
 
-
+  export const milestoneUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 8000000, // 8MB limit
+    },
+    fileFilter: function (req, file, cb) {
+      // You can adjust this filter based on what file types you want to allow
+      // for milestone submissions
+      const ext = path.extname(file.originalname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".zip"].includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Invalid file type for milestone submission"));
+      }
+    },
+  }).single('file'); // Use single() for just one file with field name 'file'
 
 // Function to delete a file from S3
 // export const deleteFromS3 = async (key) => {
@@ -91,7 +106,7 @@ if (!process.env.S3_BUCKET_NAME) {
     try {
       const uploadParams = {
         Bucket: process.env.S3_BUCKET_NAME,
-        Key: `profileImage/${fileName}`, // Fixed string template literal
+        Key: fileName, // Fixed string template literal
         Body: buffer,
       };
   
@@ -136,7 +151,6 @@ export const compressionMiddleware = async (
     console.log('Compression middleware started');
     try {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-        
         if (!files) {
             return next(new Error('No files uploaded'));
         }
