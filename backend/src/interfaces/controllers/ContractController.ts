@@ -149,40 +149,5 @@ export const ContractController = {
             next(error);
         }
     },
-    reviewFreelancer: async (req: CustomRequest, res: Res, next: Next) => {
-        try {
-            const { freelancerId,taskId, contractId, rating, review } = req.body;
-            const clientId = req.user?.userId || '';
-            
-            const result = await ContractUseCase.reviewFreelancer(
-                contractId, 
-                taskId,
-                clientId, 
-                freelancerId, 
-                rating,
-                review || ''
-            );
-            
-            res.status(result.isNewReview ? 201 : 200).json({
-                review: result.review
-            });
-        } catch (error:any) {
-            next(error);
-        }
-    },
-    
-    getFreelancerReviews: async (req: Req, res: Res, next: Next) => {
-        try {
-            const freelancerId = req.params.id;
-            const reviews = await ContractUseCase.getFreelancerReviews(freelancerId);
-            
-            res.status(200).json({
-                message: 'Reviews retrieved successfully',
-                reviews
-            });
-        } catch (error) {
-            console.error('Error retrieving freelancer reviews:', error);
-            next(error);
-        }
-    }
+   
 };

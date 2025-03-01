@@ -1,21 +1,34 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaStar, FaRegStar } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Formik,Form,Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { RequestSchema } from "../../components/Schemas/requestSchema";
 
 interface FreelancerDetail {
-  name: string; 
+  name: string;
   location: string;
   tagline: string;
   experience: string;
   hourlyRate: number;
   skills: string[];
-  description: string; 
+  description: string;
   profileImage: string | null;
-  attachments : string [];
+  attachments: string[];
+  averageRating: number;
+  totalReviews: number;
+  reviews: Review[];
+}
+
+interface Review {
+  _id: string;
+  clientId: string;
+  clientName: string;
+  rating: number;
+  review: string;
+  projectTitle: string;
+  createdAt: string;
 }
 
 interface RequestFormData {
@@ -26,6 +39,7 @@ interface RequestFormData {
 
 const FreelancerDetail: React.FC = () => {
   const [freelancerDetail, setFreelancerDetail] = useState<FreelancerDetail | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -43,6 +57,11 @@ const FreelancerDetail: React.FC = () => {
       try {
         const response = await axiosConfig.get(`client/freelancer/${id}`);
         setFreelancerDetail(response.data.freelancer);
+        if (response.data.freelancer.reviews) {
+          setReviews(response.data.freelancer.reviews);
+        } else {
+          setReviews([]);
+        }
       } catch (error) {
         setError("Failed to load freelancer details");
       } finally {
@@ -53,11 +72,10 @@ const FreelancerDetail: React.FC = () => {
   }, [id]);
 
   const handleSubmit = async (values: RequestFormData, { setSubmitting, resetForm }: any) => {
-    
     try {
       const response = await axiosConfig.post(`client/create-request`, { ...values, freelancerId: id, requesterId: userId });
       toast.success("Request placed successfully!");
-      setShowModal(false)
+      setShowModal(false);
       resetForm();
     } catch (error) {
       console.error("Error placing request:", error);
@@ -65,6 +83,25 @@ const FreelancerDetail: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array(5)
+      .fill(0)
+      .map((_, index) => (
+        <span key={index}>
+          {index < rating ? (
+            <FaStar className="text-yellow-400 inline" />
+          ) : (
+            <FaRegStar className="text-gray-300 inline" />
+          )}
+        </span>
+      ));
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
   if (loading) return <div> Loading...</div>;
@@ -90,6 +127,26 @@ const FreelancerDetail: React.FC = () => {
                 {freelancerDetail.tagline}
               </span>
               <h1 className="text-2xl font-bold mb-2">{freelancerDetail.name}</h1>
+              <div className="flex items-center mt-2">
+                <div className="flex px-2 py-1 bg-yellow-500 rounded-md mr-2">
+                  <span className="text-sm text-white">
+                    {freelancerDetail.averageRating ? freelancerDetail.averageRating.toFixed(1) : "0.0"} 
+                  </span>
+                </div>
+                {[...Array(5)].map((_, i) => (
+                  <FaStar
+                    key={i}
+                    className={`w-6 h-6 ${
+                      i < Math.round(freelancerDetail.averageRating || 0) 
+                        ? "text-yellow-400" 
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+                <span className="ml-2 text-gray-600 text-sm">
+                  ({freelancerDetail.totalReviews || 0} reviews)
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -136,6 +193,35 @@ const FreelancerDetail: React.FC = () => {
                   </span>
                 ))}
               </div>
+              
+              {/* Reviews Section */}
+              <h2 className="text-lg font-semibold mb-4 flex items-center mt-6">
+                <span className="mr-2">⭐</span> Client Reviews
+              </h2>
+              <div className="space-y-4">
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <div key={review._id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-lg">{review.projectTitle}</h3>
+                          <div className="flex items-center mt-1">
+                            <div className="mr-2">{renderStars(review.rating)}</div>
+                            <span className="text-gray-500 text-sm">{formatDate(review.createdAt)}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-700">Client:</p>
+                          <p className="text-sm text-gray-600">{review.clientName}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-gray-700">{review.review}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No reviews yet.</p>
+                )}
+              </div>
             </div>
 
             <div className="bg-white p-6 max-h-80 w-full sm:w-96 border border-gray-200">
@@ -167,12 +253,12 @@ const FreelancerDetail: React.FC = () => {
                     {/* Header Section */}
                     <div className="bg-blue-50 p-5 text-center border-b border-gray-100">
                       <div className="relative">
-                       <button
-                                     onClick={() => setShowModal(false)}
-                                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                                   >
-                                     <FaTimes className="w-5 h-5" />
-                                   </button>
+                        <button
+                          onClick={() => setShowModal(false)}
+                          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                        >
+                          <FaTimes className="w-5 h-5" />
+                        </button>
                         <img
                           src={freelancerDetail.profileImage || "https://via.placeholder.com/100"}
                           alt="Profile"
@@ -184,151 +270,150 @@ const FreelancerDetail: React.FC = () => {
                     </div>
 
                     {/* Form Section */}
-                    <Formik 
-                     initialValues={{
-                      fullName:"",
-                      email: "",
-                      description: "",
-                     }}
-                     validationSchema={RequestSchema}
-                     onSubmit={handleSubmit}
-                     >
-                     {({isSubmitting,errors,touched}) => (
+                    <Formik
+                      initialValues={{
+                        fullName: "",
+                        email: "",
+                        description: "",
+                      }}
+                      validationSchema={RequestSchema}
+                      onSubmit={handleSubmit}
+                    >
+                      {({ isSubmitting, errors, touched }) => (
+                        <Form className="p-5 space-y-4">
+                          <p className="text-center text-gray-600 text-sm">
+                            I am interested in working with {freelancerDetail.name}
+                          </p>
 
-                    <Form className="p-5 space-y-4">
-                      <p className="text-center text-gray-600 text-sm">
-                        I am interested in working with {freelancerDetail.name}
-                      </p>
+                          <div className="flex space-x-4">
+                            <div className="w-1/2">
+                              <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">
+                                Full Name
+                              </label>
+                              <Field
+                                type="text"
+                                name="fullName"
+                                id="fullName"
+                                className={`w-full px-3 py-2 border ${
+                                  touched.fullName && errors.fullName
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                                } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
+                                placeholder="Enter your name"
+                              />
+                              <ErrorMessage
+                                name="fullName"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+                            <div className="w-1/2">
+                              <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
+                                Email
+                              </label>
+                              <Field
+                                type="email"
+                                name="email"
+                                id="email"
+                                className={`w-full px-3 py-2 border ${
+                                  touched.email && errors.email
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 focus:ring-blue-500'
+                                } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
+                                placeholder="Enter your email"
+                              />
+                              <ErrorMessage
+                                name="email"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+                          </div>
 
-                      <div className="flex space-x-4">
-                        <div className="w-1/2">
-                          <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 mb-1">
-                            Full Name
-                          </label>
-                          <Field
-                            type="text"
-                            name="fullName"
-                            id="fullName"
-                            className={`w-full px-3 py-2 border ${
-                              touched.fullName && errors.fullName 
-                                ? 'border-red-500 focus:ring-red-500' 
-                                : 'border-gray-300 focus:ring-blue-500'
-                            } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
-                            placeholder="Enter your name"
-                          />
-                          <ErrorMessage
-                          name="fullName"
-                          component="div"
-                          className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-                        <div className="w-1/2">
-                          <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">
-                            Email
-                          </label>
-                          <Field
-                            type="email"
-                            name="email"
-                            id="email"
-                            className={`w-full px-3 py-2 border ${
-                              touched.email && errors.email 
-                                ? 'border-red-500 focus:ring-red-500' 
-                                : 'border-gray-300 focus:ring-blue-500'
-                            } rounded-lg focus:ring-1 focus:border-transparent text-sm`}
-                            placeholder="Enter your email"
-                          />
-                          <ErrorMessage
-                          name="email"
-                          component="div"
-                          className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-                      </div>
+                          <div>
+                            <label htmlFor="description" className="block text-xs font-medium text-gray-700 mb-1">
+                              Tell us about the project
+                            </label>
+                            <Field
+                              as="textarea"
+                              name="description"
+                              id="description"
+                              rows={3}
+                              className={`w-full px-3 py-2 border ${
+                                touched.description && errors.description
+                                  ? 'border-red-500 focus:ring-red-500'
+                                  : 'border-gray-300 focus:ring-blue-500'
+                              } rounded-lg focus:ring-1 focus:border-transparent text-sm resize-none`}
+                              placeholder="Provide project details"
+                            />
+                            <ErrorMessage
+                              name="description"
+                              component="div"
+                              className="text-red-500 text-xs mt-1"
+                            />
+                          </div>
 
-                      <div>
-                        <label htmlFor="description" className="block text-xs font-medium text-gray-700 mb-1">
-                          Tell us about the project
-                        </label>
-                        <Field
-                          as="textarea"
-                          name="description"
-                          id="description"
-                          rows={3}
-                          className={`w-full px-3 py-2 border ${
-                            touched.description && errors.description 
-                              ? 'border-red-500 focus:ring-red-500' 
-                              : 'border-gray-300 focus:ring-blue-500'
-                          } rounded-lg focus:ring-1 focus:border-transparent text-sm resize-none`}
-                          placeholder="Provide project details"
-                        />
-                         <ErrorMessage 
-                            name="description" 
-                            component="div" 
-                            className="text-red-500 text-xs mt-1" 
-                          />
-                      </div>
-
-                      {/* Submit Button */}
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-all shadow-md hover:shadow-lg"
-                      >
-                         {isSubmitting ? "Submitting..." : "Submit Offer"}
-                      </button>
-                    </Form>
-                     )}
-                     </Formik>
+                          {/* Submit Button */}
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-all shadow-md hover:shadow-lg"
+                          >
+                            {isSubmitting ? "Submitting..." : "Submit Offer"}
+                          </button>
+                        </Form>
+                      )}
+                    </Formik>
                   </div>
                 </div>
               )}
 
               {/* Stats Section */}
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6">
-          {/* Job Success */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm text-gray-600">Job Success</p>
-              <p className="text-sm text-gray-600">88%</p>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-blue-600 rounded-full" style={{ width: "88%" }}></div>
-            </div>
-          </div>
-        
-          {/* Recommendation */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm text-gray-600">Recommendation</p>
-              <p className="text-sm text-gray-600">100%</p>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-blue-600 rounded-full" style={{ width: "100%" }}></div>
-            </div>
-          </div>
-        
-          {/* On Time */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm text-gray-600">On Time</p>
-              <p className="text-sm text-gray-600">90%</p>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-blue-600 rounded-full" style={{ width: "90%" }}></div>
-            </div>
-          </div>
-        
-          {/* On Budget */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-sm text-gray-600">On Budget</p>
-              <p className="text-sm text-gray-600">80%</p>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div className="h-2 bg-blue-600 rounded-full" style={{ width: "80%" }}></div>
-            </div>
-          </div>
-        </div>
+              <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6">
+                {/* Job Success */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-600">Job Success</p>
+                    <p className="text-sm text-gray-600">88%</p>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full">
+                    <div className="h-2 bg-blue-600 rounded-full" style={{ width: "88%" }}></div>
+                  </div>
+                </div>
+
+                {/* Recommendation */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-600">Recommendation</p>
+                    <p className="text-sm text-gray-600">100%</p>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full">
+                    <div className="h-2 bg-blue-600 rounded-full" style={{ width: "100%" }}></div>
+                  </div>
+                </div>
+
+                {/* On Time */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-600">On Time</p>
+                    <p className="text-sm text-gray-600">90%</p>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full">
+                    <div className="h-2 bg-blue-600 rounded-full" style={{ width: "90%" }}></div>
+                  </div>
+                </div>
+
+                {/* On Budget */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-600">On Budget</p>
+                    <p className="text-sm text-gray-600">80%</p>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full">
+                    <div className="h-2 bg-blue-600 rounded-full" style={{ width: "80%" }}></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

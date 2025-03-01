@@ -22,6 +22,8 @@ interface Freelancer {
   rate: number;
   tagline: string;
   rating: number;
+  averageRating?:number;
+  totalReviews?:number;
 }
 
 const FreelancerList: React.FC = () => {
@@ -45,8 +47,6 @@ const FreelancerList: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm); 
@@ -60,6 +60,8 @@ const FreelancerList: React.FC = () => {
   const fetchFreelancers = async () => {
     
     try {
+      // const ratingsResponse = await axiosConfig.get(`/users/freelancer-ratings`);
+      // const ratingsData = ratingsResponse.data.ratings || [];
       const response = await axiosConfig.get("/client/freelancer-list", {
         params: {
           page: currentPage,
@@ -72,7 +74,18 @@ const FreelancerList: React.FC = () => {
           experience: filters.experience
         },
       });
-      setFreelancers(response.data.data);
+      const freelancerData = response.data.data;
+      
+      // const freelancersWithRatings = freelancerData.map((freelancer: Freelancer)=>{
+      //   const ratingInfo = ratingsData.find((r:any) => r.freelancerId === freelancer._id);
+      //   return {
+      //     ...freelancer,
+      //     averageRating: ratingInfo? ratingInfo.averageRating : 0,
+      //     totalReviews: ratingInfo? ratingInfo.totalReviews : 0
+      //   };
+      // });
+      // console.log('freelancers',freelancersWithRatings)
+      setFreelancers(freelancerData);
       setTotalPages(response.data.totalPages); 
       setLoading(false);
     } catch (err) {
@@ -133,9 +146,6 @@ const FreelancerList: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  // const filteredTasks = freelancers.filter((freelancer) =>
-  //     freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  
 
   if (loading)  return <Loader visible={loading} />;
   if (error) return <div>{error}</div>;
@@ -170,6 +180,7 @@ const FreelancerList: React.FC = () => {
               <option>Relevance</option>
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
+              <option>Rating: High to Low</option>
               <option>Newest</option>
             </select>
           </div>
@@ -207,31 +218,29 @@ const FreelancerList: React.FC = () => {
                 </p>
                 <p className="text-blue-500 font-bold mt-2">{freelancer.rate}</p>
                 <div className="flex items-center mt-2">
+                <div className="flex px-2 py-1 bg-yellow-500 rounded-md mr-2">
+                  <span className=" text-sm text-white">
+                    {freelancer.averageRating ? freelancer.averageRating.toFixed(1) : "0.0"} 
+                  </span>
+                  </div>
                   {[...Array(5)].map((_, i) => (
-                    <svg
+                    <FaStar
                       key={i}
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill={i < Math.round(freelancer.rating) ? "currentColor" : "none"}
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="w-5 h-5 text-yellow-400"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.5l1.76 3.57 3.92.56-2.84 2.77.67 3.91L12 14.56l-3.51 1.85.67-3.91-2.84-2.77 3.92-.56L12 4.5z"
-                      />
-                    </svg>
+                      className={`w-6 h-6 ${
+                        i < Math.round(freelancer.averageRating || 0) 
+                          ? "text-yellow-400" 
+                          : "text-gray-300"
+                      }`}
+                    />
                   ))}
                 </div>
                 <Link to={`/client/freelancer-detail/${freelancer._id}`}>
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition mt-2">View Detail</button>
                 </Link>
               </div>
-              
             ))}
           </div>
+
           {/* Pagination  */}
           <div className="flex justify-center items-center mt-6 space-x-2">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (

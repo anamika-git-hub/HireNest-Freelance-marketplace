@@ -95,7 +95,7 @@ export const FreelancerProfileUseCase = {
         sortCriteria: { [key: string]: 1 | -1 };
         skip: number;
         limit: number;
-})=>{
+    })=>{
         try {
             return await FreelancerProfileRepository.getFreelancers(filters,sortCriteria,skip,limit);
         } catch (error) {

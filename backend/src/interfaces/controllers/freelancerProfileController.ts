@@ -47,6 +47,7 @@ export const FreelancerProfileController = {
             if (sortOption === "Price: Low to High") sortCriteria.hourlyRate = 1;
             if (sortOption === "Price: High to Low") sortCriteria.hourlyRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
+            if (sortOption === "Rating: High to Low") sortCriteria.rating = -1;
 
             const filters: FilterCriteria = {};
 
@@ -105,6 +106,7 @@ export const FreelancerProfileController = {
             try {
                 const { id } = req.params; 
                 const freelancer = await FreelancerProfileUseCase.getFreelancerById(id);
+                console.log('freeee',freelancer);
                 res.status(200).json({ freelancer, message: 'Task fetched successfully' });
             } catch (error) {
                 next(error); 

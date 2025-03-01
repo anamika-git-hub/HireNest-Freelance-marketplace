@@ -14,6 +14,7 @@ import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
 import { uploader,compressionMiddleware } from '../../utils/uploader';
 import { PaymentController } from '../controllers/PaymentController';
+import { RatingController } from '../controllers/ratingController';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -55,4 +56,6 @@ router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
 router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);
 
 router.post('/release-escrow',checkAuth('user'),PaymentController.releaseEscrow);
+
+router.get('/freelancer-ratings',checkAuth('user'),RatingController.getFreelancerRatings);
 export default router;

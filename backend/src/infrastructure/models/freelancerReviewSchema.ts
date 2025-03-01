@@ -9,7 +9,7 @@ const freelancerReviewSchema = new Schema(
     },
     clientId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'userDetail',
       required: true,
     },
     contractId: {
