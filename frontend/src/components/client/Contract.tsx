@@ -65,7 +65,6 @@ const ContractSection: React.FC = () => {
 
   const handleSubmit = async (values: ContractFormValues, { setSubmitting, resetForm }: any) => {
     try {
-      // Convert string values to numbers where needed
       const formattedValues = {
         ...values,
         budget: Number(values.budget),
@@ -74,11 +73,12 @@ const ContractSection: React.FC = () => {
           cost: Number(milestone.cost)
         }))
       };
-
+      const account = await axiosConfig.get("/users/account-detail")
       const response = await axiosConfig.post("/client/create-contract", {
         ...formattedValues,
         bidId,
         taskId,
+        clientId:account.data.userDetails._id,
         freelancerId
       });
 

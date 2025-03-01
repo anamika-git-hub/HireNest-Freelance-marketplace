@@ -6,6 +6,8 @@ import axiosConfig from '../../service/axios';
 import { loadStripe } from '@stripe/stripe-js';
 import {Elements,PaymentElement,useStripe,useElements} from '@stripe/react-stripe-js';
 import { XIcon ,FileIcon,CheckCircle,XCircle} from 'lucide-react';
+import FreelancerReviewModal from '../../components/client/freelancerReviewModal';
+import { Link } from 'react-router-dom';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!);
 
@@ -31,7 +33,10 @@ interface Milestone {
 interface ContractDetail {
   _id: string;
   taskId: string;
-  freelancerId: string;
+  freelancerId: {
+    _id:string;
+    name: string;
+  };
   title: string;
   budget: string;
   description: string;
@@ -69,7 +74,6 @@ const PaymentForm: React.FC<{
       if (error) {
         toast.error(error.message || 'Payment failed');
       } else {
-        toast.success('Payment successful');
         onSuccess();
       }
     } catch (err) {
@@ -121,7 +125,6 @@ const PaymentModal: React.FC<{
     }, []);
     useEffect(() => {
     const initializePaymentIntent = async () => {
-      console.log('fffrrrr',freelancerId)
       try {
         const response = await axiosConfig.post('/client/create-payment-intent', {
           amount: Number(milestone.cost),
@@ -325,6 +328,9 @@ const ClientContractDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const [viewMilestone, setViewMilestone] = useState<Milestone | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+  const [contractCompleted, setContractCompleted] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -333,6 +339,7 @@ const ClientContractDetails: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const response = await axiosConfig.get(`/users/contract/${id}`);
+        console.log('fffffff',response.data.result)
         setContract(response.data.result);
       } catch (err) {
         setError('Failed to fetch contract details. Please try again later.');
@@ -398,7 +405,6 @@ const ClientContractDetails: React.FC = () => {
       
       setViewMilestone(null);
       
-      // Check if all milestones are completed or accepted
       const updatedMilestones = contract.milestones.map(m => 
         m._id === viewMilestone._id ? { ...m, status: 'accepted' } : m
       );
@@ -408,13 +414,12 @@ const ClientContractDetails: React.FC = () => {
       );
       
       if (allCompleted) {
-        // Update contract status to completed
         await axiosConfig.post(`/client/complete-contract`, {
           contractId: contract._id,
         });
-        
-        toast.success('All milestones completed. Contract marked as completed.');
         setContract(prev => prev ? { ...prev, status: 'completed' } : null);
+        setContractCompleted(true);
+        setShowReviewModal(true);
       }
       
     } catch (err) {
@@ -472,7 +477,6 @@ const ClientContractDetails: React.FC = () => {
     );
   }
 
-  console.log('cccc',contract)
 
   return (
     <div className="h-full bg-gray-100 py-4 px-4 ">
@@ -482,12 +486,8 @@ const ClientContractDetails: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900">{contract.title}</h2>
             <p className="text-gray-500 mt-1">Contract ID: {contract._id}</p>
             <div className="mt-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                contract.status === 'completed' ? 'bg-green-100 text-green-800' :
-                contract.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
-                'bg-yellow-100 text-yellow-800'
-              }`}>
-                {contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}
+              <span className="text-lg font-medium">
+                Freelancer Name:<Link to={`/client/freelancer-detail/${contract.freelancerId._id}`}> <span className="font-semibold text-blue-700">{contract.freelancerId?.name || "Unassigned"}</span></Link>
               </span>
             </div>
           </div>
@@ -589,7 +589,7 @@ const ClientContractDetails: React.FC = () => {
             <PaymentModal
               milestone={selectedMilestone}
               contractId={contract._id}
-              freelancerId={contract.freelancerId}
+              freelancerId={contract.freelancerId._id}
               onClose={() => setSelectedMilestone(null)}
               onSuccess={handlePaymentSuccess}
             />
@@ -602,6 +602,18 @@ const ClientContractDetails: React.FC = () => {
               onReject={handleRejectMilestone}
             />
           )}
+          {showReviewModal && contractCompleted && contract && (
+              <FreelancerReviewModal
+                freelancerId={contract.freelancerId._id}
+                taskId = {contract.taskId}
+                contractId={contract._id}
+                projectTitle = {contract.title}
+                onClose={() => setShowReviewModal(false)}
+                onSuccess={() => {
+                  toast.success('Thank you for your feedback!');
+                }}
+              />
+            )}
 
           <div className="bg-blue-50 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4 text-blue-800">Project Terms</h3>

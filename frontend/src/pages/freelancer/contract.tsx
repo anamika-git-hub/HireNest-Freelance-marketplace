@@ -13,7 +13,7 @@ interface Milestone {
 }
 
 interface ContractDetail {
-  id?: string;
+  _id?: string;
   taskId: string;
   bidId: string;
   title: string;
@@ -94,7 +94,7 @@ const ContractDetails: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{contract.title}</h2>
-              <p className="text-gray-500 mt-1">Contract ID: {contract.id}</p>
+              <p className="text-gray-500 mt-1">Contract ID: {contract._id?.toLocaleUpperCase().slice(-6)}</p>
               {contract.status === 'rejected' && (
                 <p className="text-red-500 font-semibold mt-2">Status: This contract is rejected by you</p>
               )}

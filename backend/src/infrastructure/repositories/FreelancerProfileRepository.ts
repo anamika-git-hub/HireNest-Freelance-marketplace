@@ -58,6 +58,18 @@ export const FreelancerProfileRepository = {
                     throw new Error(`Failed to get freelancer by Id due to an unknown error`);
                 } 
             }
+        },
+        updateFreelancerRating: async (userId: string, averageRating: number, totalReviews: number) => {
+            return await FreelancerProfileModel.findOneAndUpdate(
+                {userId},
+                { 
+                    $set: { 
+                        averageRating,
+                        totalReviews
+                    } 
+                },
+                { new: true }
+            );
         }
     
 }

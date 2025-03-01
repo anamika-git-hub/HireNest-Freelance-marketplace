@@ -3,12 +3,14 @@ import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { IContract } from "../entities/contract";
 import { FilterCriteria } from "../entities/filter";
 import mongoose from "mongoose";
+import { FreelancerReviewRepository } from "../infrastructure/repositories/freelancerReviewRepository";
+import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 
 export const ContractUseCase = {
     createContract : async(data:IContract)=>{
         return await ContractRepository.createContract(data)
     },
-    getContract: async(id: mongoose.Types.ObjectId) => {
+    getContract: async(id:string) => {
         return await ContractRepository.getContract(id)
     },
     updateContract: async (id: string, updatedData:IContract) => {
@@ -27,7 +29,6 @@ export const ContractUseCase = {
     },
     submitMilestone: async(contractId:string, milestoneId: string, submissionDetails: any) => {
         try {
-            console.log('ssss',contractId,milestoneId,submissionDetails)
             const contract = await ContractRepository.getContractById(contractId);
             if(!contract){
                 throw new Error('Contract not found');
@@ -92,21 +93,17 @@ export const ContractUseCase = {
             throw new Error('Milestone is not in review status');
           }
     
-          // Update milestone status to accepted
           const updatedContract = await ContractRepository.updateMilestoneStatus(
             contractId,
             milestoneId,
             'accepted',
             {}
           );
-    
-          // Check if all milestones are completed or accepted
           const allCompleted = updatedContract?.milestones.every(
             m => m.status === 'completed'
           );
           
           if (allCompleted) {
-            // Update contract status to completed
             await ContractRepository.updateContractStatus(contractId, 'completed');
           }
     
@@ -135,7 +132,6 @@ export const ContractUseCase = {
             throw new Error('Milestone is not in review status');
           }
     
-          // Update milestone status to active and include rejection reason
           const updatedContract = await ContractRepository.updateMilestoneStatus(
             contractId,
             milestoneId,
@@ -160,6 +156,79 @@ export const ContractUseCase = {
           console.error('Error completing contract:', error);
           throw error;
         }
-      }
+      },
+      reviewFreelancer: async (
+        contractId: string, 
+        taskId: string,
+        clientId: string, 
+        freelancerId: string, 
+        rating: number,
+        review: string
+    ) => {
+        try {
+            const contract = await ContractRepository.getContractByClientAndFreelancer(
+                contractId,
+                taskId,
+                freelancerId,
+                'accepted'
+            );
+            
+            if (!contract) {
+                throw new Error('Contract not found or not completed');
+            }
+            
+            const existingReview = await FreelancerReviewRepository.findByContractId(contractId);
+            
+            let reviewDoc;
+            let isNewReview = false;
+            
+            if (existingReview) {
+                reviewDoc = await FreelancerReviewRepository.updateReview(
+                    existingReview._id,
+                    rating,
+                    review
+                );
+            } else {
+                isNewReview = true;
+                reviewDoc = await FreelancerReviewRepository.createReview({
+                    freelancerId,
+                    clientId,
+                    contractId,
+                    rating,
+                    review,
+                    projectTitle: contract.title
+                });
+            }
+            
+
+            const allReviews = await FreelancerReviewRepository.findByFreelancerId(freelancerId);
+            const totalRating = allReviews.reduce((sum, item) => sum + item.rating, 0);
+            const averageRating = totalRating / allReviews.length;
+            
+            await FreelancerProfileRepository.updateFreelancerRating(
+                freelancerId, 
+                parseFloat(averageRating.toFixed(1)),
+                allReviews.length
+            );
+            
+            return {
+                isNewReview,
+                review: reviewDoc
+            };
+        } catch (error) {
+            console.error('Error in reviewFreelancer use case:', error);
+            throw error;
+        }
+    },
+    
+    getFreelancerReviews: async (freelancerId: string) => {
+        try {
+            const reviews = await FreelancerReviewRepository.findByFreelancerIdWithClient(freelancerId);
+            return reviews;
+        } catch (error) {
+            console.error('Error in getFreelancerReviews use case:', error);
+            throw error;
+        }
+    }
 
 }

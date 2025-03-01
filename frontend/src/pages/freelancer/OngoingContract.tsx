@@ -37,8 +37,9 @@ interface Milestone {
 interface ContractDetail {
   _id: string;
   taskId: string;
-  clientId: string;
-  clientName: string;
+  clientId: {
+    firstname:string;
+    lastname:string};
   freelancerId: string;
   title: string;
   budget: string;
@@ -178,6 +179,7 @@ const FreelancerContractDetails: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const response = await axiosConfig.get(`/users/contract/${id}`);
+        console.log('ressp',response)
         setContract(response.data.result);
       } catch (error) {
         setError(`Failed to fetch contract details.Please try again later.`);
@@ -236,7 +238,6 @@ const FreelancerContractDetails: React.FC = () => {
     }
   
   };
-console.log('rdessss',contract)
   const downloadInvoice = (paymentId: string) => {
     // Demo function - would generate and download invoice in real implementation
     toast.success('Downloading invoice...');
@@ -309,6 +310,7 @@ console.log('rdessss',contract)
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{contract.title}</h2>
             <p className="text-gray-500 mt-1">Contract ID: {contract._id}</p>
+            <p className="text-gray-600">Client: {contract.clientId.firstname} {contract.clientId.lastname}</p>
           </div>
           <button
             onClick={sendMessage}

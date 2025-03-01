@@ -24,7 +24,7 @@ export const ContractController = {
         try {
             const {id} = req.params;
             const Id = new mongoose.Types.ObjectId(id)
-            const result = await ContractUseCase.getContract(Id);
+            const result = await ContractUseCase.getContract(id);
             res.status(200).json({result})
         } catch (error) {
             next(error)
@@ -61,20 +61,16 @@ export const ContractController = {
             if (taskIds) filters.taskId = { $in: taskIds.map(id => new mongoose.Types.ObjectId(id)) };
             if (bidIds) filters.bidId = { $in: bidIds.map(id => new mongoose.Types.ObjectId(id)) };
             if (status) filters.status = status;
-            console.log('fff',filters)
             const contracts = await ContractUseCase.getAllContracts(filters);
-            console.log('ccc',contracts)
             res.status(200).json({contracts})
         } catch (error) {
-            
+            next(error)
         }
     },
     submitMilestone: async(req:CustomRequest,res: Res, next: Next) => {
         try {
-            console.log('sksksks',req.file)
             const {contractId, milestoneId, description} = req.body;
 
-            console.log('rreqqq',req.body,contractId,milestoneId,description)
             const userId = req.user?.userId || "";
             let fileUrl = null;
             let fileName = null;
@@ -92,7 +88,6 @@ export const ContractController = {
             };
             const uploadResult = req.file ? 
                 await uploadImage(req.file, 'milestoneSubmit') : null;
-                console.log('upload',uploadResult)
             const submissionDetails = {
                 description,
                 fileUrl:uploadResult?.Location ?? null,
@@ -121,7 +116,6 @@ export const ContractController = {
             const contract = await ContractUseCase.getContractDetails(contractId);
             await PaymentUseCase.releaseEscrow(contractId, milestoneId, contract.freelancerId);
             const result = await ContractUseCase.acceptMilestone(contractId, milestoneId);
-            console.log('resu',result)
             sendNotification(contract.freelancerId,{
                 type: 'milestone_accepted',
                 title: 'Milestone Accepted', 
@@ -138,7 +132,6 @@ export const ContractController = {
     rejectMilestone: async(req: Req, res: Res, next: Next) => {
         try {
             const {contractId, milestoneId, rejectionReason} = req.body;
-            console.log('booody',req.body)
             const contract = await ContractUseCase.getContractDetails(contractId);
             const result = await ContractUseCase.rejectMilestone(contractId, milestoneId, rejectionReason || 'No reason provided');
 
@@ -155,7 +148,41 @@ export const ContractController = {
         } catch (error) {
             next(error);
         }
-    }
+    },
+    reviewFreelancer: async (req: CustomRequest, res: Res, next: Next) => {
+        try {
+            const { freelancerId,taskId, contractId, rating, review } = req.body;
+            const clientId = req.user?.userId || '';
+            
+            const result = await ContractUseCase.reviewFreelancer(
+                contractId, 
+                taskId,
+                clientId, 
+                freelancerId, 
+                rating,
+                review || ''
+            );
+            
+            res.status(result.isNewReview ? 201 : 200).json({
+                review: result.review
+            });
+        } catch (error:any) {
+            next(error);
+        }
+    },
     
-
-}
+    getFreelancerReviews: async (req: Req, res: Res, next: Next) => {
+        try {
+            const freelancerId = req.params.id;
+            const reviews = await ContractUseCase.getFreelancerReviews(freelancerId);
+            
+            res.status(200).json({
+                message: 'Reviews retrieved successfully',
+                reviews
+            });
+        } catch (error) {
+            console.error('Error retrieving freelancer reviews:', error);
+            next(error);
+        }
+    }
+};

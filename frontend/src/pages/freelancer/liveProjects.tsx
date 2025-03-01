@@ -74,7 +74,6 @@ const FreelancerContractsList: React.FC = () => {
       .filter(m => m.status === 'completed' || m.status === 'paid')
       .reduce((sum, m) => sum + (Number(m.cost) * 0.9), 0) // Assuming 10% platform fee
       .toString();
-console.log('skskkskssk',contract,totalEarned,)
     // Calculate remaining amount
     const remainingAmount = (Number(contract.budget) - Number(totalEarned)).toString();
 
@@ -114,14 +113,12 @@ console.log('skskkskssk',contract,totalEarned,)
         setError(null);
         const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
         const bidIds = bidResponse.data.bid.map((bid:Bid) => bid._id);
-        console.log('biidd',bidIds)
         const response =await axiosConfig.get("/users/contracts", {
           params: {
             bidIds: bidIds,
             status: 'accepted'
           }
         });
-         console.log('ffff',response)
         const processedContracts = response.data.contracts.map(processContract);
         setContracts(processedContracts);
         setIsLoading(false);
@@ -188,7 +185,6 @@ console.log('skskkskssk',contract,totalEarned,)
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">
                       {contract.title}
                     </h2>
-                    <p className="text-gray-600">Client: {contract.clientName}</p>
                     <p className="text-gray-500 text-sm mt-1">
                       Started: {new Date(contract.startDate).toLocaleDateString()}
                     </p>

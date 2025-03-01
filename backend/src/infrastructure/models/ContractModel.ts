@@ -83,13 +83,14 @@ const ContractSchema = new mongoose.Schema({
     ref: 'TaskSubmission',
     required: true
   },
-  clientId: {
-    type: String,
-    ref: 'User',
+  bidId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BidSubmission',
     required: true
   },
-  clientName: {
-    type: String,
+  clientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'userDetail',
     required: true
   },
   freelancerId: {
@@ -112,12 +113,16 @@ const ContractSchema = new mongoose.Schema({
   milestones: [MilestoneSchema],
   status: {
     type: String,
-    enum: ['ongoing', 'completed', 'accepted'],
-    default: 'ongoing'
+    enum: ['pending','ongoing', 'completed', 'accepted'],
+    default: 'pending'
   },
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  startDate: {
+    type: Date,
+    default: null
   }
 });
 

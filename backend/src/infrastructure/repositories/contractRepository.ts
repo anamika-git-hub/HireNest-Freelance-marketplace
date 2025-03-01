@@ -10,35 +10,43 @@ export const ContractRepository = {
         const contract = new ContractModel(data)
         return await contract.save();
     },
-    getContract: async (id: mongoose.Types.ObjectId) => {
+    getContract: async (id: string) => {
         return await ContractModel.findOne({
             $or: [{ bidId: id }, { _id: id }]
-        });
+        }).populate('freelancerId').populate('clientId');
     },
     updateContract: async(bidId: string, updates: IContract) => {
         return await ContractModel.findOneAndUpdate({bidId},updates,{upsert:true,new: true})
     },
-    updateContractStatus: async (contractId: string, status: string) => {
-        try {
-          const updatedContract = await ContractModel.findByIdAndUpdate(
-            contractId,
-            { $set: { status } },
-            { new: true }
-          );
-          
-          return updatedContract;
-        } catch (error) {
-          console.error('Error updating contract status:', error);
-          throw error;
+    updateContractStatus: async (bidId: string, status: string) => {
+      try {
+        interface UpdateData {
+          status: string;
+          startDate?: Date;
         }
-      },
+        const updateData: UpdateData = { status };
+        if (status === 'accepted') {
+          updateData.startDate = new Date();
+        }
+        
+        const updatedContract = await ContractModel.findOneAndUpdate(
+          { bidId },
+          { $set: updateData },
+          { new: true }
+        );
+        
+        return updatedContract;
+      } catch (error) {
+        console.error('Error updating contract status:', error);
+        throw error;
+      }
+    },
     
     getAllContracts: async (filters:FilterCriteria) => {
-        return await ContractModel.find({...filters});
+        return await ContractModel.find({...filters}).populate('freelancerId');
     },
     updateMilestoneStatus: async (contractId:string,milestoneId:string, status: string, additionalData: any = {}) => {
         try {
-            console.log('djdjdj')
             const updateData: any = { 'milestones.$.status': status };
             
             // Add additional data to the update if provided
@@ -98,4 +106,17 @@ updateMilestoneWithPayment: async (
           throw error;
         }
       },
+      getContractByClientAndFreelancer: async (
+        contractId: string, 
+        taskId: string, 
+        freelancerId: string,
+        status: string
+    ) => {
+        return await ContractModel.findOne({
+            _id: contractId,
+            taskId: taskId,
+            freelancerId: freelancerId,
+            status: status
+        });
+    }
 }
