@@ -5,7 +5,7 @@ const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row items-center justify-center lg:space-x-8 space-y-8 lg:space-y-0 px-4">
       {/* Contact Info Box */}
-      <div className="bg-blue-500 rounded-lg p-8 text-white max-w-md w-full flex-grow">
+      <div className="bg-blue-600 rounded-lg p-8 text-white max-w-md w-full flex-grow">
         {/* Header */}
         <h2 className="text-2xl font-bold mb-4">Contact Info</h2>
         <p className="text-sm mb-6">

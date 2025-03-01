@@ -65,7 +65,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       receiverId: contacts._id,
       role
     });
-    console.log('clear chat')
   };
 
   useEffect(() => {

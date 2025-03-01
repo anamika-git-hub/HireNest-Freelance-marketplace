@@ -37,7 +37,6 @@ const TaskDetailForm: React.FC = () => {
     fetchTaskDetail();
   }, [id]);
 
-  console.log(taskDetail,'dkfjslkfjsdk')
   const initialValues = {
     projectName:taskDetail?.projectName || "",
     category:taskDetail?.category || "",

@@ -108,7 +108,6 @@ const ClientContractsList: React.FC = () => {
             status: 'accepted'
           }
         });
-         console.log('sksksk',contractsResponse)
         const processedContracts = contractsResponse.data.contracts.map(processContract);
         setContracts(processedContracts);
         setIsLoading(false);

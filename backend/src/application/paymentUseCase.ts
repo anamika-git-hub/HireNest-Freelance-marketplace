@@ -61,7 +61,6 @@ export const PaymentUseCase = {
         }
     },
  handleWebhook: async (event: any) => {
-  console.log('lllllllllllllll')
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
@@ -90,7 +89,6 @@ export const PaymentUseCase = {
 
   handlePaymentSuccess: async (paymentIntent: any, session: any) => {
     const { milestoneId, contractId } = paymentIntent.metadata;
-    console.log('ddkdkdk')
     await ContractRepository.updateMilestoneStatus(
       contractId,
       milestoneId,
@@ -165,14 +163,12 @@ export const PaymentUseCase = {
         platformFee: Math.floor(escrowRecord.amount * 0.1).toString(),
         netAmount: transferAmount.toString()
       };
-      
       const updatedMilestone = await ContractRepository.updateMilestoneWithPayment(
         contractId,
         milestoneId,
         'completed',
         paymentDetails
       );
-  
       if (!updatedMilestone) {
         throw new Error('Failed to update milestone');
       }
@@ -182,13 +178,9 @@ export const PaymentUseCase = {
         milestoneId,
         'released'
       );
-  
       if (!updatedEscrow) {
-        // If escrow update fails, log the error but don't throw
-        // since the milestone is already updated
         console.error('Warning: Milestone updated but escrow status update failed');
       }
-  
       // Add to transaction history
       await Paymentrepository.updateTransactionHistory(
         null, 
@@ -197,8 +189,6 @@ export const PaymentUseCase = {
         null, 
         `Payment of ${transferAmount} released to freelancer ID: ${freelancerId}`
       );
-      
-      console.log('Payment details:', paymentDetails);
       return { success: true, paymentDetails };
     }catch (error) {
       console.error('Error releasing escrow:', error);

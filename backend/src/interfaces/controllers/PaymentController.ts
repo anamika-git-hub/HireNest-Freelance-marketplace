@@ -15,10 +15,6 @@ export const PaymentController = {
     },
     createWebhook: async (req: Req, res: Res, next: Next) => {
         try {
-            console.log('Received webhook event');
-            console.log('Headers:', req.headers);
-            console.log('Body:', req.body);
-            console.log('Signature:', req.headers['stripe-signature']);
             const sig = req.headers['stripe-signature'] as string;
             const endpointSecret = Config.STRIPE_WEBHOOK_SECRET as string;
             const event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
@@ -32,7 +28,6 @@ export const PaymentController = {
     releaseEscrow: async (req: Req, res: Res, next: Next) => {
         try {
             const {contractId,milestoneId,freelancerId} = req.body;
-            console.log('rrrrrr',req.body)
            const result = await PaymentUseCase.releaseEscrow(contractId,milestoneId,freelancerId);
             res.status(200).json({success:true, result});
         } catch (error) {

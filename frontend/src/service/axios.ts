@@ -1,5 +1,4 @@
 import axios from "axios";
-import dotenv from 'dotenv';
 import store from "../store/store";
 import { logoutUser } from "../store/userSlice";
 import toast from "react-hot-toast";

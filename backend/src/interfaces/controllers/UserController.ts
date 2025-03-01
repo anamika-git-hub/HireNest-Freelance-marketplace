@@ -130,7 +130,6 @@ export const UserController = {
         try {
             
             const { id } = req.params;
-            console.log(id)
             const result = await userUseCase.notificationRead(id)
             res.status(200).json(result)
         } catch (error) {

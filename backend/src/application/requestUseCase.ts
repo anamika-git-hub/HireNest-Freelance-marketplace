@@ -74,7 +74,6 @@ export const RequestUseCase = {
         const request = await RequestRepository.getRequestById(id);
         if(!request?.freelancerId) return await RequestRepository.updateRequestStatus(id,status)
         const {userId, _id:freelncerProfileId ,name} = request?.freelancerId;
-        console.log(request?.freelancerId.userId)
         if (status === 'accepted' || status === 'rejected') {
             const notificationData = {
                 senderId: userId,

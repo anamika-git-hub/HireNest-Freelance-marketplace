@@ -136,7 +136,6 @@ useEffect(() => {
     if (loading) return <Loader visible={loading} />;
     if (error) return <div className="text-red-500">{error}</div>;
 
-    console.log('total',totalPages)
     return (
         <div className="p-6 pt-24 bg-gray-100 min-h-screen">
             <div className="mb-6">

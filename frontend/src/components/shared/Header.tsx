@@ -152,7 +152,6 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   }, []);
 
   const handleNotificationClick = async(notificationId?:string,index?: number) => {
-    console.log('33',notificationId,index)
     await axiosConfig.put(`/users/mark-as-read/${notificationId}`);
     setNotifications((prevNotifications) => {
       const updatedNotifications = prevNotifications.filter((_, i) => i !== index);

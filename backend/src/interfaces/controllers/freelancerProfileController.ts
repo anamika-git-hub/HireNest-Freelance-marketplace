@@ -86,7 +86,6 @@ export const FreelancerProfileController = {
 
             const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(filters);
             const totalPages = Math.ceil(totalFreelancers/limit);
-            console.log('ffff',freelancers.length, totalFreelancers)
             res.status(200).json({data:freelancers,totalPages,message: 'Listed freelancers successfully'})
         } catch (error) {
             next(error);

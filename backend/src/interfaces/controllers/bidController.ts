@@ -16,7 +16,6 @@ export const BidController = {
         try {
             const { id } = req.params;
             const updates = req.body;
-            console.log(id,updates)
 
             const result = await BidUseCase.updateBid(id, updates);
             res.status(200).json({ message: "Bid updated successfully", bid: result });

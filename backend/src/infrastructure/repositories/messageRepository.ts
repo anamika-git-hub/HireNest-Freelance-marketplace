@@ -58,9 +58,7 @@ export const MessageRepository = {
 
         const finalContacts = contactData.map(contact => {
             const userDetail = userDetails.find(user => user._id.toString() === contact._id);
-            console.log('userDetail',userDetail)
             if (userDetail) {
-                console.log('contact',contact)
                 return {
                     ...contact,
                     name: role === 'freelancer' ? `${userDetail.firstname} ${userDetail.lastname}` : userDetail.name,
@@ -73,7 +71,6 @@ export const MessageRepository = {
             return contact;
 
         });
-        console.log('finalcontactacs',finalContacts)
 
         return finalContacts; 
     }  ,

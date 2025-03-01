@@ -25,7 +25,6 @@ const FreelancerProfile: React.FC = () => {
   };
 
    const currentUserId = useSelector((state: RootState) => state.user.userId);
-   console.log('curr',currentUserId)
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +71,6 @@ const FreelancerProfile: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
-    console.log(values)
 
 formData.append("userId",currentUserId || "");    
 formData.append("name", values.name);
@@ -96,7 +94,6 @@ attachments.forEach((attachment, index) => {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log('ress',response)
       toast.success("Profile submitted successfully!");
       navigate('/login')
       

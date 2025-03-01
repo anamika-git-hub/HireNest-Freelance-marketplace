@@ -65,7 +65,6 @@ const FreelancerBookmarks: React.FC = () => {
                         },
                     }
                 );
-                console.log('ffff',freelancerResponse.data.data)
                 setBookmarks(freelancerResponse.data.data);
                 setTotalPages(freelancerResponse.data.totalPages);
                 setLoading(false);
