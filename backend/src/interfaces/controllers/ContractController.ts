@@ -68,7 +68,13 @@ export const ContractController = {
             const filters: FilterCriteria = {};
             if (taskIds) filters.taskId = { $in: taskIds.map(id => new mongoose.Types.ObjectId(id)) };
             if (bidIds) filters.bidId = { $in: bidIds.map(id => new mongoose.Types.ObjectId(id)) };
-            if (status) filters.status = status;
+            if (status) {
+                if(status === 'filter'){
+                    filters.status =  { $in: ['ongoing', 'completed'] }
+                }else {
+                    filters.status = status;
+                }
+            }
             if(freelancerId){
                const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(freelancerId);
                filters.freelancerId = freelancerProfile ? freelancerProfile._id.toString() : undefined;

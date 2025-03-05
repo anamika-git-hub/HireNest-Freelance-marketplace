@@ -5,7 +5,7 @@ export interface FilterCriteria {
     bidId?: { $in: mongoose.Types.ObjectId[] };
     freelancerId?:string;
     clientId?:string;
-    status?:string;
+    status?:string | { $in:string[]};
     role?: string;
     _id?:{$in:string[]};
     $or?: { [key: string]: { $regex: string; $options: string } }[];
