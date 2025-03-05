@@ -266,7 +266,7 @@ const FreelancerContractDetails: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-4 px-4">
-      <div className="min-h-screen pt-20 bg-white shadow-lg rounded-lg p-6 mx-auto">
+      <div className="h-screen overflow-y-auto pt-20 bg-white shadow-lg rounded-lg p-6 mx-auto">
         {/* Payment Details Modal */}
         {selectedPayment && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

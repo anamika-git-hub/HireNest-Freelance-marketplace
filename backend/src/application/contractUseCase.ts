@@ -16,13 +16,15 @@ export const ContractUseCase = {
     updateContract: async (id: string, updatedData:IContract) => {
         return await ContractRepository.updateContract(id,updatedData)
     },
-    updateContractStatus: async (bidId: string, status: string, taskId:string) => {
+    updateContractStatus: async (id: string, status: string, taskId:string) => {
         if (status === 'accepted') {
             await TaskRepository.updateTaskStatus(taskId, 'ongoing');
         }else if (status === 'rejected') {
             await TaskRepository.updateTaskStatus(taskId, 'pending');
+        }else if (status === 'ongoing') {
+          await TaskRepository.updateTaskStatus(taskId,'completed')
         }
-        return await ContractRepository.updateContractStatus(bidId,status);
+        return await ContractRepository.updateContractStatus(id,status);
     },
     getAllContracts: async (filters:FilterCriteria) => {
         return await ContractRepository.getAllContracts(filters);

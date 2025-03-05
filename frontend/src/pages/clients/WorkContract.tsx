@@ -22,7 +22,7 @@ interface Milestone {
   description: string;
   dueDate: string;
   cost: string;
-  status: 'unpaid' | 'active' | 'completed' | 'review' | 'accepted' | 'rejected';
+  status: 'unpaid' | 'active' | 'completed' | 'review' | 'rejected';
   completionDetails?: {
     description: string;
     files: MilestoneFile[];
@@ -339,7 +339,6 @@ const ClientContractDetails: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const response = await axiosConfig.get(`/users/contract/${id}`);
-        console.log('fffffff',response.data.result)
         setContract(response.data.result);
       } catch (err) {
         setError('Failed to fetch contract details. Please try again later.');
@@ -398,7 +397,7 @@ const ClientContractDetails: React.FC = () => {
         ...prev,
         milestones: prev.milestones.map(m =>
           m._id === viewMilestone._id
-            ? { ...m, status: 'accepted' }
+            ? { ...m, status: 'completed' }
             : m
         ),
       } : null);
@@ -406,16 +405,18 @@ const ClientContractDetails: React.FC = () => {
       setViewMilestone(null);
       
       const updatedMilestones = contract.milestones.map(m => 
-        m._id === viewMilestone._id ? { ...m, status: 'accepted' } : m
+        m._id === viewMilestone._id ? { ...m, status: 'completed' } : m
       );
       
       const allCompleted = updatedMilestones.every(
-        m => m.status === 'accepted' || m.status === 'completed'
+        m => m.status === 'completed'
       );
       
       if (allCompleted) {
         await axiosConfig.post(`/client/complete-contract`, {
           contractId: contract._id,
+          taskId:contract.taskId,
+          status:'ongoing'
         });
         setContract(prev => prev ? { ...prev, status: 'completed' } : null);
         setContractCompleted(true);
@@ -531,7 +532,6 @@ const ClientContractDetails: React.FC = () => {
                         <p className="text-gray-600">{milestone.description}</p>
                         <div className="mt-2">
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                           milestone.status === 'accepted' ? 'bg-green-100 text-green-800' :
                            milestone.status === 'review' ? 'bg-purple-100 text-purple-800' :
                            milestone.status === 'active' ? 'bg-blue-100 text-blue-800' :
                            milestone.status === 'rejected' ? 'bg-red-100 text-red-800' :
@@ -569,7 +569,7 @@ const ClientContractDetails: React.FC = () => {
                           </button>
                         )}
                         
-                        {(milestone.status === 'accepted' || milestone.status === 'completed') && milestone.completionDetails && (
+                        {(milestone.status === 'completed') && milestone.completionDetails && (
                           <button
                             onClick={() => handleViewMilestone(milestone)}
                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"

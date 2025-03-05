@@ -43,6 +43,7 @@ router.post('/reject-milestone', checkAuth('client'), ContractController.rejectM
 router.post('/release-escrow', checkAuth('client'), PaymentController.releaseEscrow);
 
 router.post('/review-freelancer',checkAuth('client'),RatingController.reviewFreelancer);
+router.post('/complete-contract',checkAuth('client'),ContractController.updateContractStatus);
 router.get('/freelancer-reviews/:id',checkAuth('client'),RatingController.getFreelancerReviews);
 
 export default router;

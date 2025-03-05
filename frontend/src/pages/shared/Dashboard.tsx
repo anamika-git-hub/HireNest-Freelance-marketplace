@@ -1,20 +1,24 @@
-import React,{useState,useEffect} from 'react';
-import { FaBell, FaEllipsisH, FaUsers, FaUserCircle,  FaEdit, FaTrash  } from "react-icons/fa";
-import axiosConfig from "../../service/axios";
-import {IoMdTime } from "react-icons/io";
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { FaBell, FaEllipsisH, FaUsers, FaUserCircle, FaEdit, FaTrash, FaCheckCircle, FaStar, FaChartLine } from "react-icons/fa";
+import { IoMdTime } from "react-icons/io";
+import { Link,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../../components/shared/Loader';
+import axiosConfig from "../../service/axios";
 
+// Interfaces
 interface Notification {
-  text: string
+  _id: string;
+  text: string;
+  createdAt: Date;
+  read: boolean;
 }
 
 interface Bid {
   _id: string;
   rate: number;
   deliveryTime: number;
-  taskId: { _id: string, projectName: string, rateType: string };
+  taskId: { _id: string, projectName: string, rateType: string, category: string };
   timeUnit: string;
   createdAt: Date;
   status: "pending" | "accepted" | "rejected";
@@ -31,312 +35,746 @@ interface Task {
   maxRate: number | string;
   timeLeft?: string;
   bids?: number;
+  status?: "active" | "ongoing" | "completed" | "pending";
+  description?: string;
+}
+
+interface RawContract {
+  _id: string;
+  taskId: string;
+  title: string;
+  freelancerId: string;
+  budget: string;
+  status: 'ongoing' | 'completed' | 'accepted';
+  milestones: Array<{
+    title: string;
+    cost: string;
+    status: 'unpaid' | 'active' | 'completed';
+    dueDate: string;
+    _id: string;
+  }>;
+  startDate: string;
+}
+
+interface ChartData {
+  month: string;
+  views: number;
+}
+
+interface Milestone {
+  id: string;
+  title: string;
+  status: 'unpaid' | 'active' | 'completed';
+  cost: string;
+  dueDate: string;
+}
+
+interface ProcessedContract {
+  _id: string;
+  taskId: string;
+  title: string;
+  freelancerId: string;
+  budget: string;
+  status: 'ongoing' | 'completed';
+  nextMilestone?: Milestone;
+  completedMilestones: number;
+  totalMilestones: number;
+  startDate: string;
 }
 
 const Dashboard: React.FC = () => {
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [bids, setBids] = useState<Bid[]>([]);
-    const [notifications,setNotifications] = useState<Notification[]>([])
-     const [loading, setLoading] = useState<boolean>(true);
-     const [error, setError] = useState<string | null>(null);
-    const userId = localStorage.getItem('userId');
-    const role = localStorage.getItem('role');
-    let type = ''
-    if(role === 'client'){
-        type = 'bid'
-    }else {
-        type = 'request'
-    }
-    const fetchNotifications = async() => {
-        if(userId){
-            const response = await axiosConfig.get(`/users/notifications`)
-           
-            setNotifications(response.data);
-            setLoading(false)
-        }else{
-          setError('User not logged in');
-          setLoading(false);
-        }
-    }
-    useEffect(()=> {
-        fetchNotifications()
-    },[])
+  // States
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [bids, setBids] = useState<Bid[]>([]);
+  const [latestBids, setLatestBids] = useState<Bid[]>([]);
+  const [bidsWon, setBidsWon] = useState<number>(0);
+  const [completedProjects, setCompletedProjects] = useState<number>(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [contracts, setContracts] = useState<ProcessedContract[]>([]);
+  const [viewsData, setViewsData] = useState<ChartData[]>([]);
+  const [taskBidCounts, setTaskBidCounts] = useState<{[key: string]: number}>({});
 
-    useEffect(() => {
-      const userId = localStorage.getItem("userId");
+  const navigate = useNavigate()
   
-      if (userId) {
-        axiosConfig
-          .get(`/users/bid/${userId}`)
-          .then((response) => {
-            setBids(response.data.bid);
-            setLoading(false);
-          })
-          .catch((err) => {
-            setError("Failed to fetch bids");
-            setLoading(false);
-          });
-      } else {
-        setError("User not logged in");
-        setLoading(false);
-      }
-    }, []);
+  // Get user details from localStorage
+  const userId = localStorage.getItem('userId');
+  const role = localStorage.getItem('role') || 'freelancer'; // Default to freelancer if not set
+  
+  // Process contract helper function
+  const processContract = (contract: RawContract): ProcessedContract => {
+    const totalMilestones = contract.milestones.length;
+    const completedMilestones = contract.milestones.filter(
+      m => m.status === 'completed'
+    ).length;
 
-    useEffect(() => {
+    // Find the next milestone (first non-completed milestone)
+    const nextMilestone = contract.milestones.find(
+      m => m.status !== 'completed'
+    );
+
+    return {
+      _id: contract._id,
+      taskId: contract.taskId,
+      title: contract.title,
+      freelancerId: contract.freelancerId,
+      budget: contract.budget,
+      status: contract.status === 'accepted' ? 'ongoing' : contract.status,
+      nextMilestone: nextMilestone ? {
+        id: nextMilestone._id,
+        title: nextMilestone.title,
+        status: nextMilestone.status,
+        cost: nextMilestone.cost,
+        dueDate: nextMilestone.dueDate,
+      } : undefined,
+      completedMilestones,
+      totalMilestones,
+      startDate: contract.startDate
+    };
+  };
+  
+  // Fetch bids, calculate stats
+  useEffect(() => {
+    if (role === 'freelancer' && userId) {
+      setLoading(true);
+      axiosConfig
+        .get(`/users/bid/${userId}`)
+        .then((response) => {
+          const allBids = response.data.bid;
+          setBids(allBids);
+          
+          // Count bids won (accepted bids)
+          const acceptedBidsCount = allBids.filter(bid => bid.status === "accepted").length;
+          setBidsWon(acceptedBidsCount);
+          
+          // Get latest 3 bids sorted by creation date
+          const latest = [...allBids]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 3);
+          setLatestBids(latest);
+          
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError("Failed to fetch bids");
+          setLoading(false);
+        });
+    }
+  }, [userId, role]);
+  
+  // Fetch completed projects count for freelancer
+  useEffect(() => {
+    if (role === 'freelancer' && userId) {
+      axiosConfig
+        .get("/users/contracts", {
+          params: {
+            freelancerId: userId,
+            status: 'completed'
+          }
+        })
+        .then((response) => {
+          setCompletedProjects(response.data.contracts.length);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch completed projects count", err);
+          setCompletedProjects(0);
+        });
+    }
+  }, [userId, role]);
+
+// Fetch completed projects count for clients
+  useEffect(() => {
+    if (role === 'client' && userId) {
+      axiosConfig
+        .get("/users/contracts", {
+          params: {
+            clientId: userId,
+            status: 'completed'
+          }
+        })
+        .then((response) => {
+          setCompletedProjects(response.data.contracts.length);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch completed projects count", err);
+          setCompletedProjects(0);
+        });
+    }
+  }, [userId, role]);
+  
+  // Fetch ongoing projects (contracts) for freelancer
+  useEffect(() => {
+    if (role === 'freelancer' && userId) {
+      const fetchContractsData = async () => {
+        try {
+          const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
+          const bidIds = bidResponse.data.bid.map((bid: Bid) => bid._id);
+          
+          const response = await axiosConfig.get("/users/contracts", {
+            params: {
+              bidIds: bidIds,
+              status: 'ongoing'
+            }
+          });
+          console.log('freelancers contrr',response.data.contracts)
+          const processedContracts = response.data.contracts.map(processContract);
+
+          console.log('contracts',processedContracts)
+          setContracts(processedContracts);
+        } catch (err) {
+          console.error('Error fetching contracts:', err);
+          setContracts([]);
+        }
+      };
+
+      fetchContractsData();
+    }
+  }, [userId, role]);
+  
+  // Fetch ongoing projects (contracts) for client
+  useEffect(() => {
+    if(role === 'client' && userId){
+    
+    const fetchContractsData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const tasksResponse = await axiosConfig.get("/client/my-tasks");
+        const ongoingTasks = tasksResponse.data.filter((task: Task) => 
+          task.status === 'ongoing'
+        );
+        
+        if (ongoingTasks.length === 0) {
+          setContracts([]);
+          setLoading(false);
+          return;
+        }
+
+        const taskIds = ongoingTasks.map((task: Task) => task._id);
+        const contractsResponse = await axiosConfig.get("/users/contracts", {
+          params: {
+            taskIds: taskIds,
+            status: 'ongoing'
+          }
+        });
+        const processedContracts = contractsResponse.data.contracts.map(processContract);
+        setContracts(processedContracts);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch contracts. Please try again later.');
+        setLoading(false);
+        console.error('Error fetching contracts:', err);
+      }
+    };
+
+    fetchContractsData();
+      
+  }
+  }, [userId,role]);
+
+  const getProgressColor = (completed: number, total: number) => {
+    const percentage = (completed / total) * 100;
+    if (percentage < 33) return 'bg-blue-500';
+    if (percentage < 66) return 'bg-blue-600';
+    return 'bg-blue-700';
+  };
+
+  const handleContractClick = (contractId: string) => {
+    navigate(`/client/client-contract/${contractId}`);
+  };
+
+  // Stats based on real data
+  const stats = role === 'freelancer' 
+    ? [
+        { title: "Bids Won", value: bidsWon, color: "text-green-500" },
+        { title: "Completed Projects", value: completedProjects, color: "text-pink-500" },
+        { title: "5★ Reviews", value: 15, color: "text-yellow-500" },
+        { title: "Requests Received", value: 237, color: "text-blue-500" }
+      ]
+    : [
+        { title: "Active Tasks", value: tasks.filter(t => t.status === 'pending').length, color: "text-green-500" },
+        { title: "Total Tasks", value: tasks.length, color: "text-pink-500" },
+        { title: "Completed Projects", value: completedProjects, color: "text-yellow-500" },
+        { title: "Proposals Received", value: tasks.reduce((acc, task) => acc + (task.bids || 0), 0), color: "text-blue-500" }
+      ];
+  
+  // Demo chart data (for now)
+  const demoViewsData: ChartData[] = [
+    { month: "Sep", views: 120 },
+    { month: "Oct", views: 180 },
+    { month: "Nov", views: 150 },
+    { month: "Dec", views: 210 },
+    { month: "Jan", views: 250 },
+    { month: "Feb", views: 237 }
+  ];
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        if (!userId) {
+          throw new Error('User not logged in');
+        }
+
+        const { data } = await axiosConfig.get('/users/notifications', {
+          params: {
+            page: 1,
+            limit: 4,
+            role: role
+          }
+        });
+        
+        setNotifications(data.result);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+        setNotifications([]);
+      }
+    };
+
+    fetchNotifications();
+  }, [userId, role]);
+
+  // Fetch tasks for client
+  useEffect(() => {
+    if (role === 'client') {
       const fetchTasks = async () => {
         try {
           const response = await axiosConfig.get("/client/my-tasks");
           const fetchedTasks = response.data;
-  
+          
           const tasksWithTimeLeft = fetchedTasks.map((task: Task) => ({
             ...task,
             timeLeft: calculateTimeLeft(task.timeline),
           }));
+          
           setTasks(tasksWithTimeLeft);
-          setLoading(false);
+          
+          // Fetch bid counts for each task
           tasksWithTimeLeft.forEach((task: Task) => {
             fetchBidCount(task._id);
           });
         } catch (err) {
-          setError("Failed to load tasks. Please try again later.");
-          setLoading(false);
+          setError("Failed to load tasks");
+          console.error("Failed to fetch tasks:", err);
         }
       };
-  
+
       fetchTasks();
-    }, []);
-
-    const fetchBidCount = async (taskId: string) => {
-      try {
-        const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
-        const bidCount = response.data.bids.length;
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task._id === taskId ? { ...task, bids: bidCount } : task
-          )
-        );
-      } catch (err) {
-        console.error(`Failed to fetch bids for task ${taskId}:`, err);
-      }
-    };
-  
-    const calculateTimeLeft = (timeline: string): string => {
-      const deadline = new Date(timeline);
-      const now = new Date();
-      const timeDiff = deadline.getTime() - now.getTime();
-  
-      if (timeDiff <= 0) {
-        return "Task deadline reached";
-      }
-      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-  
-      return `${days} days, ${hours} hours left`;
-    };
-
-      useEffect(() => {
-        const timer = setInterval(() => {
-          setTasks((prevTasks) =>
-            prevTasks.map((task) => ({
-              ...task,
-              timeLeft: calculateTimeLeft(task.timeline),
-            }))
-          );
-        }, 60000);
-    
-        return () => clearInterval(timer);
-      }, [tasks]);
-
-      if (loading)  return <Loader visible={loading} />;
-  if (error) return <div>{error}</div>;
-
-    const getTasks = () => {
-      if(role === 'freelancer'){
-        return (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-gray-800 text-lg font-semibold">My Bids</h3>
-              <button className="text-gray-500 hover:text-gray-700">
-                <FaEllipsisH className="w-5 h-5" />
-              </button>
-            </div>
-            <ul className="space-y-6">
-             {bids.slice(0,2).map((bid, index) => (
-              <li 
-              key={index}
-              className="border-b pb-4">
-                <div className="flex justify-between items-center">
-                  
-                  <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
-                  <p className="text-gray-800 font-semibold">{bid.taskId.projectName}</p>
-                  </Link>
-                  {/* <span className="text-yellow-600 bg-yellow-100 text-xs px-2 py-1 rounded">Expiring</span> */}
-                </div>
-                
-                <div className="mt-3 flex items-center">
-                <p className="text-gray-500 text-sm flex items-center mt-2 me-2">
-                  <IoMdTime className="mr-1" />
-                  {bid.deliveryTime} {bid.timeUnit}
-                </p>
-                    <button className="flex items-center bg-gray-200 text-gray-600 px-3 mx-2 py-1 rounded-md hover:bg-gray-300">
-                        <FaEdit className="mr-1" /> 
-                    </button>
-                    <button className="flex items-center bg-gray-200 text-gray-600 px-3 py-1 rounded-md hover:bg-gray-300">
-                        <FaTrash className="mr-1" /> 
-                    </button>
-                </div>
-              </li>
-               ))}
-            </ul>
-          </>
-        )
-      }else if (role === 'client'){
-        return (
-          <>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-gray-800 text-lg font-semibold">My Tasks</h3>
-            <button className="text-gray-500 hover:text-gray-700">
-              <FaEllipsisH className="w-5 h-5" />
-            </button>
-          </div>
-          <ul className="space-y-6">
-            
-          {tasks.map((task, index) => {
-          const isDeadlineReached = task.timeLeft === "Task deadline reached";
-          return (
-            <li
-              key={index}
-            className="border-b pb-4">
-              <div className="flex justify-between items-center">
-                <p className="text-gray-800 font-semibold">{task.projectName}</p>
-                {/* <span className="text-yellow-600 bg-yellow-100 text-xs px-2 py-1 rounded">Expiring</span> */}
-              </div>
-              <p className="text-gray-500 text-sm flex items-center mt-2">
-                <IoMdTime className="mr-1" />
-                {task.timeLeft}
-              </p>
-              <div className="mt-3 flex items-center">
-                 <Link to={`/client/bidders-list/${task._id}`}>
-                  <button
-                    disabled={isDeadlineReached}
-                    className={`flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 ${isDeadlineReached ? 'cursor-not-allowed opacity-50' : ''}`}
-                    onClick={() => isDeadlineReached && toast(
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span role="img" aria-label="warning" style={{ marginRight: '10px' }}>
-                          ⚠️
-                        </span>
-                        You can't access it because the deadline of your task is reached
-                      </div>,
-                      {
-                        style: {
-                          background: '#FFEB3B', 
-                          color: '#000',
-                          display: 'flex', 
-                          alignItems: 'center', 
-                        },
-                      }
-                    )}
-                  >
-                  <FaUsers className="mr-1" /> Manage Bidders
-                    <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">
-                      {task.bids || 0}
-                    </span>
-                  </button>
-                </Link>
-              </div>
-            </li>
-            );
-            })}
-          </ul>
-          </>
-        )
-      }
     }
+  }, [role]);
 
+  // Fetch bid count for a task
+  const fetchBidCount = async (taskId: string) => {
+    try {
+      const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
+      setTaskBidCounts(prev => ({
+        ...prev,
+        [taskId]: response.data.length
+      }));
+    } catch (err) {
+      console.error("Failed to fetch bid count for task:", taskId, err);
+    }
+  };
+
+  // Set up chart data
+  useEffect(() => {
+    setViewsData(demoViewsData);
+    setLoading(false);
+  }, []);
+
+  // Update time left for tasks
+  useEffect(() => {
+    if (role === 'client' && tasks.length > 0) {
+      const timer = setInterval(() => {
+        setTasks(prevTasks =>
+          prevTasks.map(task => ({
+            ...task,
+            timeLeft: calculateTimeLeft(task.timeline),
+          }))
+        );
+      }, 60000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [tasks, role]);
+
+  // Calculate time left helper function
+  const calculateTimeLeft = (timeline: string): string => {
+    const deadline = new Date(timeline);
+    const now = new Date();
+    const timeDiff = deadline.getTime() - now.getTime();
+
+    if (timeDiff <= 0) {
+      return "Task deadline reached";
+    }
+    
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+
+    return `${days} days, ${hours} hours left`;
+  };
+
+  // Format date for notifications
+  const formatDate = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - new Date(date).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    }
+  };
+
+  // Delete bid handler
+  const handleDeleteBid = (bidId: string) => {
+    axiosConfig
+      .delete(`/users/bid/${bidId}`)
+      .then(() => {
+        toast.success("Bid deleted successfully");
+        setBids(bids.filter(bid => bid._id !== bidId));
+        setLatestBids(latestBids.filter(bid => bid._id !== bidId));
+      })
+      .catch((err) => {
+        toast.error("Failed to delete bid");
+      });
+  };
+
+  // Edit bid handler
+  const handleEditBid = (bidId: string) => {
+    toast.success("Navigate to edit bid page");
+    // In a real app, this would navigate to an edit page
+  };
+
+  // Loading and error states
+  if (loading) return <Loader visible={loading} />;
+  if (error) return <div className="p-6 text-red-500">{error}</div>;
   return (
-    <section className="bg-gray-100 w-full">
-      <div className="p-6 pt-36 space-y-6 mx-">
-        {/* Stats Section */}
-        <div className="grid grid-cols-4 gap-6">
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <h3 className="text-gray-500 text-sm">Task Bids Won</h3>
-            <p className="text-2xl font-bold">22</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <h3 className="text-gray-500 text-sm">Tasks Done</h3>
-            <p className="text-2xl font-bold text-pink-500">28</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <h3 className="text-gray-500 text-sm">Reviews</h3>
-            <p className="text-2xl font-bold text-yellow-500">28</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <h3 className="text-gray-500 text-sm">This Month Views</h3>
-            <p className="text-2xl font-bold text-blue-500">987</p>
+    <section className="bg-gray-100 w-full min-h-screen">
+      <div className="p-6 pt-24 lg:pt-24 space-y-6 max-w-7xl mx-auto h-screen overflow-y-auto">
+        {/* Page title */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {role === 'freelancer' ? 'Freelancer Dashboard' : 'Client Dashboard'}
+          </h2>
+          <div className="flex space-x-4">
+            <Link to={role === 'freelancer' ? '/freelancer/task-list':'/client/freelancer-list'}>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">
+                {role === 'freelancer' ? 'Find Tasks' : 'Find Freelancer'}
+              </button>
+            </Link>
           </div>
         </div>
 
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-white shadow-md rounded-lg p-6 text-center">
+              <h3 className="text-gray-500 text-sm">{stat.title}</h3>
+              <p className={`text-3xl font-bold ${stat.color} mt-2`}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Graph and Notifications */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Graph Section */}
-          <div className="col-span-2 bg-white shadow-md rounded-lg p-4">
-            <h3 className="text-gray-600 text-sm font-semibold">Your Profile Views</h3>
-            <p className="text-gray-400 text-xs">Last 6 Months</p>
-            <div className="mt-4 h-40 bg-gray-100 rounded-lg flex items-center justify-center">
-              <p className="text-gray-400 text-sm">Graph Placeholder</p>
+          <div className="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-gray-800 text-lg font-semibold">Your Profile Views</h3>
+                <p className="text-gray-400 text-xs">Last 6 Months</p>
+              </div>
+              <button className="text-blue-600 text-sm font-medium">View Details</button>
+            </div>
+            <div className="mt-4 h-60 bg-gray-50 rounded-lg p-4 flex flex-col justify-between">
+              {/* This would be replaced with an actual chart component */}
+              <div className="h-48 flex items-end space-x-4">
+                {viewsData.map((item, index) => (
+                  <div key={index} className="flex flex-col items-center flex-1">
+                    <div 
+                      className="w-full bg-blue-500 rounded-t-sm" 
+                      style={{ height: `${(item.views / 250) * 100}%` }}
+                    ></div>
+                    <span className="text-xs mt-2 text-gray-600">{item.month}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="text-xs text-gray-400">Total Views: {viewsData.reduce((acc, item) => acc + item.views, 0)}</span>
+                <span className="text-xs text-gray-400">
+                  <FaChartLine className="inline mr-1" /> 
+                  {role === 'freelancer' ? '+28%' : '+12%'} from last month
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Notifications Section */}
-          <div className="bg-white shadow-md rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-gray-800 text-lg font-bold">Notifications</h3>
-              <button className="text-gray-500 hover:text-gray-700">
-                <FaBell className="w-5 h-5" />
-              </button>
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-gray-800 text-lg font-semibold">Notifications</h3>
+              <Link to={`/notification`}>
+              <button className="text-blue-600 text-sm font-medium">View All</button>
+              </Link>
             </div>
-             <ul className="mt-4 divide-y divide-gray-200">
-                      {/* {notifications.slice(0,4).map((notification,index)=>(
-                        <li
-                                key={index}
-                                 className="flex items-start py-2">
-                                <FaUserCircle className="w-6 h-6 text-gray-300" />
-                                
-                                <p className="ml-3 text-sm text-gray-700">
-                                  {notification.text}
-                                </p>
-                                </li>
-                              ))} */}
-                            </ul>
+            <ul className="space-y-4 max-h-60 overflow-y-auto">
+              {notifications.length > 0 ? (
+                notifications.map((notification, index) => (
+                  <li 
+                    key={index}
+                    className={`flex items-start py-2 ${!notification.read ? 'bg-blue-50 -mx-2 px-2 rounded' : ''}`}
+                  >
+                    <div className={`flex-shrink-0 mt-1 ${!notification.read ? 'text-blue-500' : 'text-gray-300'}`}>
+                      <FaUserCircle className="w-6 h-6" />
+                    </div>
+                    <div className="ml-3">
+                      <p className={`text-sm ${!notification.read ? 'text-gray-800 font-medium' : 'text-gray-600'}`}>
+                        {notification.text}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">{formatDate(notification.createdAt)}</p>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center py-4 text-gray-500">
+                  <p>No notifications yet</p>
+                </li>
+              )}
+            </ul>
           </div>
         </div>
 
-        {/* Bidders and My Tasks */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Bidders Section */}
-          <div className="col-span-2 bg-white shadow-md rounded-lg p-4">
-            <h3 className="text-gray-600 text-sm font-semibold">Ongoing Projects</h3>
-            <ul className="mt-4 space-y-4">
-              <li className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <img className="w-12 h-12 rounded-full" src="https://via.placeholder.com/150" alt="Profile" />
-                  <div>
-                    <h4 className="font-bold">E-commerce Web Application</h4>
-                    <p className="text-gray-400 text-sm">Web development</p>
-                  </div>
-                </div>
-                <p className="text-gray-500 text-sm">$3,200</p>
-              </li>
-            </ul>
+        {/* Projects and Task/Bid Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Projects Section */}
+          <div className="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-gray-800 text-lg font-semibold">Ongoing Projects</h3>
+              <Link to={`/${role}/${role}-contract-list`}>
+              <button className="text-blue-600 text-sm font-medium">View All</button>
+              </Link>
+            </div>
+            {contracts.length > 0 ? (
+              <ul className="space-y-6">
+                {contracts.map((contract, index) => (
+                  <li key={index} 
+                      className="border-b pb-4 last:border-0"
+                      onClick={()=> handleContractClick(contract._id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div>
+                          <h4 className="font-bold text-gray-800">{contract.title}</h4>
+                          {/* <p className="text-gray-500 text-sm">{contract.category}</p> */}
+                          <div className="flex items-center mt-1">
+                            <div className="w-32 bg-gray-200 rounded-full h-2 mr-2">
+                              <div 
+                                className={` h-2 rounded-full ${getProgressColor(contract.completedMilestones, contract.totalMilestones)}`}
+                                style={{ width: `${Math.round((contract.completedMilestones / contract.totalMilestones) * 100)}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500">{Math.round((contract.completedMilestones / contract.totalMilestones) * 100)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-800 font-semibold">${contract.budget.toLocaleString()}</p>
+                        {/* <p className="text-gray-500 text-sm">Deadline: {new Date(contract.deadline).toLocaleDateString()}</p> */}
+                      </div>
+                    </div>
+                    <div className="mt-3 flex justify-between items-center">
+                      {/* <p className="text-sm text-gray-500">
+                        {role === 'freelancer' 
+                          ? `Client: ${contract.clientName}` 
+                          : `Freelancer: ${contract.freelancerName}`}
+                      </p> */}
+                      <button className="text-blue-600 text-sm font-medium">View Details</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No ongoing projects at the moment.</p>
+                <button className="mt-2 text-blue-600 font-medium">
+                  {role === 'freelancer' ? 'Find Projects' : 'Post a Project'}
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* My Tasks Section */}
+          {/* Role-specific section (My Bids for Freelancer / My Tasks for Client) */}
           <div className="bg-white shadow-md rounded-lg p-6">
-          {getTasks()}
-            </div>
-          
+            {role === 'freelancer' ? (
+              // Freelancer - My Bids Section
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-gray-800 text-lg font-semibold">My Recent Bids</h3>
+                  <Link to="/freelancer/bids" className="text-blue-600 text-sm font-medium">
+                    View All
+                  </Link>
+                </div>
+                {latestBids.length > 0 ? (
+                  <ul className="space-y-6">
+                    {latestBids.map((bid, index) => (
+                      <li key={index} className="border-b pb-4 last:border-0">
+                        <div className="flex justify-between items-start">
+                          <Link to={`/freelancer/task-detail/${bid.taskId._id}`}>
+                            <p className="text-gray-800 font-semibold">{bid.taskId.projectName}</p>
+                          </Link>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            bid.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                            bid.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                          </span>
+                        </div>
+                        <p className="text-gray-500 text-sm mt-1">{bid.taskId.category}</p>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <p className="text-gray-600 text-sm flex items-center">
+                              <IoMdTime className="mr-1" />
+                              {bid.deliveryTime} {bid.timeUnit}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                              ${bid.rate}{bid.taskId.rateType === 'hourly' ? '/hr' : ''}
+                            </p>
+                          </div>
+                          {bid.status === 'pending' && (
+                            <div className="flex space-x-2">
+                              <button 
+                                className="flex items-center bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300"
+                                onClick={() => handleEditBid(bid._id)}
+                              >
+                                <FaEdit className="text-xs" /> 
+                              </button>
+                              <button 
+                                className="flex items-center bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300"
+                                onClick={() => handleDeleteBid(bid._id)}
+                              >
+                                <FaTrash className="text-xs" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>You haven't placed any bids yet.</p>
+                    <Link to="/freelancer/find-tasks" className="mt-2 text-blue-600 font-medium block">
+                      Browse Available Tasks
+                    </Link>
+                  </div>
+                )}
+              </>
+            ) : (
+              // Client - My Tasks Section
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-gray-800 text-lg font-semibold">My Active Tasks</h3>
+                  <Link to="/client/my-tasks" className="text-blue-600 text-sm font-medium">
+                    View All
+                  </Link>
+                </div>
+                {tasks.length > 0 ? (
+                  (() => {
+                    const pendingTasks = tasks.filter(task => task.status === 'pending');
+                    
+                    if (pendingTasks.length === 0) {
+                      return (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>You have no active tasks at the moment.</p>
+                          <Link to="/client/post-task" className="mt-2 text-blue-600 font-medium block">
+                            Post a New Task
+                          </Link>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <ul className="space-y-6">
+                        {pendingTasks
+                          .slice(0, 3)
+                          .map((task, index) => {
+                            const isDeadlineReached = task.timeLeft === "Task deadline reached";
+                            return (
+                              <li key={index} className="border-b pb-4 last:border-0">
+                                <div className="flex justify-between items-start">
+                                  <Link to={`/client/my-task-detail/${task._id}`}>
+                                    <p className="text-gray-800 font-semibold">{task.projectName}</p>
+                                  </Link>
+                                  <span className={`text-xs px-2 py-1 rounded ${
+                                    isDeadlineReached ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                                  }`}>
+                                    {isDeadlineReached ? 'Expired' : 'Active'}
+                                  </span>
+                                </div>
+                                <p className="text-gray-500 text-sm mt-1">{task.category}</p>
+                                <p className="text-gray-600 text-sm flex items-center mt-2">
+                                  <IoMdTime className="mr-1" />
+                                  {task.timeLeft}
+                                </p>
+                                <div className="mt-3">
+                                  <Link to={`/client/bidders-list/${task._id}`}>
+                                    <button
+                                      disabled={isDeadlineReached}
+                                      className={`flex items-center bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 ${
+                                        isDeadlineReached ? 'cursor-not-allowed opacity-50' : ''
+                                      }`}
+                                      onClick={() => isDeadlineReached && toast(
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                          <span role="img" aria-label="warning" style={{ marginRight: '10px' }}>
+                                            ⚠️
+                                          </span>
+                                          Task deadline has passed
+                                        </div>,
+                                        {
+                                          style: {
+                                            background: '#FFEB3B',
+                                            color: '#000',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                          },
+                                        }
+                                      )}
+                                    >
+                                      <FaUsers className="mr-1" /> View Bids
+                                      <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs">
+                                        {taskBidCounts[task._id] || 0}
+                                      </span>
+                                    </button>
+                                  </Link>
+                                </div>
+                              </li>
+                            );
+                          })}
+                      </ul>
+                    );
+                  })()
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>You haven't posted any tasks yet.</p>
+                    <Link to="/client/post-task" className="mt-2 text-blue-600 font-medium block">
+                      Post Your First Task
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </section>

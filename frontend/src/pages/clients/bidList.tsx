@@ -94,7 +94,7 @@ const BiddersList: React.FC = () => {
         const taskResponse = await axiosConfig.get(`/users/tasks/${id}`);
         const taskStatus = taskResponse.data.task.status;
 
-        if (taskStatus === 'onhold') {
+        if (taskStatus !== 'pending') {
           toast.error("This task is currently on hold and cannot be accepted.");
           setLoading(false);
           return;

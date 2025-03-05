@@ -105,7 +105,7 @@ const ClientContractsList: React.FC = () => {
         const contractsResponse = await axiosConfig.get("/users/contracts", {
           params: {
             taskIds: taskIds,
-            status: 'accepted'
+            status: 'ongoing'
           }
         });
         const processedContracts = contractsResponse.data.contracts.map(processContract);

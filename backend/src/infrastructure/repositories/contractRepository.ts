@@ -18,7 +18,7 @@ export const ContractRepository = {
     updateContract: async(bidId: string, updates: IContract) => {
         return await ContractModel.findOneAndUpdate({bidId},updates,{upsert:true,new: true})
     },
-    updateContractStatus: async (bidId: string, status: string) => {
+    updateContractStatus: async (id: string, status: string) => {
       try {
         interface UpdateData {
           status: string;
@@ -26,11 +26,15 @@ export const ContractRepository = {
         }
         const updateData: UpdateData = { status };
         if (status === 'accepted') {
+          updateData.status = 'ongoing'
           updateData.startDate = new Date();
+        }
+        if (status === 'ongoing') {
+          updateData.status = 'completed'
         }
         
         const updatedContract = await ContractModel.findOneAndUpdate(
-          { bidId },
+          {$or: [{ bidId: id }, { _id: id }]},
           { $set: updateData },
           { new: true }
         );
@@ -43,6 +47,7 @@ export const ContractRepository = {
     },
     
     getAllContracts: async (filters:FilterCriteria) => {
+      console.log('filters',filters)
         return await ContractModel.find({...filters}).populate('freelancerId');
     },
     updateMilestoneStatus: async (contractId:string,milestoneId:string, status: string, additionalData: any = {}) => {

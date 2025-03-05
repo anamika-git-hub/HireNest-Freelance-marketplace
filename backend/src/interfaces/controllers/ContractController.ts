@@ -5,6 +5,8 @@ import { sendNotification } from "../..";
 import { uploadToS3 } from "../../utils/uploader";
 import { PaymentUseCase } from "../../application/paymentUseCase";
 import mongoose from "mongoose";
+import { FreelancerProfileRepository } from "../../infrastructure/repositories/FreelancerProfileRepository";
+import { AccountDetailRepository } from "../../infrastructure/repositories/accountDetail";
 
 interface CustomRequest extends Req {
     user?: { userId: string }; 
@@ -44,8 +46,13 @@ export const ContractController = {
     updateContractStatus: async (req: Req,res: Res, next: Next) => {
         try {
             const {id} = req.params;
-            const {status,taskId} = req.body;
-            const result = await ContractUseCase.updateContractStatus(id,status,taskId);
+            const {status,taskId,contractId} = req.body;
+            let result
+            if(contractId){
+             result = await ContractUseCase.updateContractStatus(contractId,status,taskId);
+            }else{
+             result = await ContractUseCase.updateContractStatus(id,status,taskId);
+            }
             res.status(200).json({result})
         } catch (error) {
             next(error)
@@ -54,13 +61,22 @@ export const ContractController = {
     getAllContracts: async (req: Req,res: Res, next: Next) => {
         try {
             const taskIds = req.query.taskIds as string [] | undefined;
+            const freelancerId = req.query.freelancerId as string | "";
+            const clientId = req.query.clientId as string | "";
             const bidIds = req.query.bidIds as string [] | undefined;
             const status = req.query.status as string || "";
-
             const filters: FilterCriteria = {};
             if (taskIds) filters.taskId = { $in: taskIds.map(id => new mongoose.Types.ObjectId(id)) };
             if (bidIds) filters.bidId = { $in: bidIds.map(id => new mongoose.Types.ObjectId(id)) };
             if (status) filters.status = status;
+            if(freelancerId){
+               const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(freelancerId);
+               filters.freelancerId = freelancerProfile ? freelancerProfile._id.toString() : undefined;
+            }
+            if(clientId){
+                const accountDetail = await AccountDetailRepository.findUserDetailsById(clientId);
+                filters.clientId = accountDetail ? accountDetail._id.toString() : undefined;
+            }
             const contracts = await ContractUseCase.getAllContracts(filters);
             res.status(200).json({contracts})
         } catch (error) {
