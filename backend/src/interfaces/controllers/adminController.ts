@@ -72,4 +72,13 @@ export const AdminController = {
             next(error)
         }
     },
+    getDashboardStats: async(req: Req, res: Res, next: Next) => {
+        try {
+            const result = await adminUseCase.getDashboardStats();
+            console.log('rrrr',result);
+            res.status(200).json({result})
+        } catch (error) {
+            next(error)
+        }
+    }
 };

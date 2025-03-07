@@ -114,6 +114,70 @@ export const TaskRepository = {
                 throw new Error(`Failed to get Task by userId due to an unknown error`);
             }   
         }
+    },
+
+    totalProjectsCount: async() => {
+        return await TaskSubmissionModel.countDocuments();
+    },
+    ongoingProjectsCount: async() => {
+        return await TaskSubmissionModel.countDocuments({
+            status: 'ongoing'
+        })
+    },
+    completedProjectsCount: async() => {
+        return await TaskSubmissionModel.countDocuments({
+            status: 'completed'
+        })
+    },
+
+    categoryAgg:async() => {
+       return await TaskSubmissionModel.aggregate([
+            {
+              $group: {
+                _id: '$category',
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $sort: { count: -1 }
+            },
+            {
+              $limit: 5
+            }
+          ]);
+    },
+    recentProjects: async() => {
+        return await TaskSubmissionModel.aggregate([
+            {
+              $sort: { createdAt: -1 }
+            },
+            {
+              $limit: 3
+            },
+            {
+              $lookup: {
+                from: 'userdetails',
+                localField: 'clientId',
+                foreignField: 'userId',
+                as: 'clientDetails'
+              }
+            },
+            {
+              $project: {
+                id: { $toString: '$_id' },
+                name: '$projectName',
+                client: { 
+                  $concat: [
+                    { $arrayElemAt: ['$clientDetails.firstname', 0] }, 
+                    ' ', 
+                    { $arrayElemAt: ['$clientDetails.lastname', 0] }
+                  ] 
+                },
+                budget: { $toString: { $avg: ['$minRate', '$maxRate'] } },
+                status: '$status'
+              }
+            }
+          ]);
     }
 
 };

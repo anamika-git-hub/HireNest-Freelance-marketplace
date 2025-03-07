@@ -14,7 +14,8 @@ router.post('/categories',checkAuth('admin'),uploadCategoryImage,CategoryControl
 router.get('/categories/:id',checkAuth('admin'),CategoryController.getCategoryById);
 router.put('/categories/:id',checkAuth('admin'),uploadCategoryImage,CategoryController.updateCategory);
 router.delete('/categories/:id',checkAuth('admin'),CategoryController.deleteCategory);
-
+router.get('/dashboard',checkAuth('admin'),AdminController.getDashboardStats);
 
 router.put('/:userId/:isBlocked',checkAuth('admin'),AdminController.toggleBlockUser);
+
 export default router;

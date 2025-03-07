@@ -184,6 +184,9 @@ export const FreelancerProfileRepository = {
                 },
                 { new: true }
             );
+        },
+        activeFreelancersCount: async() => {
+            return await FreelancerProfileModel.countDocuments();
         }
     
 }

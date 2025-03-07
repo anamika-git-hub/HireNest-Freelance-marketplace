@@ -48,6 +48,74 @@ export const UserRepository = {
             { new: true } 
           );
           return updatedUser
+    },
+
+    totalUsersCount: async() => {
+        const totalUsers = await UserModel.countDocuments();
+        return totalUsers;
+    },
+
+    userGrowthAgg: async(sevenMonthsAgo: Date, currentDate: Date) => {
+        return await UserModel.aggregate([
+            {
+              $match: {
+                createdAt: { $gte: sevenMonthsAgo, $lte: currentDate },
+                isVerified: true
+              }
+            },
+            {
+              $project: {
+                month: { $month: '$createdAt' },
+                year: { $year: '$createdAt' },
+                role: 1
+              }
+            },
+            {
+              $group: {
+                _id: { month: '$month', year: '$year', role: '$role' },
+                count: { $sum: 1 }
+              }
+            },
+            {
+              $sort: { '_id.year': 1, '_id.month': 1 }
+            }
+          ]);
+    },
+
+    pendingVerificationUsers: async() => {
+        return await UserModel.aggregate([
+            {
+              $match: { isVerified: false }
+            },
+            {
+              $sort: { createdAt: -1 }
+            },
+            {
+              $limit: 3
+            },
+            {
+              $lookup: {
+                from: 'userdetails',
+                localField: '_id',
+                foreignField: 'userId',
+                as: 'userDetails'
+              }
+            },
+            {
+              $project: {
+                id: { $toString: '$_id' },
+                name: { 
+                  $concat: [
+                    { $arrayElemAt: ['$userDetails.firstname', 0] }, 
+                    ' ', 
+                    { $arrayElemAt: ['$userDetails.lastname', 0] }
+                  ] 
+                },
+                type: '$role',
+                submittedDate: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }
+              }
+            }
+          ]);
     }
 
 };

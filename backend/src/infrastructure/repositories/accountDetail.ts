@@ -8,5 +8,6 @@ export const AccountDetailRepository = {
         UserDetailModel.findOneAndUpdate({ userId }, updates, { new: true }),  
 
     
-    findUserDetailsById: async( userId:string) => UserDetailModel.findOne({userId})
+    findUserDetailsById: async( userId:string) => UserDetailModel.findOne({userId}),
+    activeClientsCount: async() => UserDetailModel.countDocuments(),
 }

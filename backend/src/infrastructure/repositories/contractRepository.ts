@@ -123,5 +123,94 @@ updateMilestoneWithPayment: async (
             freelancerId: freelancerId,
             status: status
         });
+    },
+    completedMilestones: async() => {
+      return await ContractModel.find({
+        'milestones.status': 'completed'
+      });
+    },
+    monthlyRevenueAgg: async(sevenMonthsAgo: Date,currentDate: Date) => {
+      return await ContractModel.aggregate([
+        {
+          $unwind: '$milestones'
+        },
+        {
+          $match: {
+            'milestones.status': 'completed',
+            'milestones.paymentDetails': { $exists: true },
+            'milestones.paymentDetails.paymentDate': { 
+              $gte: sevenMonthsAgo, 
+              $lte: currentDate 
+            }
+          }
+        },
+        {
+          $project: {
+            month: { $month: '$milestones.paymentDetails.paymentDate' },
+            year: { $year: '$milestones.paymentDetails.paymentDate' },
+            amount: { $toDouble: '$milestones.paymentDetails.amount' },
+            platformFee: { $toDouble: '$milestones.paymentDetails.platformFee' }
+          }
+        },
+        {
+          $group: {
+            _id: { month: '$month', year: '$year' },
+            revenue: { $sum: '$amount' },
+            commission: { $sum: '$platformFee' },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { '_id.year': 1, '_id.month': 1 }
+        }
+      ]);
+    },
+    recentTransactions: async() => {
+      return await ContractModel.aggregate([
+        {
+          $unwind: '$milestones'
+        },
+        {
+          $match: {
+            'milestones.status': 'completed',
+            'milestones.paymentDetails': { $exists: true }
+          }
+        },
+        {
+          $sort: {
+            'milestones.paymentDetails.paymentDate': -1
+          }
+        },
+        {
+          $limit: 5
+        },
+        {
+          $lookup: {
+            from: 'userdetails',
+            localField: 'clientId',
+            foreignField: '_id',
+            as: 'clientDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'freelancerprofiles',
+            localField: 'freelancerId',
+            foreignField: '_id',
+            as: 'freelancerDetails'
+          }
+        },
+        {
+          $project: {
+            id: '$milestones.paymentDetails.id',
+            client: { $concat: [{ $arrayElemAt: ['$clientDetails.firstname', 0] }, ' ', { $arrayElemAt: ['$clientDetails.lastname', 0] }] },
+            freelancer: { $arrayElemAt: ['$freelancerDetails.name', 0] },
+            amount: '$milestones.paymentDetails.amount',
+            commission: '$milestones.paymentDetails.platformFee',
+            date: { $dateToString: { format: '%Y-%m-%d', date: '$milestones.paymentDetails.paymentDate' } },
+            status: 'Completed'
+          }
+        }
+      ]);
     }
 }
