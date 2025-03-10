@@ -5,6 +5,17 @@ import { FilterCriteria } from "../entities/filter";
 import mongoose from "mongoose";
 import { FreelancerReviewRepository } from "../infrastructure/repositories/freelancerReviewRepository";
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
+import { BidRepository } from "../infrastructure/repositories/BidRepository";
+import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
+import { sendNotification } from "..";
+
+const getNotificationText = (status: 'accepted' | 'rejected', projectName:string):string => {
+  const messages = {
+    accepted: `Congratulations! Your contract for the project ${projectName} has been accepted by the freelancer.`,
+    rejected: `We regret to inform you that the freelancer has rejected your contract for ${projectName},`
+  } as const;
+  return messages[status];
+}
 
 export const ContractUseCase = {
     createContract : async(data:IContract)=>{
@@ -23,6 +34,27 @@ export const ContractUseCase = {
             await TaskRepository.updateTaskStatus(taskId, 'pending');
         }else if (status === 'ongoing') {
           await TaskRepository.updateTaskStatus(taskId,'completed')
+        }
+        if (status === 'accepted' || status === 'rejected') {
+          const senderId = (await BidRepository.getBidById(id)).bidderId
+          const {clientId, projectName} = await TaskRepository.getTaskById(taskId)
+          const notificationData = {
+            senderId,
+            userId:clientId,
+            role:'client',
+            projectName,
+            text: getNotificationText(status,projectName),
+            isRead: false,
+            createdAt: new Date(),
+            types:status === 'accepted'?'contract_accepted': 'contract_rejected',
+            projectUrl: `/client/bidders-list/${taskId}`
+          };
+          await NotificationRepository.createNotification(notificationData);
+
+          sendNotification(clientId.toString(),{
+            ...notificationData,
+            text:getNotificationText(status === 'accepted'? 'rejected' : 'accepted',projectName),
+          })
         }
         return await ContractRepository.updateContractStatus(id,status);
     },
@@ -57,10 +89,38 @@ export const ContractUseCase = {
                     }
                 }
             );
+ 
+             if(updatedContract){
+              const contract = await ContractRepository.getContractById(contractId);
+                   if(!contract) throw new Error('contract not found');
+                   const {taskId,bidId} = contract;
+                   const bid = await BidRepository.getBidById(bidId.toString());
+                   if(!bid) throw new Error("Bid not found");
+                    const {bidderId} = bid;
+                    const task = await TaskRepository.getTaskById(taskId.toString());
+                    if(!task) throw new Error("Task not found");
+                    const {clientId,projectName} = task;
+                 const notificationData = {
+                     senderId:bidderId,
+                     userId:clientId,
+                     role:'client',
+                     types:'milestone_submission',
+                     createdAt: new Date(),
+                     isRead: false,
+                     projectUrl:`/client/client-contract/${contractId}`,
+                     projectName:projectName,
+                     text:`A freelancer has submitted a milestone of the project ${projectName} for a review.`,
+                 }
+                 await NotificationRepository.createNotification(notificationData);
+                 sendNotification(clientId.toString(), {
+                    ...notificationData
+                 })
+             }           
             return {
                 success: true,
                 milestoneTitle: milestone.title,
-                clientId: contract.clientId
+                clientId: contract.clientId,
+                projectName: contract.title
             };
         } catch (error:any) {
             throw new Error(`Error submitting milestone:${error}`)
@@ -85,7 +145,7 @@ export const ContractUseCase = {
           if (!contract) {
             throw new Error('Contract not found');
           }
-    
+           console.log('ccc',contract)
           const milestone = contract.milestones.find(m => m._id.toString() === milestoneId);
           if (!milestone) {
             throw new Error('Milestone not found');
@@ -101,6 +161,34 @@ export const ContractUseCase = {
             'accepted',
             {}
           );
+          
+            if(updatedContract){
+              const {taskId,bidId} = contract;
+              const bid = await BidRepository.getBidById(bidId.toString());
+              if(!bid) throw new Error("Bid not found");
+               const {bidderId} = bid;
+               const task = await TaskRepository.getTaskById(taskId.toString());
+               if(!task) throw new Error("Task not found");
+               const {clientId,projectName} = task;  
+               console.log('oooooooooo',bidderId,clientId,projectName)    
+                const notificationData = {
+                    senderId:clientId,
+                    userId: bidderId,
+                    role:'freelancer',
+                    types:'milestone_accepted',
+                    projectName,
+                    projectUrl:`/freelancer/freelancer-contract/${contractId}`,
+                    text:`Your milestone submission for the project ${projectName} has been accepted.`,
+                    isRead: false,
+                    createdAt: new Date(),
+
+                }
+                console.log('nnnnnn',notificationData)
+                await NotificationRepository.createNotification(notificationData)
+                sendNotification(bidderId.toString(),{
+                    ...notificationData 
+                });
+            }          
           const allCompleted = updatedContract?.milestones.every(
             m => m.status === 'completed'
           );

@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
-import { stripe } from "..";
+import { sendNotification, stripe } from "..";
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
 import { Paymentrepository } from "../infrastructure/repositories/paymentRepository";
 import Stripe from "stripe";
+import { BidRepository } from "../infrastructure/repositories/BidRepository";
+import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
+import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
 
 export const PaymentUseCase = {
     createPaymentIntent: async (amount: number, milestoneId: string, contractId: string, freelancerId: string) => {
@@ -89,12 +92,36 @@ export const PaymentUseCase = {
 
   handlePaymentSuccess: async (paymentIntent: any, session: any) => {
     const { milestoneId, contractId } = paymentIntent.metadata;
-    await ContractRepository.updateMilestoneStatus(
+   const result = await ContractRepository.updateMilestoneStatus(
       contractId,
       milestoneId,
       'active',
       session
     );
+    if(result){
+     const contract = await ContractRepository.getContractById(contractId);
+     if(!contract) throw new Error('contract not found');
+     const {taskId,bidId} = contract;
+     const bid = await BidRepository.getBidById(bidId.toString());
+     if(!bid) throw new Error("Bid not found");
+      const {bidderId} = bid;
+      const task = await TaskRepository.getTaskById(taskId.toString());
+      if(!task) throw new Error("Task not found");
+      const {clientId,projectName} = task;
+      const notificationData = {
+        senderId:clientId,
+        userId: bidderId,
+        role: 'freelancer',
+        projectName,
+        text:`A milestone for project "${projectName}" is now active. You can begin work on this milestone.`,
+        isRead: false,
+        createdAt:new Date(),
+        types:'milestone_activated',
+        projectUrl:`freelancer/freelancer-contract/${contractId}`
+      };
+      await NotificationRepository.createNotification(notificationData);
+      sendNotification(bidderId.toString(),notificationData);
+    }
 
     await Paymentrepository.updateEscrowStatus(
       milestoneId,

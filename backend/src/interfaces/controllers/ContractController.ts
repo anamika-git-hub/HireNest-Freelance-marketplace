@@ -7,6 +7,7 @@ import { PaymentUseCase } from "../../application/paymentUseCase";
 import mongoose from "mongoose";
 import { FreelancerProfileRepository } from "../../infrastructure/repositories/FreelancerProfileRepository";
 import { AccountDetailRepository } from "../../infrastructure/repositories/accountDetail";
+import { NotificationRepository } from "../../infrastructure/repositories/notificationRepository";
 
 interface CustomRequest extends Req {
     user?: { userId: string }; 
@@ -89,13 +90,9 @@ export const ContractController = {
             next(error)
         }
     },
-    submitMilestone: async(req:CustomRequest,res: Res, next: Next) => {
+    submitMilestone: async(req:Req,res: Res, next: Next) => {
         try {
             const {contractId, milestoneId, description} = req.body;
-
-            const userId = req.user?.userId || "";
-            let fileUrl = null;
-            let fileName = null;
             const uploadImage = async (file: Express.Multer.File, folderName: string) => {
                 try {
                     const uniqueFileName = `${Date.now()}-${file.originalname}`;
@@ -117,16 +114,7 @@ export const ContractController = {
                 submittedAt: new Date().toISOString()
             };
             const result = await ContractUseCase.submitMilestone(contractId, milestoneId, submissionDetails);
-            if(result.clientId){
-                sendNotification(result.clientId, {
-                    type: 'milestone_submission',
-                    title: 'Milestone Submitted',
-                    message : `A freelancer has submitted a milestone for a review : ${result.milestoneTitle}`,
-                    contractId,
-                    milestoneId,
-                    createdAt: new Date().toISOString()
-                })
-            }
+           
             res.status(200).json({success: true, result});
         } catch (error) {
             next(error)
@@ -135,37 +123,37 @@ export const ContractController = {
     acceptMilestone : async(req: Req,res: Res, next: Next) => {
         try {
             const {contractId, milestoneId} = req.body;
+            console.log('111111',contractId,milestoneId)
             const contract = await ContractUseCase.getContractDetails(contractId);
             await PaymentUseCase.releaseEscrow(contractId, milestoneId, contract.freelancerId);
             const result = await ContractUseCase.acceptMilestone(contractId, milestoneId);
-            sendNotification(contract.freelancerId,{
-                type: 'milestone_accepted',
-                title: 'Milestone Accepted', 
-                message: `Your milestone submission has been accepted: ${result.milestoneTitle}`,
-                contractId,
-                milestoneId,
-                createdAt: new Date().toISOString()
-            });
             res.status(200).json({success: true, result});
         } catch (error) {
             next(error);
         }
     },
-    rejectMilestone: async(req: Req, res: Res, next: Next) => {
+    rejectMilestone: async(req: CustomRequest, res: Res, next: Next) => {
         try {
             const {contractId, milestoneId, rejectionReason} = req.body;
             const contract = await ContractUseCase.getContractDetails(contractId);
             const result = await ContractUseCase.rejectMilestone(contractId, milestoneId, rejectionReason || 'No reason provided');
-
-            sendNotification(contract.freelancerId,{
-                type: 'milestone_rejected',
-                title: 'Milestone Rejected',
-                message:`Your milestone submission has been rejected: ${result.milestoneTitle}`,
-                contractId,
-                milestoneId,
-                rejectionReason: rejectionReason || 'No reason provided',
-                createdAt: new Date().toISOString()
-            });
+            const userId = req.user?.userId || "";
+            if(result){
+                const notificationData = {
+                    senderId:userId,
+                    userId:contract.freelancerId,
+                    role:'freelancer',
+                    text:`Your milestone submission has been rejected: ${result.milestoneTitle}`,
+                    types:'milestone_rejected',
+                    isRead: false,
+                    createdAt: new Date(),
+                }
+                await NotificationRepository.createNotification(notificationData)
+                sendNotification(contract.freelancerId,{
+                    ...notificationData
+                });
+            }
+           
             res.status(200).json({success: true, result});
         } catch (error) {
             next(error);

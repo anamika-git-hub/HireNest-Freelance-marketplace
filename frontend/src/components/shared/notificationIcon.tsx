@@ -15,7 +15,11 @@ import {
   FaUserCheck, 
   FaUserTimes,
   FaProjectDiagram,
-  FaMoneyBillWave
+  FaMoneyBillWave,
+  FaCheckCircle,
+  FaFileUpload,
+  FaCheckDouble,
+  FaTimesCircle
 } from "react-icons/fa";
 
 interface NotificationIconProps {
@@ -29,18 +33,24 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ type, className = "
     
     const icons: Record<string, JSX.Element> = {
       // Project related
-      request: <MdWork className={`${defaultClasses} text-blue-500`} />,
-      bid: <MdGavel className={`${defaultClasses} text-blue-500`} />,
+      request_submission: <MdWork className={`${defaultClasses} text-blue-500`} />,
+      bid_placed: <MdGavel className={`${defaultClasses} text-blue-500`} />,
       project_created: <FaProjectDiagram className={`${defaultClasses} text-blue-500`} />,
       project_updated: <MdAssignment className={`${defaultClasses} text-blue-500`} />,
       project_completed: <MdCheckCircle className={`${defaultClasses} text-blue-500`} />,
       
       // Proposal/Bid related
-      accepted: <FaHandshake className={`${defaultClasses} text-blue-500`} />,
-      rejected: <MdCancel className={`${defaultClasses} text-red-500`} />,
+      request_accepted: <FaHandshake className={`${defaultClasses} text-blue-500`} />,
+      request_rejected: <MdCancel className={`${defaultClasses} text-red-500`} />,
       proposal_received: <MdWork className={`${defaultClasses} text-blue-500`} />,
       bid_accepted: <FaHandshake className={`${defaultClasses} text-blue-500`} />,
       bid_rejected: <MdCancel className={`${defaultClasses} text-red-500`} />,
+      contract_accepted: <FaHandshake className={`${defaultClasses} text-blue-500`} />,
+      contract_rejected: <MdCancel className={`${defaultClasses} text-red-500`} />,
+      milestone_activated: <FaCheckCircle className={`${defaultClasses} text-green-500`} />,
+      milestone_submission: <FaFileUpload className={`${defaultClasses} text-blue-500`} />,
+      milestone_accepted: <FaCheckDouble className={`${defaultClasses} text-green-500`} />,
+      milestone_rejected: <FaTimesCircle className={`${defaultClasses} text-red-500`} />,
       
       // Payment related
       payment_received: <MdPayment className={`${defaultClasses} text-blue-500`} />,

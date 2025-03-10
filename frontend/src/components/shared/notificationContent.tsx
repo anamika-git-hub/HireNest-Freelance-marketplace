@@ -26,7 +26,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
 };
 
     const messages = {
-      request: () => (
+      request_submission: () => (
         <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
           You have a new request from
           <a href="/freelancer/requests" className="text-blue-500 hover:underline">
@@ -34,7 +34,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
           </a>
         </p>
       ),
-      bid: () => (
+      bid_placed: () => (
         <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
           <a href={notification.profileUrl} className="text-blue-500 hover:underline">
             {notification.senderName}
@@ -46,9 +46,7 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
           project.
         </p>
       ),
-      accepted: () => {
-        if (role === 'freelancer') {
-          return (
+      bid_accepted: () =>  (
             <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               Congratulations! Your bid for the project{' '}
               <a href={notification.projectUrl} className="text-blue-500 hover:underline">
@@ -56,9 +54,8 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
               </a>{' '}
               has been accepted by the client.
             </p>
-          );
-        }else if(role === 'client') {
-          return (
+          ),
+      request_accepted:() => (
             <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               Congratulations! Your request for the freelancer{' '}
               <a href={notification.profileUrl} className="text-blue-500 hover:Underline">
@@ -66,13 +63,8 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
               </a>{' '}
               has been accepted.
             </p>
-          )
-        }
-        return null;
-      },
-      rejected: () => {
-        if (role === 'freelancer') {
-          return (
+          ),
+      bid_rejected: () =>(
             <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               We regret to inform you that the client has rejected your bid for{' '}
               <a href={notification.projectUrl} className="text-blue-500 hover:underline">
@@ -80,9 +72,8 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
               </a>{' '}
               .
             </p>
-          );
-        } else if (role === 'client') {
-          return (
+          ),
+      request_rejected: () =>(
             <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
               We regret to inform you that the freelancer{' '}
               <a href={notification.profileUrl} className="text-blue-500 hover:underline">
@@ -91,10 +82,61 @@ const NotificationContent: React.FC<NotificationItemProps> = ({ notification, ro
                has rejected your request.
               .
             </p>
-          );
-        }
-        return null;
-      }
+          ),
+      contract_accepted:() => (
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              Congratulations! Your contract for the project{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:Underline">
+                {notification.projectName}
+              </a>{' '}
+              has been accepted by the freelancer.
+            </p>
+          ),
+      contract_rejected: () =>(
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              We regret to inform you that the freelancer has rejected your contract for{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:underline">
+                {notification.projectName}
+              </a>{' '}
+              .
+            </p>
+          ),
+          milestone_activated: () => (
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              A milestone for project{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:underline">
+                {notification.projectName}
+              </a>{' '}
+              is now active. You can begin work, and payment will be released upon completion.
+            </p>
+          ),
+          milestone_submission:() => (
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              A freelancer has submitted a milestone of the project{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:underline">
+                {notification.projectName}
+              </a>{' '}
+              for a review.
+            </p>
+          ),
+          milestone_accepted: () =>  (
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              Congratulations! Your milestone submission for the project{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:underline">
+                {notification.projectName}
+              </a>{' '}
+              has been accepted by the client.
+            </p>
+          ),
+          milestone_rejected: () =>(
+            <p onClick={handleClick} className="ml-3 text-sm text-gray-700">
+              We regret to inform you that the client has rejected your milestone submission for the project{' '}
+              <a href={notification.projectUrl} className="text-blue-500 hover:underline">
+                {notification.projectName}
+              </a>{' '}
+              .
+            </p>
+          ),
     };
   
     const MessageComponent = messages[notification.types as keyof typeof messages];

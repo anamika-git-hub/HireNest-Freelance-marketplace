@@ -71,8 +71,8 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
       if (userId) {
         try {
           const { data } = await axiosConfig.get('/users/notifications');
-        const filteredNotifications = data.filter(
-          (notif: Notification) => notif.role === role && !notif.isRead
+        const filteredNotifications = data.result.filter(
+          (notif: Notification) => notif.role === userRole && !notif.isRead
         );
         setNotifications(filteredNotifications);
         } catch (error) {

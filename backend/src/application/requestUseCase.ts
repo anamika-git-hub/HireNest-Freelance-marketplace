@@ -83,7 +83,7 @@ export const RequestUseCase = {
                 text: getNotificationText(status,name),
                 isRead: false,
                 createdAt: new Date(),
-                types: status,
+                types: status === 'accepted'? 'request_accepted':'request_rejected',
                 profileUrl:`/client/freelancer-detail/${freelncerProfileId}`
 
             };

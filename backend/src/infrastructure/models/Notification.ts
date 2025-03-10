@@ -9,7 +9,7 @@ export const NotificationSchema = new Schema<INotification>(
             
         },
         senderId:{
-            type:mongoose.Schema.Types.ObjectId,
+            type:mongoose.Schema.Types.ObjectId || String,
             ref:'User'
         },
         role:{
@@ -42,7 +42,22 @@ export const NotificationSchema = new Schema<INotification>(
         },
         types: {
             type:String,
-            enum:['bid','request','accepted','rejected'],
+            enum:[
+                'bid_placed',
+                'bid_accepted',
+                'bid_rejected',
+                'request_submission',
+                'request_accepted',
+                'request_rejected',
+                'contract_submission',
+                'contract_accepted',
+                'contract_rejected',
+                'milestone_activated',
+                'milestone_submission',
+                'milestone_rejected',
+                'milestone_accepted',
+                'review',
+            ],
             required:true
         },
         createdAt: { 

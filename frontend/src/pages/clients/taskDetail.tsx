@@ -26,6 +26,13 @@ interface BidFormValues {
   timeUnit: string;
 }
 
+interface ExistingBid {
+  rate: number;
+  deliveryTime: number;
+  timeUnit: string;
+  createdAt: string;
+}
+
 interface BidFormData extends BidFormValues {
   taskId?: { _id: string };
 }
@@ -38,6 +45,7 @@ const TaskDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [validationSchema, setValidationSchema] = useState<ValidationSchemaType | null>(null);
+  const [existingBid, setExistingBid] = useState<ExistingBid | null>(null);
 
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem('userId')
@@ -54,6 +62,17 @@ const TaskDetail: React.FC = () => {
         });
         setValidationSchema(schema);
 
+        const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
+        const existingBidForTask = bidResponse.data.bid.find((bid: BidFormData) => bid.taskId?._id === id);
+        
+        if (existingBidForTask) {
+          setExistingBid({
+            rate: existingBidForTask.rate,
+            deliveryTime: existingBidForTask.deliveryTime,
+            timeUnit: existingBidForTask.timeUnit,
+            createdAt: existingBidForTask.createdAt
+          });
+        }
       } catch (error) {
         setError("Failed to load task details.");
       } finally {
@@ -91,20 +110,8 @@ const TaskDetail: React.FC = () => {
     return () => clearInterval(timer);
   }, [taskDetails]);
 
-  const isBidExist = async() => {
-    const response =await axiosConfig.get(`/users/bid/${userId}`)
-    const bidExists = response.data.bid.some((bid:BidFormData) => bid.taskId?._id === id); 
-    return bidExists
-  }
-
   const handleSubmit = async (values: BidFormValues, { setSubmitting, resetForm }: any) => {
     try {
-    const bidExist = await isBidExist()
-    if(bidExist){
-      toast.error('This task is already bidded');
-      setSubmitting(false);
-      return;
-    }
     
     await axiosConfig.post(`freelancers/create-bid`, {
       ...values, 
@@ -114,6 +121,11 @@ const TaskDetail: React.FC = () => {
     
     toast.success("Bid placed successfully!");
     resetForm();
+
+    setExistingBid({
+      ...values,
+      createdAt: new Date().toISOString()
+    });
       
     } catch (error) {
       console.error("Error placing bid:", error);
@@ -216,8 +228,26 @@ const TaskDetail: React.FC = () => {
               <div className="bg-green-100 text-green-600 px-6 py-4 rounded-lg flex items-center justify-center shadow-sm mb-6">
                 <p className="text-lg font-semibold">{timeLeft}</p>
               </div>
-
-              {/* Bid Card */}
+              {/* Existing Bid Section */}
+              {existingBid ? (
+                <div className="bg-blue-50 p-6 rounded-lg shadow-md mb-6">
+                  <h2 className="text-lg font-semibold mb-4 text-blue-700">Your Bid Details</h2>
+                  <div className="space-y-2">
+                    <p className="text-gray-600">
+                      <span className="font-medium">Rate:</span> ${existingBid.rate}
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">Delivery Time:</span> {existingBid.deliveryTime} {existingBid.timeUnit}
+                    </p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">Bid Placed:</span> {new Date(existingBid.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="mt-4 text-sm text-blue-600">
+                    You have already placed a bid on this task.
+                  </div>
+                </div>
+              ) : (
               <Formik
                initialValues={initialValues}
                validationSchema={validationSchema}
@@ -296,6 +326,8 @@ const TaskDetail: React.FC = () => {
               </Form>
               )}
               </Formik>
+              )}
+              
               {/* Bookmark, Copy, and Share Section */}
           <div className="flex items-center justify-between bg-gray-100 p-4 rounded-lg shadow-md mt-6">
             <button

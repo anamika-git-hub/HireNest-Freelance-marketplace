@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface INotification {
    userId: mongoose.Types.ObjectId;
-   senderId: mongoose.Types.ObjectId;
+   senderId: mongoose.Types.ObjectId | string;
    role:string;
    senderName?:string;
    projectName?:string;

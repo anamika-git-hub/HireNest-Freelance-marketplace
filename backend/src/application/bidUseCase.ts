@@ -23,7 +23,7 @@ export const BidUseCase = {
             const {taskId,bidderId} = data
              const user = await TaskRepository.getTaskById(taskId.toString());
              const sender = await FreelancerProfileRepository.getFreelancerByUserId(bidderId.toString());
-                    const notification = {
+                    const notificationData = {
                             senderId:bidderId,
                             userId: user.clientId, 
                             role:'client',
@@ -32,23 +32,14 @@ export const BidUseCase = {
                             text: `${sender.name} placed a bid on your ${user.projectName} project`,
                             isRead: false,
                             createdAt: new Date(),
-                            types:'bid',
+                            types:'bid_placed',
                             profileUrl:`/client/freelancer-detail/${sender._id}`,
                             projectUrl:`/client/bidders-list/${taskId}`
                         }
-             await NotificationRepository.createNotification(notification);
+             await NotificationRepository.createNotification(notificationData);
 
              sendNotification(user.clientId.toString(), {
-                senderId:bidderId,
-                userId: user.clientId, 
-                senderName: sender.name, 
-                projectName: user.projectName,
-                text: `${sender.name} placed a bid on your ${user.projectName} project`,
-                isRead: false,
-                createdAt: new Date(),
-                types:'bid',
-                profileUrl:`/client/freelancer-detail/${sender._id}`,
-                projectUrl:`/client/bidders-list/${taskId}`
+                ...notificationData
             });
             return await BidRepository.createBid(data);
 
@@ -121,7 +112,7 @@ export const BidUseCase = {
                 text: getNotificationText(status, projectName),
                 isRead: false,
                 createdAt: new Date(),
-                types: status,
+                types:status === 'accepted'?'bid_accepted': 'bid_rejected',
                 projectUrl: `/freelancer/task-detail/${taskId}`
             };
     
