@@ -3,6 +3,7 @@ import { FaDollarSign, FaUserTie, FaUser, FaClipboardList, FaChartLine, FaCog, F
 import { MdAssignment, MdPayment, MdVerifiedUser, MdBlock } from 'react-icons/md';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import axiosConfig from '../../service/axios';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
@@ -57,7 +58,6 @@ const AdminDashboard: React.FC = () => {
       
       const response = await axiosConfig.get('/admin/dashboard');
       const data = response.data.result;
-      console.log('dddd',data)
       // Update all state variables with fetched data
       setStats(data.stats);
       setRevenueData(data.revenueData);
@@ -137,11 +137,16 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100">
       <div className="h-screen overflow-y-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+          <div className='flex justify-between'>
           <p className="text-gray-600">Overview of your marketplace metrics and activities</p>
+          <Link to={`/admin/sales-report`}>
+          <button className='mr-5 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700'>Sales Report</button>
+          </Link>
+          </div>
         </div>
         
         {/* Quick Stats */}
@@ -292,7 +297,9 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-800">Recent Transactions</h2>
+            <Link to={`/admin/transaction-history`}>
             <button className="text-blue-500 hover:text-blue-700 text-sm">View All</button>
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white">

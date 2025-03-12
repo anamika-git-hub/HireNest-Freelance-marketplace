@@ -1,6 +1,8 @@
 import { TaskSubmissionModel } from "../models/TaskSubmissionModel";
 import { ITaskSubmissionForm } from "../../entities/Tasks";
 import { FilterCriteria } from "../../entities/filter";
+import { BidSubmissionModel } from "../models/BidSubmissionModel";
+import mongoose from "mongoose";
 
 export const TaskRepository = {
     // Create a new task submission
@@ -178,6 +180,167 @@ export const TaskRepository = {
               }
             }
           ]);
+    },
+
+    getClientProposalStats:async(clientId:string, startDate:Date, endDate:Date) => {
+        const ObjectId = mongoose.Types.ObjectId;
+    
+    // We need to get tasks with bids information
+    // First, get all tasks by this client
+    const clientTasks = await TaskSubmissionModel.find({
+      clientId: new ObjectId(clientId),
+      createdAt: { $gte: startDate, $lte: endDate }
+    }).select('_id');
+    
+    const taskIds = clientTasks.map(task => task._id);
+    
+    // Then, get bid data for these tasks from BidSubmissionModel
+    const monthlyProposals = await BidSubmissionModel.aggregate([
+      {
+        $match: {
+          taskId: { $in: taskIds }
+        }
+      },
+      {
+        $lookup: {
+          from: "tasksubmissions",
+          localField: "taskId",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      {
+        $unwind: "$task"
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$task.createdAt" },
+            month: { $month: "$task.createdAt" }
+          },
+          proposals: { $sum: 1 },
+          shortlisted: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          },
+          hired: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+    
+    // Similar for quarterly and yearly
+    const quarterlyProposals = await BidSubmissionModel.aggregate([
+      // Similar to monthly but grouped by quarter
+      {
+        $match: {
+          taskId: { $in: taskIds }
+        }
+      },
+      {
+        $lookup: {
+          from: "tasksubmissions",
+          localField: "taskId",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      {
+        $unwind: "$task"
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$task.createdAt" },
+            quarter: { 
+              $ceil: { $divide: [{ $month: "$task.createdAt" }, 3] }
+            }
+          },
+          proposals: { $sum: 1 },
+          shortlisted: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          },
+          hired: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.quarter": 1 } }
+    ]);
+    
+    const yearlyProposals = await BidSubmissionModel.aggregate([
+      // Similar to monthly but grouped by year
+      {
+        $match: {
+          taskId: { $in: taskIds }
+        }
+      },
+      {
+        $lookup: {
+          from: "tasksubmissions",
+          localField: "taskId",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      {
+        $unwind: "$task"
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$task.createdAt" }
+          },
+          proposals: { $sum: 1 },
+          shortlisted: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          },
+          hired: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", "accepted"] },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { "_id.year": 1 } }
+    ]);
+    
+    return { monthlyProposals, quarterlyProposals, yearlyProposals };
     }
 
 };

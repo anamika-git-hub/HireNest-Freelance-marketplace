@@ -1,6 +1,7 @@
 import { Req, Res, Next } from "../../infrastructure/types/serverPackageTypes";
 import { userUseCase } from "../../application/userUseCase";
 import { FilterCriteria } from "../../entities/filter";
+import { DashboardUseCase } from "../../application/dashboardUseCase";
 
 
 interface CustomRequest extends Req {
@@ -128,7 +129,6 @@ export const UserController = {
 
     notificationRead:async (req: Req, res: Res, next: Next) => {
         try {
-            
             const { id } = req.params;
             const result = await userUseCase.notificationRead(id)
             res.status(200).json(result)
@@ -136,5 +136,15 @@ export const UserController = {
           next(error)
         }
     },
+    getUserDashboardStats: async(req: CustomRequest, res: Res, next: Next) => {
+        try {
+            const userId = req.user?.userId || '';
+            const role = req.query.role as string ;
+           const dashboardData = await DashboardUseCase.getUserDashboardStats(userId,role);
+           res.status(200).json({result: dashboardData});
+        } catch (error) {
+            next(error)
+        }
+    }
    
 }

@@ -17,5 +17,6 @@ router.delete('/categories/:id',checkAuth('admin'),CategoryController.deleteCate
 router.get('/dashboard',checkAuth('admin'),AdminController.getDashboardStats);
 
 router.put('/:userId/:isBlocked',checkAuth('admin'),AdminController.toggleBlockUser);
+router.get('/transaction-history',checkAuth('admin'),AdminController.getTransactionHistory);
 
 export default router;

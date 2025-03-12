@@ -1,5 +1,6 @@
 import { BidSubmissionModel } from "../models/BidSubmissionModel";
 import { IBidSubmissionForm } from "../../entities/Bids";
+import mongoose from "mongoose";
 
 export const BidRepository = {
     createBid: async (data: IBidSubmissionForm) => {
@@ -97,4 +98,86 @@ export const BidRepository = {
             } 
         }
     },
+    getFreelancerBidStats: async(freelancerId: string, startDate:Date, endDate:Date) => {
+        const ObjectId = mongoose.Types.ObjectId;
+    
+        // Get monthly bid statistics
+        const monthlyBids = await BidSubmissionModel.aggregate([
+          {
+            $match: {
+              bidderId: new ObjectId(freelancerId),
+              createdAt: { $gte: startDate, $lte: endDate }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" }
+              },
+              bidsPlaced: { $sum: 1 },
+              bidsWon: { 
+                $sum: { 
+                  $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] 
+                }
+              }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+        
+        // Get quarterly bid statistics
+        const quarterlyBids = await BidSubmissionModel.aggregate([
+          {
+            $match: {
+              bidderId: new ObjectId(freelancerId),
+              createdAt: { $gte: startDate, $lte: endDate }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                quarter: { 
+                  $ceil: { $divide: [{ $month: "$createdAt" }, 3] }
+                }
+              },
+              bidsPlaced: { $sum: 1 },
+              bidsWon: { 
+                $sum: { 
+                  $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] 
+                }
+              }
+            }
+          },
+          { $sort: { "_id.year": 1, "_id.quarter": 1 } }
+        ]);
+        
+        // Get yearly bid statistics
+        const yearlyBids = await BidSubmissionModel.aggregate([
+          {
+            $match: {
+              bidderId: new ObjectId(freelancerId),
+              createdAt: { $gte: startDate, $lte: endDate }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" }
+              },
+              bidsPlaced: { $sum: 1 },
+              bidsWon: { 
+                $sum: { 
+                  $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] 
+                }
+              }
+            }
+          },
+          { $sort: { "_id.year": 1 } }
+        ]);
+        
+        return { monthlyBids, quarterlyBids, yearlyBids };
+      }
+    
 };

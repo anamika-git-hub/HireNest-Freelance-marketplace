@@ -5,7 +5,7 @@ import { MdDashboard } from "react-icons/md";
 
 const AdminSidebar: React.FC = () => {
   return (
-    <aside className="w-64 h-screen bg-gray-800 text-white">
+    <aside className="w-64 min-h-screen bg-gray-800 text-white">
       <div className="p-4 text-center font-bold text-xl">HireNest</div>
       <nav className="mt-4">
         <NavLink

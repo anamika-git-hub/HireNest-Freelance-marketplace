@@ -3,6 +3,7 @@ import { adminUseCase } from '../../application/adminUseCase';
 import { CategoryUseCase } from '../../application/categoryUseCase';
 import { TokenBlacklist } from "../../infrastructure/models/TokenBockList";
 import { JwtService } from '../../infrastructure/services/JwtService';
+import { FilterCriteria } from '../../entities/filter';
 
 
 
@@ -75,7 +76,19 @@ export const AdminController = {
     getDashboardStats: async(req: Req, res: Res, next: Next) => {
         try {
             const result = await adminUseCase.getDashboardStats();
-            console.log('rrrr',result);
+            res.status(200).json({result})
+        } catch (error) {
+            next(error)
+        }
+    },
+    getTransactionHistory: async(req: Req, res: Res, next: Next) => {
+        try {
+            const { period, startDate, endDate } = req.query;
+            const page = parseInt(req.query.page as string , 10) || 1;
+            const limit = parseInt(req.query.limit as string, 10) || 10;
+            const searchTerm = req.query.searchTerm as string || '';
+            const skip = (page-1) * limit;
+            const result = await adminUseCase.getTransactionHistory(period as string, startDate as string, endDate as string,searchTerm,skip,limit);
             res.status(200).json({result})
         } catch (error) {
             next(error)

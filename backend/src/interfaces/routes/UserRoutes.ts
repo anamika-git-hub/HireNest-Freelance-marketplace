@@ -58,4 +58,5 @@ router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);
 router.post('/release-escrow',checkAuth('user'),PaymentController.releaseEscrow);
 
 router.get('/freelancer-ratings',checkAuth('user'),RatingController.getFreelancerRatings);
+router.get('/dashboard-data',checkAuth('user'),UserController.getUserDashboardStats);
 export default router;
