@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaEllipsisH, FaUsers, FaUserCircle, FaEdit, FaTrash, FaCheckCircle, FaStar, FaChartLine } from "react-icons/fa";
+import {FaUsers, FaUserCircle, FaEdit, FaTrash } from "react-icons/fa";
 import { IoMdTime } from "react-icons/io";
 import { Link,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Loader from '../../components/shared/Loader';
 import axiosConfig from "../../service/axios";
+import DashboardChart from '../../components/shared/dashboardChart';
 
 // Interfaces
 interface Notification {
@@ -56,11 +57,6 @@ interface RawContract {
   startDate: string;
 }
 
-interface ChartData {
-  month: string;
-  views: number;
-}
-
 interface Milestone {
   id: string;
   title: string;
@@ -89,27 +85,25 @@ const Dashboard: React.FC = () => {
   const [latestBids, setLatestBids] = useState<Bid[]>([]);
   const [bidsWon, setBidsWon] = useState<number>(0);
   const [completedProjects, setCompletedProjects] = useState<number>(0);
+  const [reviews, setReviews] = useState<number>(0);
+  const [requests,setRequests] = useState<number>(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [contracts, setContracts] = useState<ProcessedContract[]>([]);
-  const [viewsData, setViewsData] = useState<ChartData[]>([]);
   const [taskBidCounts, setTaskBidCounts] = useState<{[key: string]: number}>({});
 
   const navigate = useNavigate()
   
-  // Get user details from localStorage
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role') || 'freelancer'; // Default to freelancer if not set
   
-  // Process contract helper function
   const processContract = (contract: RawContract): ProcessedContract => {
     const totalMilestones = contract.milestones.length;
     const completedMilestones = contract.milestones.filter(
       m => m.status === 'completed'
     ).length;
 
-    // Find the next milestone (first non-completed milestone)
     const nextMilestone = contract.milestones.find(
       m => m.status !== 'completed'
     );
@@ -144,11 +138,9 @@ const Dashboard: React.FC = () => {
           const allBids = response.data.bid;
           setBids(allBids);
           
-          // Count bids won (accepted bids)
           const acceptedBidsCount = allBids.filter(bid => bid.status === "accepted").length;
           setBidsWon(acceptedBidsCount);
           
-          // Get latest 3 bids sorted by creation date
           const latest = [...allBids]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 3);
@@ -181,6 +173,7 @@ const Dashboard: React.FC = () => {
           setCompletedProjects(0);
         });
     }
+    
   }, [userId, role]);
 
 // Fetch completed projects count for clients
@@ -202,6 +195,41 @@ const Dashboard: React.FC = () => {
         });
     }
   }, [userId, role]);
+
+  // Fetch reviews count for freelancers
+  useEffect(() => {
+    const getReviews = async () => {
+        try {
+            const response = await axiosConfig.get(`/freelancers/reviews/${userId}`)
+            console.log(response.data.reviews)
+            setReviews(response.data.reviews.length);
+        } catch (error) {
+            setError('Failed to load freelancer reviews')
+        } finally {
+            setLoading(false);
+        }
+    }
+    getReviews()
+},[]);
+
+// Fetch requests recieved count for freelancers
+
+useEffect(() => {
+  const fetchRequests = async () => {
+         try {
+             const response = await axiosConfig.get(`/freelancers/freelancer-request`);
+             const fetchedRequests = response.data.requests;
+             setRequests(fetchedRequests.length);
+             setLoading(false);
+         } catch (err) {
+             setError("Failed to load requests. Please try again later.");
+             setLoading(false);
+         }
+     };
+     fetchRequests()
+},[])
+
+
   
   // Fetch ongoing projects (contracts) for freelancer
   useEffect(() => {
@@ -290,8 +318,8 @@ const Dashboard: React.FC = () => {
     ? [
         { title: "Bids Won", value: bidsWon, color: "text-green-500" },
         { title: "Completed Projects", value: completedProjects, color: "text-pink-500" },
-        { title: "5★ Reviews", value: 15, color: "text-yellow-500" },
-        { title: "Requests Received", value: 237, color: "text-blue-500" }
+        { title: "Reviews", value: reviews, color: "text-yellow-500" },
+        { title: "Requests Received", value: requests, color: "text-blue-500" }
       ]
     : [
         { title: "Active Tasks", value: tasks.filter(t => t.status === 'pending').length, color: "text-green-500" },
@@ -299,16 +327,6 @@ const Dashboard: React.FC = () => {
         { title: "Completed Projects", value: completedProjects, color: "text-yellow-500" },
         { title: "Proposals Received", value: tasks.reduce((acc, task) => acc + (task.bids || 0), 0), color: "text-blue-500" }
       ];
-  
-  // Demo chart data (for now)
-  const demoViewsData: ChartData[] = [
-    { month: "Sep", views: 120 },
-    { month: "Oct", views: 180 },
-    { month: "Nov", views: 150 },
-    { month: "Dec", views: 210 },
-    { month: "Jan", views: 250 },
-    { month: "Feb", views: 237 }
-  ];
 
   // Fetch notifications
   useEffect(() => {
@@ -378,13 +396,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Set up chart data
-  useEffect(() => {
-    setViewsData(demoViewsData);
-    setLoading(false);
-  }, []);
 
-  // Update time left for tasks
   useEffect(() => {
     if (role === 'client' && tasks.length > 0) {
       const timer = setInterval(() => {
@@ -400,7 +412,6 @@ const Dashboard: React.FC = () => {
     }
   }, [tasks, role]);
 
-  // Calculate time left helper function
   const calculateTimeLeft = (timeline: string): string => {
     const deadline = new Date(timeline);
     const now = new Date();
@@ -418,7 +429,6 @@ const Dashboard: React.FC = () => {
     return `${days} days, ${hours} hours left`;
   };
 
-  // Format date for notifications
   const formatDate = (date: Date): string => {
     const now = new Date();
     const diffMs = now.getTime() - new Date(date).getTime();
@@ -452,10 +462,8 @@ const Dashboard: React.FC = () => {
   // Edit bid handler
   const handleEditBid = (bidId: string) => {
     toast.success("Navigate to edit bid page");
-    // In a real app, this would navigate to an edit page
   };
 
-  // Loading and error states
   if (loading) return <Loader visible={loading} />;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
   return (
@@ -488,35 +496,8 @@ const Dashboard: React.FC = () => {
         {/* Graph and Notifications */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Graph Section */}
-          <div className="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-gray-800 text-lg font-semibold">Your Profile Views</h3>
-                <p className="text-gray-400 text-xs">Last 6 Months</p>
-              </div>
-              <button className="text-blue-600 text-sm font-medium">View Details</button>
-            </div>
-            <div className="mt-4 h-60 bg-gray-50 rounded-lg p-4 flex flex-col justify-between">
-              {/* This would be replaced with an actual chart component */}
-              <div className="h-48 flex items-end space-x-4">
-                {viewsData.map((item, index) => (
-                  <div key={index} className="flex flex-col items-center flex-1">
-                    <div 
-                      className="w-full bg-blue-500 rounded-t-sm" 
-                      style={{ height: `${(item.views / 250) * 100}%` }}
-                    ></div>
-                    <span className="text-xs mt-2 text-gray-600">{item.month}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-xs text-gray-400">Total Views: {viewsData.reduce((acc, item) => acc + item.views, 0)}</span>
-                <span className="text-xs text-gray-400">
-                  <FaChartLine className="inline mr-1" /> 
-                  {role === 'freelancer' ? '+28%' : '+12%'} from last month
-                </span>
-              </div>
-            </div>
+          <div className="lg:col-span-2">
+            <DashboardChart role={role} />
           </div>
 
           {/* Notifications Section */}
