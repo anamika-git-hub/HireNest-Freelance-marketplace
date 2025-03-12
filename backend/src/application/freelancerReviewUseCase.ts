@@ -1,3 +1,4 @@
+import { FilterCriteria } from "../entities/filter";
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { FreelancerReviewRepository } from "../infrastructure/repositories/freelancerReviewRepository";
@@ -43,7 +44,7 @@ export const FreelancerReviewUseCase = {
                     contractId,
                     rating,
                     review,
-                    projectTitle: contract.title
+                    projectName: contract.title
                 });
             }
             
@@ -68,14 +69,20 @@ export const FreelancerReviewUseCase = {
         }
     },
     
-    getFreelancerReviews: async (freelancerId: string) => {
+    getFreelancerReviews: async (userId: string,filters:FilterCriteria,skip:number,limit: number) => {
         try {
-            const reviews = await FreelancerReviewRepository.findByFreelancerIdWithClient(freelancerId);
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(userId);
+           const freelancerId = freelancerProfile ? freelancerProfile._id.toString() : null;
+           if(!freelancerId)throw new Error('freelancer is not found')
+            const reviews = await FreelancerReviewRepository.findByFreelancerIdWithClient(freelancerId,filters,skip,limit);
             return reviews;
         } catch (error) {
             console.error('Error in getFreelancerReviews use case:', error);
             throw error;
         }
+    },
+    getReviewsCount: async (filters:FilterCriteria) => {
+        return await FreelancerReviewRepository.getReviewsCount(filters)
     },
     getAggregatedRatings: async () => {
         try {

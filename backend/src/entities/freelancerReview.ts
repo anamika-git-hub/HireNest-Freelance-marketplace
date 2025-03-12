@@ -8,7 +8,7 @@ export interface IFreelancerReview {
     contractId: mongoose.Types.ObjectId | string;
     rating: number;
     review: string;
-    projectTitle: string;
+    projectName: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

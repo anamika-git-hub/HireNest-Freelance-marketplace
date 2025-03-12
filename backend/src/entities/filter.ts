@@ -17,6 +17,7 @@ export interface FilterCriteria {
     maxRate?: { $lte?: number };
     timeline?: { $gt?: string }; 
     projectName?: { $regex: string; $options: string }; 
+    review?: { $regex: string; $options: string }; 
     text?: { $regex: string; $options: string }; 
   }
   

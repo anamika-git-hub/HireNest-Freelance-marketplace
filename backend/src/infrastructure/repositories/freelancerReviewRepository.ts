@@ -1,8 +1,9 @@
-// infrastructure/repositories/FreelancerReviewRepository.ts
+
 
 import { FreelancerReviewModel } from "../models/freelancerReviewSchema";
 import { IFreelancerReview } from "../../entities/freelancerReview";
 import mongoose from "mongoose";
+import { FilterCriteria } from "../../entities/filter";
 
 export const FreelancerReviewRepository = {
     createReview: async (reviewData: IFreelancerReview) => {
@@ -26,10 +27,13 @@ export const FreelancerReviewRepository = {
         return await FreelancerReviewModel.find({ freelancerId });
     },
     
-    findByFreelancerIdWithClient: async (freelancerId: string) => {
-        return await FreelancerReviewModel.find({ freelancerId })
+    findByFreelancerIdWithClient: async (freelancerId: string,filters:FilterCriteria,skip:number,limit:number) => {
+        return await FreelancerReviewModel.find({...filters, freelancerId })
             .populate('clientId', 'name profilePicture')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 }).skip(skip).limit(limit);
+    },
+    getReviewsCount: async (filters: FilterCriteria) => {
+      return await FreelancerReviewModel.countDocuments({...filters});
     },
     getAggregatedRatings: async () => {
         try {
@@ -58,5 +62,25 @@ export const FreelancerReviewRepository = {
             throw new Error(`Failed to aggregate ratings due to an unknown error`);
           }
         }
+      },
+      getFreelancerRatings:async(freelancerId:string) => {
+        const ObjectId = mongoose.Types.ObjectId;
+    
+    const ratings = await FreelancerReviewModel.aggregate([
+      {
+        $match: {
+          freelancerId: new ObjectId(freelancerId)
+        }
+      },
+      {
+        $group: {
+          _id: "$rating",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: -1 } }
+    ]);
+    
+    return ratings;
       }
 };

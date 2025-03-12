@@ -27,7 +27,7 @@ interface Review {
   clientName: string;
   rating: number;
   review: string;
-  projectTitle: string;
+  projectName: string;
   createdAt: string;
 }
 
@@ -204,7 +204,7 @@ const FreelancerDetail: React.FC = () => {
                     <div key={review._id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-semibold text-lg">{review.projectTitle}</h3>
+                          <h3 className="font-semibold text-lg">{review.projectName}</h3>
                           <div className="flex items-center mt-1">
                             <div className="mr-2">{renderStars(review.rating)}</div>
                             <span className="text-gray-500 text-sm">{formatDate(review.createdAt)}</span>

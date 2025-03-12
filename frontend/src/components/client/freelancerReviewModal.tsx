@@ -8,7 +8,7 @@ interface FreelancerReviewModalProps {
   freelancerId: string;
   taskId: string;
   contractId: string;
-  projectTitle: string;
+  projectName: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -17,7 +17,7 @@ const FreelancerReviewModal: React.FC<FreelancerReviewModalProps> = ({
   freelancerId,
   taskId,
   contractId,
-  projectTitle,
+  projectName,
   onClose,
   onSuccess,
 }) => {
@@ -89,7 +89,7 @@ const FreelancerReviewModal: React.FC<FreelancerReviewModalProps> = ({
         </div>
         
         <div className="mb-6">
-          <p className="text-gray-600 mb-1">Project: {projectTitle}</p>
+          <p className="text-gray-600 mb-1">Project: {projectName}</p>
           <p className="text-gray-600 mb-2">How would you rate your experience with this freelancer?</p>
           
           <div className="flex space-x-2 mb-4">

@@ -9,6 +9,7 @@ import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
 import { milestoneUploader,compressionMiddleware } from '../../utils/uploader';
+import { RatingController } from '../controllers/ratingController';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -27,5 +28,6 @@ router.patch("/request-status/:id", checkAuth('freelancer'),RequestController.re
 
 router.patch("/contract-status/:id",checkAuth('freelancer'),ContractController.updateContractStatus);
 router.post('/submit-milestone',checkAuth('freelancer'),milestoneUploader,ContractController.submitMilestone);
+router.get('/reviews/:id',checkAuth('freelancer'),RatingController.getFreelancerReviews);
 
 export default router;

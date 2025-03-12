@@ -28,7 +28,7 @@ const freelancerReviewSchema = new Schema(
       type: String,
       required: false,
     },
-    projectTitle: {
+    projectName: {
       type: String,
       required: false,
     }
