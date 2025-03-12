@@ -13,6 +13,7 @@ import {
   FaBars,
   FaChevronDown,
   FaClipboardList,
+  FaCommentDots,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import Header from "./Header";
@@ -116,6 +117,14 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             >
               <FaSuitcase className="mr-3 w-4 h-4" />
               Requests
+            </NavLink>
+            <NavLink
+              to="/freelancer/reviews"
+              className="flex items-center px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              onClick={() => setDropdownOpen(false)}
+            >
+              <FaCommentDots className="mr-3 w-4 h-4" />
+              Reviews
             </NavLink>
           </div>
         )}

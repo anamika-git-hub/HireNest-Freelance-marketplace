@@ -44,7 +44,7 @@ const OTPVerification: React.FC = () => {
 
   const handleResendOTP = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/users/resend-otp",{
+      const response = await axios.post("http://localhost:5001/api/users/resend-otp",{
         email:localStorage.getItem('email'),
       });
       if (response.status === 200) {
@@ -68,7 +68,7 @@ const OTPVerification: React.FC = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/users/verify-otp", {
+      const response = await axios.post("http://localhost:5001/api/users/verify-otp", {
         otp: enteredOtp,
         email:localStorage.getItem('email')
       });

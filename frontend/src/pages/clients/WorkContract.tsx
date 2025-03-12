@@ -607,7 +607,7 @@ const ClientContractDetails: React.FC = () => {
                 freelancerId={contract.freelancerId._id}
                 taskId = {contract.taskId}
                 contractId={contract._id}
-                projectTitle = {contract.title}
+                projectName = {contract.title}
                 onClose={() => setShowReviewModal(false)}
                 onSuccess={() => {
                   toast.success('Thank you for your feedback!');

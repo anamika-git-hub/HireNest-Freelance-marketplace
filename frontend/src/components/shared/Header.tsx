@@ -24,7 +24,7 @@ interface Notification {
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || 'guest';
 
-const notificationSocket = io('http://localhost:5000/notifications', {
+const notificationSocket = io('http://localhost:5001/notifications', {
   query: { userId ,role},
 });
 interface HeaderProps {
