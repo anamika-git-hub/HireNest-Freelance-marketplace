@@ -39,7 +39,8 @@ export const adminUseCase = {
         }
 
         const token = JwtService.generateToken({id: admin.id, email: admin.email, role: admin.role});
-        return {token, admin};
+        const refreshToken = JwtService.generateRefreshToken({id: admin.id, email: admin.email, role: admin.role});
+        return {token,refreshToken, admin};
     },
     getAllUsers: async({filters,skip,limit}:{filters:any,skip:number, limit: number}) => {
         return await UserRepository.findUserByRole(filters,skip,limit);
@@ -156,5 +157,23 @@ export const adminUseCase = {
           pendingVerifications:pendingVerificationUsers,
           recentProjects
         };
-      }
+      },
+
+      getTransactionHistory: async(period?: string, startDate?: string, endDate?: string,searchTerm?:string,skip?:number,limit?:number) => {
+        const transactions = await ContractRepository.getTransactionHistory(period, startDate, endDate, searchTerm, skip, limit);
+        
+        // Calculate summary statistics
+        const totalAmount = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
+        const totalCommission = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.commission), 0);
+        const transactionCount = transactions.length;
+        
+        return {
+            transactions,
+            summary: {
+                totalAmount,
+                totalCommission,
+                transactionCount
+            }
+        }
+    }
 }
