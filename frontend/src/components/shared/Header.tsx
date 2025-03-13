@@ -9,6 +9,7 @@ import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { useUserRole } from '../../context/userRoleContext';
 import NotificationItem from './notificationItem';
+import CallNotification from './callNotification';
 
 interface UserDetail {
   profileImage: string;
@@ -26,6 +27,9 @@ const role = localStorage.getItem('role') || 'guest';
 
 const notificationSocket = io('http://localhost:5001/notifications', {
   query: { userId ,role},
+});
+const socket = io('http://localhost:5001', {
+  query: { userId, role },
 });
 interface HeaderProps {
   onLogout?: () => void;
@@ -310,7 +314,11 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
             )}
           </div>
         </div>
+        
       )}
+    {userId && (
+      <CallNotification socket={socket} userId={userId} />
+    )}
     </header>
   );
 };

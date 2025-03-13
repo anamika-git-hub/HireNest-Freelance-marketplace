@@ -55,27 +55,127 @@ app.use(catchError);
 //----------------video Call ------------------//
 
 io.on('connection', (socket) => {
-  socket.emit('me', socket.id);
+  socket.on('call_initiated', async (data) => {
+    const { roomID, callerId, callerName, receiverId, role } = data;
+    
+    // Adjust the caller ID based on role, similar to messaging
+    let adjustedCallerId: string | null = callerId;
+    if (role === 'freelancer') {
+      const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(callerId);
+      adjustedCallerId = freelancerProfile ? freelancerProfile._id.toString() : null;
+    } else if (role === 'client') {
+      const accountDetail = await AccountDetailRepository.findUserDetailsById(callerId);
+      adjustedCallerId = accountDetail ? accountDetail._id.toString() : null;
+    }
+  
+    console.log(`Call initiated from ${adjustedCallerId} to ${receiverId} in room ${roomID}`);
+    if (!adjustedCallerId) {
+      console.error('Caller ID could not be determined.');
+      return;
+    }
+    
+    // Get receiver's socket ID from your map
+    const receiverSocketId = socketConnection.get(receiverId);
 
-  socket.on('callUser', (data) => {
-    io.to(data.userToCall).emit('callUser', {
-      signal: data.signalData,
-      from: data.from,
-      name: data.name
+    
+    if (receiverSocketId) {
+      console.log(`Sending incoming call notification to ${receiverId}`);
+      io.to(receiverSocketId).emit('incoming_call', {
+        roomID,
+        callerId: adjustedCallerId, // Send the adjusted ID
+        callerName: callerName || 'Someone' // Default if name not provided
+      });
+    } else {
+      console.log(`Receiver ${receiverId} is not connected`);
+      // Optionally inform caller that receiver is not available
+      io.to(socket.id).emit('call_failed', {
+        reason: 'User is offline'
+      });
+    }
+  });
+  
+  socket.on('call_accepted', async (data) => {
+    const { roomID, callerId, accepterId, role } = data;
+    // Adjust the accepter ID based on role if needed
+    let adjustedAccepterId: string | null = accepterId;
+    if (role === 'freelancer') {
+      const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(accepterId);
+      adjustedAccepterId = freelancerProfile ? freelancerProfile._id.toString() : null;
+    } else if (role === 'client') {
+      const accountDetail = await AccountDetailRepository.findUserDetailsById(accepterId);
+      adjustedAccepterId = accountDetail ? accountDetail._id.toString() : null;
+    }
+  
+    console.log(`Call accepted by ${adjustedAccepterId} for caller ${callerId} in room ${roomID}`);
+    if (!adjustedAccepterId) {
+      console.error('Accepter ID could not be determined.');
+      return;
+    }
+    
+    // Get caller's socket ID
+    
+    const callerSocketId = socketConnection.get(callerId);
+    const accepterSoketId = socketConnection.get(adjustedAccepterId);
+
+    if (callerSocketId) {
+      io.to(roomID).emit('call_accepted', {
+        roomID,
+        accepterId: adjustedAccepterId
+      });
+      
+      // Also try a global broadcast as a fallback
+      io.emit('global_call_accepted', {
+        roomID,
+        accepterId: adjustedAccepterId,
+        callerId: callerId
+      });
+    } else {
+      console.log(`Caller ${callerId} is no longer connected`);
+      // Inform accepter that caller is no longer available
+      const accepterSocketId = socketConnection.get(accepterId);
+      if (accepterSocketId) {
+        io.to(accepterSocketId).emit('call_failed', {
+          reason: 'Caller has disconnected'
+        });
+      }
+    }
+  });
+  
+  socket.on('call_rejected', (data) => {
+    const { callerId } = data;
+    console.log(`Call rejected for caller ${callerId}`);
+    
+    // Get caller's socket ID
+    const callerSocketId = socketConnection.get(callerId);
+    
+    if (callerSocketId) {
+      io.emit('global_call_rejected', {
+        message: 'Call was rejected'
+      });
+    }
+  });
+  
+  socket.on('call_started', (data) => {
+    // You can use this to track active calls if needed
+    const { roomID, userId } = data;
+    console.log(`Call started in room ${data.roomID}`);
+    socket.join(roomID);
+  });
+  
+  socket.on('call_ended', (data) => {
+    const { roomID, userId } = data;
+    console.log(`Call ended in room ${roomID} by user ${userId}`);
+    
+    // Broadcast to all users in the room that the call has ended
+    socket.to(roomID).emit('call_ended', {
+      endedBy: userId
     });
+    socket.leave(roomID);
   });
-
-  socket.on('answerCall', (data) => {
-    io.to(data.to).emit('callAccepted', data.signal);
-  });
-
-  socket.on('endCall', (data) => {
-    io.to(data.to).emit('callEnded');
-  });
-
-  socket.on('disconnect', () => {
-    socket.broadcast.emit('callEnded');
-  });
+  
+      socket.on('disconnect',() => {
+          console.log('A user disconnected:', socket.id);        
+      })  
 });
 
 //---------------Notification ----------------//
@@ -301,112 +401,6 @@ io.on('connection',async(socket) => {
           console.error('Error sending message:', error);
         }
       });
-
-      // Add these handlers to your socket.io implementation in your server file
-// This should go inside your existing io.on('connection') block in your server.js/ts file
-
-// Video call events
-// Video call events
-socket.on('call_initiated', async (data) => {
-  const { roomID, callerId, callerName, receiverId, role } = data;
-  console.log(`Call initiated from ${callerId} to ${receiverId} in room ${roomID}`);
-  
-  // Adjust the caller ID based on role, similar to messaging
-  let adjustedCallerId: string | null = callerId;
-  if (role === 'freelancer') {
-    const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(callerId);
-    adjustedCallerId = freelancerProfile ? freelancerProfile._id.toString() : null;
-  } else if (role === 'client') {
-    const accountDetail = await AccountDetailRepository.findUserDetailsById(callerId);
-    adjustedCallerId = accountDetail ? accountDetail._id.toString() : null;
-  }
-
-  if (!adjustedCallerId) {
-    console.error('Caller ID could not be determined.');
-    return;
-  }
-  
-  // Get receiver's socket ID from your map
-  const receiverSocketId = socketConnection.get(receiverId);
-  
-  if (receiverSocketId) {
-    console.log(`Sending incoming call notification to ${receiverId}`);
-    io.to(receiverSocketId).emit('incoming_call', {
-      roomID,
-      callerId: adjustedCallerId, // Send the adjusted ID
-      callerName: callerName || 'Someone' // Default if name not provided
-    });
-  } else {
-    console.log(`Receiver ${receiverId} is not connected`);
-    // Optionally inform caller that receiver is not available
-    io.to(socket.id).emit('call_failed', {
-      reason: 'User is offline'
-    });
-  }
-});
-
-socket.on('call_accepted', async (data) => {
-  const { roomID, callerId, accepterId, role } = data;
-  console.log(`Call accepted by ${accepterId} for caller ${callerId} in room ${roomID}`);
-  
-  // Adjust the accepter ID based on role if needed
-  let adjustedAccepterId: string | null = accepterId;
-  if (role === 'freelancer') {
-    const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(accepterId);
-    adjustedAccepterId = freelancerProfile ? freelancerProfile._id.toString() : null;
-  } else if (role === 'client') {
-    const accountDetail = await AccountDetailRepository.findUserDetailsById(accepterId);
-    adjustedAccepterId = accountDetail ? accountDetail._id.toString() : null;
-  }
-
-  if (!adjustedAccepterId) {
-    console.error('Accepter ID could not be determined.');
-    return;
-  }
-  
-  // Get caller's socket ID
-  const callerSocketId = socketConnection.get(callerId);
-  
-  if (callerSocketId) {
-    io.to(callerSocketId).emit('call_accepted', {
-      roomID,
-      accepterId: adjustedAccepterId
-    });
-  }
-});
-
-socket.on('call_rejected', (data) => {
-  const { callerId } = data;
-  console.log(`Call rejected for caller ${callerId}`);
-  
-  // Get caller's socket ID
-  const callerSocketId = socketConnection.get(callerId);
-  
-  if (callerSocketId) {
-    io.to(callerSocketId).emit('call_rejected', {
-      message: 'Call was rejected'
-    });
-  }
-});
-
-socket.on('call_started', (data) => {
-  // You can use this to track active calls if needed
-  console.log(`Call started in room ${data.roomID}`);
-});
-
-socket.on('call_ended', (data) => {
-  const { roomID, userId } = data;
-  console.log(`Call ended in room ${roomID} by user ${userId}`);
-  
-  // Broadcast to all users in the room that the call has ended
-  socket.to(roomID).emit('call_ended', {
-    endedBy: userId
-  });
-});
-
-    socket.on('disconnect',() => {
-        console.log('A user disconnected:', socket.id);        
-    })    
 })
 
 const errorHandler:ErrorRequestHandler =(err, req, res, next) => {

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import VideoCall from '../shared/videoCall';
 import { ArrowLeft, MoreVertical, Video, Search, X } from 'lucide-react';
 import axiosConfig from '../../service/axios';
+import OutgoingCall from '../shared/outgoingCall'; // Import the OutgoingCall component
 
 interface Message {
   receiverId?: string;
@@ -55,7 +55,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [showOutgoingCall, setShowOutgoingCall] = useState(false);
+  const [callDetails, setCallDetails] = useState<{
+    roomID: string;
+    receiverId: string;
+    receiverName: string;
+  } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -78,44 +83,52 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     };
   }, [contacts._id, socket]);
   
-const handleVideoCall = () => {
-  console.log('Starting video call with:', contacts.name);
-  const initiateCall = async () => {
+  const handleVideoCall = async () => {
+    console.log('Starting video call with:', contacts.name);
+    
     try {
       let adjustedUserId = userId;
-      
+      let userName = '';
+      // Get the correct user ID based on role
       if (role === 'freelancer') {
         const response = await axiosConfig(`/users/freelancer-profile/${userId}`);
         const data = await response.data;
         if (data && data._id) {
-          adjustedUserId = data._id;
+          adjustedUserId = data._id
+          userName = data.name
         }
       } else if (role === 'client') {
         const response = await axiosConfig(`/users/account-detail`);
         const data = await response.data.userDetails;
         if (data && data._id) {
           adjustedUserId = data._id;
+          userName = data.firstname+' '+ data.lastname
         }
       }
+      
+      // Create a unique room ID
       const sortedIds = [adjustedUserId, contacts._id].sort().join('-');
       const roomID = `room-${sortedIds}`;
       
+      // Set call details and show the outgoing call component
+      setCallDetails({
+        roomID,
+        receiverId: contacts._id,
+        receiverName: contacts.name || 'User'
+      });
+      setShowOutgoingCall(true);
       // Emit event to notify the other user
       socket.emit('call_initiated', {
         roomID,
         callerId: userId, 
-        callerName: 'You', 
+        callerName: userName || 'You', // Use actual user name
         receiverId: contacts._id,
         role 
-      })
-      navigate(`/video-call?roomID=${roomID}`);
+      });
     } catch (error) {
       console.error('Error initiating call:', error);
     }
   };
-  
-  initiateCall();
-};
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
@@ -420,6 +433,15 @@ const handleVideoCall = () => {
           </button>
         </div>
       </div>
+      {showOutgoingCall && callDetails && (
+        <OutgoingCall
+          socket={socket}
+          roomID={callDetails.roomID}
+          receiverId={callDetails.receiverId}
+          receiverName={callDetails.receiverName}
+          onCallEnded={() => setShowOutgoingCall(false)}
+        />
+      )}
     </div>
   );
 };

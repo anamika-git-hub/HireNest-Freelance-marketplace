@@ -63,27 +63,12 @@
 //   );
 // }
 
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { Socket } from 'socket.io-client';
 
-// Function to generate random ID (keep your existing function)
-function randomID(len) {
-  let result = '';
-  if (result) return result;
-  var chars = '12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP',
-    maxPos = chars.length,
-    i;
-  len = len || 5;
-  for (i = 0; i < len; i++) {
-    result += chars.charAt(Math.floor(Math.random() * maxPos));
-  }
-  return result;
-}
-
-// Parse URL parameters (keep your existing function)
+// Function to get URL parameters
 export function getUrlParams(url = window.location.href) {
   let urlStr = url.split('?')[1];
   return new URLSearchParams(urlStr);
@@ -97,81 +82,193 @@ interface VideoCallProps {
 const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const zegoRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Get roomID from URL parameters
-  const roomID = getUrlParams(location.search).get('roomID') || randomID(5);
+  const roomID = getUrlParams(location.search).get('roomID');
   
   useEffect(() => {
-    // If socket is provided, emit an event to notify the other user
-    if (socket && userId) {
-      socket.emit('call_initiated', {
-        roomID,
-        callerId: userId
-      });
+    // Create audio element for call sounds
+    audioRef.current = new Audio('/sounds/call-connected.mp3');
+    
+    if (!roomID) {
+      setError('No roomID provided');
+      console.error('No roomID provided');
+      setTimeout(() => navigate('/messages'), 2000);
+      return;
     }
     
-    // Listen for call end event
-    const handleBeforeUnload = () => {
-      if (socket) {
-        socket.emit('call_ended', {
-          roomID,
-          userId
-        });
+    if (!socket || !userId) {
+      setError('Connection issue. Please try again.');
+      console.error('Socket or userId missing');
+      setTimeout(() => navigate('/messages'), 2000);
+      return;
+    }
+    
+    // Play connected sound
+    try {
+      if (audioRef.current) {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.error('Error playing sound:', err);
+            // Try again after user interaction
+            document.addEventListener('click', function tryPlayAgain() {
+              audioRef.current?.play();
+              document.removeEventListener('click', tryPlayAgain);
+            }, { once: true });
+          });
+        }
       }
-    };
+    } catch (err) {
+      console.error('Error playing sound:', err);
+    }
     
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Emit call ended when component unmounts
-      if (socket) {
-        socket.emit('call_ended', {
-          roomID,
-          userId
-        });
-      }
-    };
-  }, [socket, userId, roomID]);
-  
-  const myMeeting = async (element) => {
-    // generate Kit Token
-    const appID = 144934725;
-    const serverSecret = "b6e3f7ba590dd679abea06c777796dc8";
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      appID, 
-      serverSecret, 
-      roomID, 
-      userId || randomID(5), 
-      userId || randomID(5)
-    );
-    
-    // Create instance object from Kit Token
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
-    
-    // start the call
-    zp.joinRoom({
-      container: element,
-      sharedLinks: [
-        {
-          name: 'Personal link',
-          url: `${window.location.protocol}//${window.location.host}/video-call?roomID=${roomID}`,
-        },
-      ],
-      scenario: {
-        mode: ZegoUIKitPrebuilt.OneONoneCall, // Changed to one-on-one call
-      },
-      showPreJoinView: true,
-      onLeaveRoom: () => {
-        navigate(-1); // Go back when call ends
-      }
+    // Let server know we've joined
+    socket.emit('call_started', {
+      roomID,
+      userId
     });
+    
+    // Setup call ended listener
+    const handleCallEnded = () => {
+      console.log('Call ended by other user');
+      
+      // If we have access to Zego instance, clean it up
+      if (zegoRef.current) {
+        try {
+          zegoRef.current.destroy();
+        } catch (e) {
+          console.error('Error destroying Zego instance:', e);
+        }
+      }
+      
+      navigate('/messages');
+    };
+    
+    socket.on('call_ended', handleCallEnded);
+    
+    // Cleanup function
+    return () => {
+      socket.off('call_ended', handleCallEnded);
+      
+      // Notify server that we're leaving the call
+      socket.emit('call_ended', {
+        roomID,
+        userId
+      });
+      
+      // Stop audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      
+      // Destroy Zego instance if it exists
+      if (zegoRef.current) {
+        try {
+          zegoRef.current.destroy();
+        } catch (e) {
+          console.error('Error destroying Zego instance:', e);
+        }
+      }
+    };
+  }, [socket, userId, roomID, navigate]);
+  
+  const myMeeting = async (element: HTMLDivElement) => {
+    if (!roomID || !userId) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // generate Kit Token
+      const appID = 144934725;
+      const serverSecret = "b6e3f7ba590dd679abea06c777796dc8";
+      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+        appID, 
+        serverSecret, 
+        roomID, 
+        userId, 
+        userId  // Using userId for username too
+      );
+      
+      // Create instance object from Kit Token
+      const zp = ZegoUIKitPrebuilt.create(kitToken);
+      zegoRef.current = zp; // Save reference for cleanup
+      
+      // start the call
+      zp.joinRoom({
+        container: element,
+        sharedLinks: [
+          {
+            name: 'Personal link',
+            url: `${window.location.protocol}//${window.location.host}/video-call?roomID=${roomID}`,
+          },
+        ],
+        scenario: {
+          mode: ZegoUIKitPrebuilt.OneONoneCall,
+        },
+        showPreJoinView: true,
+        turnOnCameraWhenJoining: true,
+        turnOnMicrophoneWhenJoining: true,
+        useFrontFacingCamera: true,
+        onJoinRoom: () => {
+          setIsLoading(false);
+          console.log('Joined room successfully');
+        },
+        onLeaveRoom: () => {
+          // When user leaves through UI
+          socket?.emit('call_ended', {
+            roomID,
+            userId
+          });
+          navigate('/messages');
+        },
+        // onError: (error: any) => {
+        //   console.error('Zego error:', error);
+        //   setError('Failed to connect to call. Please try again.');
+        //   setTimeout(() => navigate('/messages'), 2000);
+        // }
+      });
+    } catch (error) {
+      console.error('Error joining video call:', error);
+      setError('Failed to connect to call. Please try again.');
+      setTimeout(() => navigate('/messages'), 2000);
+    }
   };
+  
+  // Create ref handler compatible with both TypeScript and Zego expectations
+  const handleRef = (element: HTMLDivElement | null) => {
+    if (element) {
+      myMeeting(element);
+    }
+  };
+  
+  if (error) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 text-white">
+        <div className="text-xl mb-4">{error}</div>
+        <div className="text-sm">Redirecting to messages...</div>
+      </div>
+    );
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 text-white">
+        <div className="text-xl mb-4">Connecting to call...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+      </div>
+    );
+  }
   
   return (
     <div
-      className="myCallContainer"
-      ref={myMeeting}
+      className="video-call-container"
+      ref={handleRef}
       style={{ width: '100vw', height: '100vh' }}
     ></div>
   );
