@@ -73,7 +73,7 @@ const Chat: React.FC = () => {
             userId: userId
           }
         });
-
+  
         const contactList: Contacts[] = response.data.map((receiver: Contacts) => ({
           _id: receiver._id,
           name: receiver.name,
@@ -82,20 +82,23 @@ const Chat: React.FC = () => {
           lastMessage: receiver.lastMessage,
           unreadCount: receiver.unreadCount,
         }));
-        setContacts(sortContacts(contactList));
-
-        if (contactList.length > 0) {
-          const firstContact = contactList[0];
+        
+        const sortedContacts = sortContacts(contactList);
+        setContacts(sortedContacts);
+  
+        if (sortedContacts.length > 0 && !selectedContactId) {
+          const firstContact = sortedContacts[0];
           setSelectedContact(firstContact);
+          setSelectedContactId(firstContact._id);
           initializeChat(firstContact._id);
         }
       } catch (error) {
         console.error('Error fetching requests:', error);
       }
     };
-
+  
     fetchData();
-  }, [role, userId]);
+  }, [role, userId, selectedContactId]); 
 
   useEffect(() => {
     socket.on('messages_marked_read', ({ chatId, readBy }) => {
@@ -142,13 +145,28 @@ const Chat: React.FC = () => {
         });
         return sortContacts(updatedContacts);
       });
+      
+      if (selectedContactId === (data.senderId === userId ? data.receiverId : data.senderId)) {
+        const formattedMessage: Message = {
+          type: data.senderId === userId ? 'sent' : 'received',
+          text: data.text,
+          time: data.createdAt || new Date(),
+          isRead: data.isRead,
+          mediaUrl: data.mediaUrl,
+          mediaType: data.mediaType,
+          fileName: data.fileName
+        };
+        setMessages(prevMessages => [...prevMessages, formattedMessage]);
+      }
     });
+
+    
 
     return () => {
       socket.off('messages_marked_read');
       socket.off('receive_message');
     };
-  }, [userId]);
+  }, [userId,selectedContactId]);
 
   const initializeChat = (contactId: string) => {
     socket.off('message_history');

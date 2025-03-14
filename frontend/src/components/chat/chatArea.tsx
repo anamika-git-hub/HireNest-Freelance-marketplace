@@ -44,6 +44,7 @@ interface ChatAreaProps {
 const ChatArea: React.FC<ChatAreaProps> = ({
   contacts,
   messages,
+  setMessages,
   userId,
   socket,
   role,
@@ -258,6 +259,15 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           return dateB - dateA;
         });
       });
+      const newMsg: Message = {
+        type: 'sent',
+        text: text.trim(),
+        time: new Date(),
+        isRead: false,
+        ...mediaData
+      };
+      
+      setMessages(prevMessages => [...prevMessages, newMsg]);
       setNewMessage('');
       setSelectedFile(null);
     }
