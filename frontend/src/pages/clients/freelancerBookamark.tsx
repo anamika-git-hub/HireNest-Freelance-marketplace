@@ -50,23 +50,35 @@ const FreelancerBookmarks: React.FC = () => {
             try {
                 const bookmarkResponse = await axiosConfig.get("/users/bookmarks");
                 const bookmarksData = bookmarkResponse.data.bookmark.items;
-                const freelancerBookmarkIds = bookmarksData
-                    .filter((bookmark: { type: string }) => bookmark.type === "freelancer")
-                    .map((bookmark: { itemId: string }) => bookmark.itemId);
-
-                const freelancerResponse = await axiosConfig.get<ApiResponse>(
-                    "/client/freelancer-list",
-                    {
-                        params: {
-                            page: currentPage,
-                            limit: ITEMS_PER_PAGE,
-                            searchTerm: debouncedSearchTerm,
-                            bookmarkedFreelancerIds: freelancerBookmarkIds
-                        },
+                
+                if (bookmarksData.length) {
+                    const freelancerBookmarkIds = bookmarksData
+                        .filter((bookmark: { type: string }) => bookmark.type === "freelancer")
+                        .map((bookmark: { itemId: string }) => bookmark.itemId);
+                    
+                    if (freelancerBookmarkIds.length) {
+                        const freelancerResponse = await axiosConfig.get<ApiResponse>(
+                            "/client/freelancer-list",
+                            {
+                                params: {
+                                    page: currentPage,
+                                    limit: ITEMS_PER_PAGE,
+                                    searchTerm: debouncedSearchTerm,
+                                    bookmarkedFreelancerIds: freelancerBookmarkIds
+                                },
+                            }
+                        );
+                        setBookmarks(freelancerResponse.data.data);
+                        setTotalPages(freelancerResponse.data.totalPages);
+                    } else {
+                        setBookmarks([]);
+                        setTotalPages(1);
                     }
-                );
-                setBookmarks(freelancerResponse.data.data);
-                setTotalPages(freelancerResponse.data.totalPages);
+                } else {
+                    setBookmarks([]);
+                    setTotalPages(1);
+                }
+                
                 setLoading(false);
             } catch (err) {
                 console.error("Error fetching bookmarks or freelancers", err);
@@ -170,73 +182,75 @@ const FreelancerBookmarks: React.FC = () => {
                 )}
             </div>
 
-            <div className="flex justify-center items-center mt-6 space-x-2">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                        currentPage === 1
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                    <FaChevronLeft className="w-4 h-4" />
-                </button>
+            {bookmarks.length > 0 && (
+                <div className="flex justify-center items-center mt-6 space-x-2">
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                            currentPage === 1
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                        <FaChevronLeft className="w-4 h-4" />
+                    </button>
 
-                {Array.from({ length: totalPages || 1 }, (_, i) => i + 1)
-                    .filter(pageNumber => {
-                        if (pageNumber === 1 || pageNumber === totalPages) return true;
-                        if (Math.abs(pageNumber - currentPage) <= 2) return true;
-                        return false;
-                    })
-                    .map((page, index, array) => {
-                        if (index > 0 && array[index] - array[index - 1] > 1) {
+                    {Array.from({ length: totalPages || 1 }, (_, i) => i + 1)
+                        .filter(pageNumber => {
+                            if (pageNumber === 1 || pageNumber === totalPages) return true;
+                            if (Math.abs(pageNumber - currentPage) <= 2) return true;
+                            return false;
+                        })
+                        .map((page, index, array) => {
+                            if (index > 0 && array[index] - array[index - 1] > 1) {
+                                return (
+                                    <React.Fragment key={`ellipsis-${page}`}>
+                                        <span className="w-8 h-8 flex items-center justify-center text-gray-700">
+                                            ...
+                                        </span>
+                                        <button
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                                page === currentPage
+                                                    ? "bg-blue-500 text-white"
+                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    </React.Fragment>
+                                );
+                            }
+
                             return (
-                                <React.Fragment key={`ellipsis-${page}`}>
-                                    <span className="w-8 h-8 flex items-center justify-center text-gray-700">
-                                        ...
-                                    </span>
-                                    <button
-                                        onClick={() => handlePageChange(page)}
-                                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                                            page === currentPage
-                                                ? "bg-blue-500 text-white"
-                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
-                                </React.Fragment>
+                                <button
+                                    key={page}
+                                    onClick={() => handlePageChange(page)}
+                                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                                        page === currentPage
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
+                                >
+                                    {page}
+                                </button>
                             );
-                        }
+                        })}
 
-                        return (
-                            <button
-                                key={page}
-                                onClick={() => handlePageChange(page)}
-                                className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                                    page === currentPage
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                }`}
-                            >
-                                {page}
-                            </button>
-                        );
-                    })}
-
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                        currentPage === totalPages
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                    <FaChevronRight className="w-4 h-4" />
-                </button>
-            </div>
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                            currentPage === totalPages
+                                ? "text-gray-400 cursor-not-allowed"
+                                : "text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                        <FaChevronRight className="w-4 h-4" />
+                    </button>
+                </div>
+            )}
 
             {confirmRemove && (
                 <ConfirmMessage

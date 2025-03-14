@@ -4,7 +4,13 @@ import axiosConfig from "../../service/axios";
 import { FaChevronLeft, FaChevronRight, FaFileExcel, FaFilePdf, FaSearch } from "react-icons/fa";
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from "jspdf-autotable";
+
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 
 const TransactionHistory: React.FC = () => {
   const location = useLocation();
@@ -38,7 +44,6 @@ const TransactionHistory: React.FC = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const exportOptionsRef = useRef<HTMLDivElement | null>(null);
   
-  // Handle search term debounce
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -48,14 +53,12 @@ const TransactionHistory: React.FC = () => {
     };
   }, [searchTerm]);
   
-  // Focus input on search term change
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, [debouncedSearchTerm]);
   
-  // Close export options dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportOptionsRef.current && !exportOptionsRef.current.contains(event.target as Node)) {
@@ -78,7 +81,6 @@ const TransactionHistory: React.FC = () => {
       setLoading(true);
       let queryParams = "?";
       
-      // Add filter params
       if (filter.period !== "all" && filter.period !== "custom") {
         queryParams += `period=${filter.period}&`;
       } else if (filter.period === "custom" && filter.startDate && filter.endDate) {
@@ -97,7 +99,6 @@ const TransactionHistory: React.FC = () => {
     }
   };
 
-  // Apply client-side filtering based on search term
   useEffect(() => {
     if (!transactions) return;
     
@@ -120,25 +121,20 @@ const TransactionHistory: React.FC = () => {
 
   let groupedData: Record<string, { amount: number; commission: number; count: number }> = {};
   
-  // Group data based on filter period
   (filteredTransactions.length > 0 ? filteredTransactions : transactions).forEach(transaction => {
     const date = new Date(transaction.timestamp || transaction.date);
     let key = '';
     
     if (filter.period === 'weekly' || (filter.period === 'custom' && 
         new Date(filter.endDate).getTime() - new Date(filter.startDate).getTime() <= 7 * 24 * 60 * 60 * 1000)) {
-      // Group by day if period is weekly or custom with less than 7 days
       key = date.toISOString().split('T')[0];
     } else if (filter.period === 'monthly' || 
               (filter.period === 'custom' && 
                new Date(filter.endDate).getTime() - new Date(filter.startDate).getTime() <= 31 * 24 * 60 * 60 * 1000)) {
-      // Group by date within month for monthly view or custom view with less than a month
       key = date.getDate().toString();
     } else if (filter.period === 'yearly') {
-      // Group by month if period is yearly
       key = date.toLocaleString('default', { month: 'short' });
     } else {
-      // Default: group by month-year
       key = `${date.toLocaleString('default', { month: 'short' })}-${date.getFullYear()}`;
     }
     
@@ -151,7 +147,6 @@ const TransactionHistory: React.FC = () => {
     groupedData[key].count += 1;
   });
   
-  // Convert to array format for chart
   const chartArray = Object.entries(groupedData).map(([name, data]) => ({
     name,
     revenue: parseFloat(data.amount.toFixed(2)),
@@ -162,7 +157,7 @@ const TransactionHistory: React.FC = () => {
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilter(prev => ({ ...prev, [name]: value }));
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   };
 
   const handlePageChange = (page: number) => {
@@ -188,23 +183,17 @@ const TransactionHistory: React.FC = () => {
   const exportToPDF = () => {
     if (!transactions.length) return;
     
-    // Using jsPDF and jsPDF-autotable
-    const jsPDF = require('jspdf');
-    const autoTable = require('jspdf-autotable');
     
     const doc = new jsPDF();
     
-    // Add title
     doc.text("Transactions Report", 14, 15);
     
-    // Prepare columns and rows for the table
     const columns = Object.keys(transactions[0]).map(key => ({ 
       header: key.charAt(0).toUpperCase() + key.slice(1), 
       dataKey: key 
     }));
     
-    // Generate the table
-    doc.autoTable({
+    autoTable(doc, {
       columns: columns,
       body: transactions,
       startY: 20,
@@ -212,15 +201,12 @@ const TransactionHistory: React.FC = () => {
       columnStyles: { id: { cellWidth: 20 } },
       margin: { top: 20 }
     });
-    
-    // Save and download the PDF
     doc.save("transactions.pdf");
     
     console.log("Exported to PDF successfully");
     setShowExportOptions(false);
   };
   
-  // Calculate pagination values
   const displayedTransactions = filteredTransactions.length > 0 ? filteredTransactions : transactions;
   const totalPages = Math.ceil(displayedTransactions.length / ITEMS_PER_PAGE);
   const currentTransactions = displayedTransactions.slice(
