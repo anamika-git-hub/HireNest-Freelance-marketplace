@@ -56,7 +56,6 @@ const MyTaskList: React.FC = () => {
     fetchTasks();
   }, []);
 
-  // Status color map
   const statusColorMap = {
     pending: "bg-yellow-100 text-yellow-700",
     onhold: "bg-gray-100 text-gray-700",
@@ -67,12 +66,10 @@ const MyTaskList: React.FC = () => {
   useEffect(() => {
     let result = [...tasks];
     
-    // Filter by status
     if (activeFilter !== "all") {
       result = result.filter(task => task.status === activeFilter);
     }
     
-    // Filter by search term
     if (searchTerm) {
       result = result.filter(task => 
         task.projectName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -80,10 +77,9 @@ const MyTaskList: React.FC = () => {
     }
     
     setFilteredTasks(result);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1); 
   }, [searchTerm, activeFilter, tasks]);
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredTasks.length / ITEMS_PER_PAGE);
   const currentTasks = filteredTasks.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -142,7 +138,6 @@ const MyTaskList: React.FC = () => {
     }
   };
 
-  // Filter Button Component
   const FilterButton: React.FC<{
     filter: "all" | Task['status'];
     label: string;

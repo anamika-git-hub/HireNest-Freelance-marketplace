@@ -58,7 +58,6 @@ io.on('connection', (socket) => {
   socket.on('call_initiated', async (data) => {
     const { roomID, callerId, callerName, receiverId, role } = data;
     
-    // Adjust the caller ID based on role, similar to messaging
     let adjustedCallerId: string | null = callerId;
     if (role === 'freelancer') {
       const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(callerId);
@@ -74,7 +73,6 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // Get receiver's socket ID from your map
     const receiverSocketId = socketConnection.get(receiverId);
 
     
@@ -82,12 +80,11 @@ io.on('connection', (socket) => {
       console.log(`Sending incoming call notification to ${receiverId}`);
       io.to(receiverSocketId).emit('incoming_call', {
         roomID,
-        callerId: adjustedCallerId, // Send the adjusted ID
-        callerName: callerName || 'Someone' // Default if name not provided
+        callerId: adjustedCallerId, 
+        callerName: callerName || 'Someone' 
       });
     } else {
       console.log(`Receiver ${receiverId} is not connected`);
-      // Optionally inform caller that receiver is not available
       io.to(socket.id).emit('call_failed', {
         reason: 'User is offline'
       });
@@ -96,7 +93,6 @@ io.on('connection', (socket) => {
   
   socket.on('call_accepted', async (data) => {
     const { roomID, callerId, accepterId, role } = data;
-    // Adjust the accepter ID based on role if needed
     let adjustedAccepterId: string | null = accepterId;
     if (role === 'freelancer') {
       const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(accepterId);
@@ -112,7 +108,6 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // Get caller's socket ID
     
     const callerSocketId = socketConnection.get(callerId);
     const accepterSoketId = socketConnection.get(adjustedAccepterId);
@@ -123,7 +118,6 @@ io.on('connection', (socket) => {
         accepterId: adjustedAccepterId
       });
       
-      // Also try a global broadcast as a fallback
       io.emit('global_call_accepted', {
         roomID,
         accepterId: adjustedAccepterId,
@@ -131,7 +125,6 @@ io.on('connection', (socket) => {
       });
     } else {
       console.log(`Caller ${callerId} is no longer connected`);
-      // Inform accepter that caller is no longer available
       const accepterSocketId = socketConnection.get(accepterId);
       if (accepterSocketId) {
         io.to(accepterSocketId).emit('call_failed', {
@@ -145,7 +138,6 @@ io.on('connection', (socket) => {
     const { callerId } = data;
     console.log(`Call rejected for caller ${callerId}`);
     
-    // Get caller's socket ID
     const callerSocketId = socketConnection.get(callerId);
     
     if (callerSocketId) {
@@ -156,7 +148,6 @@ io.on('connection', (socket) => {
   });
   
   socket.on('call_started', (data) => {
-    // You can use this to track active calls if needed
     const { roomID, userId } = data;
     console.log(`Call started in room ${data.roomID}`);
     socket.join(roomID);
@@ -166,7 +157,6 @@ io.on('connection', (socket) => {
     const { roomID, userId } = data;
     console.log(`Call ended in room ${roomID} by user ${userId}`);
     
-    // Broadcast to all users in the room that the call has ended
     socket.to(roomID).emit('call_ended', {
       endedBy: userId
     });
@@ -196,7 +186,6 @@ notificationIo.on('connection', async (socket) => {
   });
 });
 
-// Function to send notifications
 export const sendNotification = (userId: any , notification: any) => {
   const socketId = notificationConnections.get(userId);
   if (socketId) {
@@ -204,7 +193,7 @@ export const sendNotification = (userId: any , notification: any) => {
   }
 };
 
-//------------------Chat----------------///
+//------------------Chat----------------//
 
 const socketConnection = new Map<string, string>();
 
@@ -404,7 +393,7 @@ io.on('connection',async(socket) => {
 })
 
 const errorHandler:ErrorRequestHandler =(err, req, res, next) => {
-  console.error(err.stack); // Log the error for debugging
+  console.error(err.stack); 
   res.status(500).json({ message: err.message || 'Internal Server Error' });
 };
 

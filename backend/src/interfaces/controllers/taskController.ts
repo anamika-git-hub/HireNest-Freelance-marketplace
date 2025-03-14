@@ -59,18 +59,15 @@ export const TaskController = {
     
             const skip = (page - 1) * limit;
     
-            // Sort criteria based on sortOption
             let sortCriteria: { [key: string]: 1 | -1 } = {};
             if (sortOption === "Price: Low to High") sortCriteria.minRate = 1;
             if (sortOption === "Price: High to Low") sortCriteria.maxRate = -1;
             if (sortOption === "Newest") sortCriteria.createdAt = -1;
     
-            // Filters for query
             const filters: FilterCriteria = {};
             if (category) filters.category = category;
             if (skills) filters.skills = { $all: skills }; 
     
-            // Handle price range filter
             if (priceRange) {
                 const minRate = parseFloat(priceRange.min);
                 const maxRate = parseFloat(priceRange.max);
@@ -85,7 +82,6 @@ export const TaskController = {
             if (bookmarkedTaskIds) {
                 filters._id = { $in: bookmarkedTaskIds };
             }
-            // Fetch tasks and count
             const tasks = await TaskUseCase.getTasks({ filters, sortCriteria, skip, limit });
             const totalTasks = await TaskUseCase.getTasksCount(filters);
             const totalPages = Math.ceil(totalTasks / limit);

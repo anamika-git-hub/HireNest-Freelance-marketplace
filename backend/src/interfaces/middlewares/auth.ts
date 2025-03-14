@@ -17,7 +17,6 @@ export const checkAuth = (userRole: string) => {
 
             const accessToken = authHeader.split(' ')[1];
             try {
-                // Try verifying access token
                 const userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
                 
                 if (userRole !== 'user') {
@@ -33,7 +32,6 @@ export const checkAuth = (userRole: string) => {
             } catch (error) {
                 if (error instanceof Error) {
                     if (error.name === 'TokenExpiredError') {
-                        // Handle token expiry
                         const refreshHeader = req.headers['refreshtoken'] as string;
                         if (!refreshHeader) {
                             res.status(401).json({ message: 'Session expired. Please log in again.' });
@@ -42,7 +40,6 @@ export const checkAuth = (userRole: string) => {
 
                         const refreshToken = refreshHeader.split(' ')[1];
                         try {
-                            // Verify refresh token
                             const refreshData = JwtService.verifyRefreshToken(refreshToken) as { id: string, role: string };
                             
                             if (userRole !== 'user') {
@@ -66,7 +63,6 @@ export const checkAuth = (userRole: string) => {
                 }
             }
         } catch (error) {
-            // Handle unexpected errors
             console.error('Auth middleware error:', error);
             res.status(500).json({ message: 'Internal server error' });
             return;

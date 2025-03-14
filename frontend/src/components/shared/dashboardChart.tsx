@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import axiosConfig from '../../service/axios';
 
-// Define types for your different chart data structures
 type RevenueData = {
   month?: string;
   quarter?: string;
@@ -51,10 +50,8 @@ type TaskStatusData = {
   value: number;
 }
 
-// Combined type for all possible chart data types
 type ChartDataType = RevenueData | ActivityData | RatingData | SpendingData | ProposalData | TaskStatusData;
 
-// Define type for the complete API response
 type DashboardData = {
   revenue?: {
     monthly: RevenueData[];
@@ -102,10 +99,8 @@ const DashboardChart = ({ role }) => {
   const [allChartData, setAllChartData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Colors for the charts
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
   
-  // Function to update chart data based on selections
   const updateChartData = (data: DashboardData | null, type: string, period: string) => {
     if (!data) return;
     
@@ -117,19 +112,17 @@ const DashboardChart = ({ role }) => {
       } else if (type === 'activity' && data.activity) {
         newData = data.activity[period] || [];
       } else if (type === 'rating' && data.rating) {
-        // Transform rating data to match expected format
         newData = data.rating.distribution.map(item => ({
           name: item.label,
           value: item.count
         }));
       }
-    } else { // client
+    } else {
       if (type === 'spending' && data.spending) {
         newData = data.spending[period] || [];
       } else if (type === 'proposals' && data.proposals) {
         newData = data.proposals[period] || [];
       } else if (type === 'taskStatus' && data.taskStatus) {
-        // Transform task status data to match expected format
         newData = data.taskStatus.distribution.map(item => ({
           name: item.status,
           value: item.count
@@ -140,7 +133,6 @@ const DashboardChart = ({ role }) => {
     setChartData(newData);
   };
   
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -152,7 +144,6 @@ const DashboardChart = ({ role }) => {
         const result = response.data.result;
         setAllChartData(result);
         
-        // Set initial chart data based on current chartType and selectedPeriod
         updateChartData(result, chartType, selectedPeriod);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -309,7 +300,6 @@ const DashboardChart = ({ role }) => {
     return null;
   };
 
-  // Calculate summary data for the footer
   const calculateSummary = () => {
     if (!chartData.length) return { total: 0, count: 0 };
     
@@ -334,7 +324,6 @@ const DashboardChart = ({ role }) => {
   
   const summary = calculateSummary();
   
-  // Loading state
   if (isLoading) {
     return (
       <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-60">
@@ -343,7 +332,6 @@ const DashboardChart = ({ role }) => {
     );
   }
   
-  // No data state
   const hasData = chartData.length > 0;
   if (!hasData && !isLoading) {
     return (

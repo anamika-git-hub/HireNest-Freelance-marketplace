@@ -74,7 +74,7 @@ const ActiveBids: React.FC = () => {
     }
     
     setFilteredBids(result);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1); 
   }, [searchTerm, activeFilter, bids]);
 
   const totalPages = Math.ceil(filteredBids.length / ITEMS_PER_PAGE);

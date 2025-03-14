@@ -20,12 +20,12 @@ const CategoryForm: React.FC = () => {
     initialValues: {
       name: "",
       description: "",
-      image: null, // New field for image
+      image: null, 
     },
     validationSchema: categoryValidationSchema,
     onSubmit: async (values) => {
       try {
-        setApiError(null); // Reset error
+        setApiError(null); 
         const formData = new FormData();
         formData.append("name", values.name);
         formData.append("description", values.description);
@@ -58,16 +58,16 @@ const CategoryForm: React.FC = () => {
     if (isEditMode && id) {
       const fetchCategory = async () => {
         try {
-          setApiError(null); // Reset error
+          setApiError(null); 
           const response = await axiosConfig.get(`/admin/categories/${id}`);
           formik.setValues({
             name: response.data.name || "",
             description: response.data.description || "",
-            image: null, // Images are not set as a preview URL
+            image: null, 
           });
 
           if (response.data.image) {
-            setImagePreview(response.data.image); // Set the image preview
+            setImagePreview(response.data.image); 
           }
         } catch (err) {
           console.error("Error fetching category data", err);
@@ -87,7 +87,7 @@ const CategoryForm: React.FC = () => {
     if (file) {
       formik.setFieldValue("image", file);
 
-      // Generate a preview of the selected image
+      
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);

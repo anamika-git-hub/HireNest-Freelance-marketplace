@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface BookmarkState {
-  bookmarks: string[]; // Store task IDs
+  bookmarks: string[]; 
 }
 
 const initialState: BookmarkState = {

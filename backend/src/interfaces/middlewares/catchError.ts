@@ -10,7 +10,6 @@ export const catchError = (err: unknown, req: Req, res: Res, next: Next) => {
             error: message
         });
     } else {
-        // If the error is not an instance of Error
         console.error('An unknown error occurred');
         res.status(500).json({
             success: false,

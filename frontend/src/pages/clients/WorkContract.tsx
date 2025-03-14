@@ -392,7 +392,6 @@ const ClientContractDetails: React.FC = () => {
       
       toast.success('Milestone accepted and payment released');
       
-      // Update the contract state
       setContract(prev => prev ? {
         ...prev,
         milestones: prev.milestones.map(m =>
@@ -441,7 +440,6 @@ const ClientContractDetails: React.FC = () => {
       
       toast.success('Milestone rejected and sent back to freelancer');
       
-      // Update the contract state
       setContract(prev => prev ? {
         ...prev,
         milestones: prev.milestones.map(m =>

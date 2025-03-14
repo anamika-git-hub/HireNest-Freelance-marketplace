@@ -26,7 +26,6 @@ import { Req,Res,Next } from "../infrastructure/types/serverPackageTypes";
 //   fs.mkdirSync(tempDir);
 // }
 
-// Set up AWS credentials
 
 if (!process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY) {
     throw new Error("Missing required AWS credentials in environment variables");
@@ -40,8 +39,7 @@ export const s3Client = new S3Client({
   },
 });
 
-// Multer configuration
-const storage = multer.memoryStorage(); // Store file in memory
+const storage = multer.memoryStorage(); 
 
 export const uploader = multer({
     storage: multer.memoryStorage(),
@@ -65,11 +63,9 @@ export const uploader = multer({
   export const milestoneUploader = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 8000000, // 8MB limit
+      fileSize: 8000000, 
     },
     fileFilter: function (req, file, cb) {
-      // You can adjust this filter based on what file types you want to allow
-      // for milestone submissions
       const ext = path.extname(file.originalname).toLowerCase();
       if ([".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".zip"].includes(ext)) {
         cb(null, true);
@@ -77,7 +73,7 @@ export const uploader = multer({
         cb(new Error("Invalid file type for milestone submission"));
       }
     },
-  }).single('file'); // Use single() for just one file with field name 'file'
+  }).single('file'); 
 
 // Function to delete a file from S3
 // export const deleteFromS3 = async (key) => {
@@ -94,7 +90,6 @@ export const uploader = multer({
 //   }
 // };
 
-// Function to upload a file to S3
 if (!process.env.S3_BUCKET_NAME) {
     throw new Error("Missing S3_BUCKET_NAME environment variable");
   }
@@ -106,7 +101,7 @@ if (!process.env.S3_BUCKET_NAME) {
     try {
       const uploadParams = {
         Bucket: process.env.S3_BUCKET_NAME,
-        Key: fileName, // Fixed string template literal
+        Key: fileName, 
         Body: buffer,
       };
   
@@ -122,20 +117,16 @@ if (!process.env.S3_BUCKET_NAME) {
     }
   };
 
-// Utility function to compress an image file
 
  const compressFile = async (fileBuffer:Buffer) => {
   try {
-    // Compress the image using sharp
     const compressedBuffer = await sharp(fileBuffer)
-      .resize({ width: 600 })  // Resize to 600px width
-      .jpeg({ quality: 80 })   // Set JPEG quality to 80
+      .resize({ width: 600 })  
+      .jpeg({ quality: 80 })   
       .toBuffer();
 
-    // Get the size of the compressed image in bytes
     const compressedSize = Buffer.byteLength(compressedBuffer);
 
-    // Return the compressed buffer and the size of the compressed image
     return { compressedBuffer, compressedSize };
   } catch (error) {
     console.error("Error compressing file:", error);
@@ -155,9 +146,8 @@ export const compressionMiddleware = async (
             return next(new Error('No files uploaded'));
         }
 
-        // Compress each file
         for (const fieldName in files) {
-            const file = files[fieldName][0]; // Get first file from each field
+            const file = files[fieldName][0]; 
             const { compressedBuffer, compressedSize } = await compressFile(file.buffer);
             file.buffer = compressedBuffer;
             file.size = compressedSize;

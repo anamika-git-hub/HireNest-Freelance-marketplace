@@ -21,7 +21,6 @@ export const AccountDetailUseCase = {
                 }
             };
     
-            // Upload files to S3 if they exist
             const profileImageUrl = files.profileImage ? 
                 await uploadImage(files.profileImage[0], 'profileImages') : null;
                 
@@ -68,12 +67,10 @@ export const AccountDetailUseCase = {
                 }
             };
     
-            // Keep existing images if no new files are uploaded
             let profileImageUrl = updates.profileImage;
             let idFrontImageUrl = updates.idFrontImage;
             let idBackImageUrl = updates.idBackImage;
     
-            // Upload new images if they exist in files
             if (files.profileImage) {
                 const result = await uploadImage(files.profileImage[0], 'profileImages');
                 profileImageUrl = result?.Location ?? null;

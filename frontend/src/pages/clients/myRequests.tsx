@@ -78,7 +78,6 @@ const MyRequestList: React.FC = () => {
             result = result.filter(request => request.status === activeFilter);
           }
         
-        // Apply search filter
         if (searchTerm) {
             result = result.filter(request => 
                 request.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,7 +87,7 @@ const MyRequestList: React.FC = () => {
         }
         
         setFilteredRequests(result);
-        setCurrentPage(1); // Reset to first page when filters change
+        setCurrentPage(1);
     }, [searchTerm, requests, freelancerProfiles,activeFilter]);
 
     const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);

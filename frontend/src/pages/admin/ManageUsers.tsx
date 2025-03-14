@@ -71,7 +71,7 @@ const ManageUsers: React.FC = () => {
     }, [debouncedSearchTerm]);
 
     const toggleBlockUser = async (userId: string, isBlocked: boolean) => {
-      setConfirmDelete({ userId, isBlocked });  // Set confirmation state
+      setConfirmDelete({ userId, isBlocked });  
     };
 
  
@@ -87,7 +87,7 @@ const ManageUsers: React.FC = () => {
       } catch (error) {
         console.error(`Error during ${action} action:`, error);
       } finally {
-        setConfirmDelete(null);  // Reset confirmation state
+        setConfirmDelete(null);  
       }
     };
 

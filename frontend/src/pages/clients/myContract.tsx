@@ -39,7 +39,6 @@ const MyContract: React.FC = () => {
     milestones: [initialMilestone],
   };
 
-  // Modified validation schema
   const ContractValidationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
@@ -172,7 +171,7 @@ const MyContract: React.FC = () => {
                 <div>
                   <label className="block font-medium mb-2">Budget</label>
                   <Field
-                    type="text" // Changed from number to text
+                    type="text" 
                     name="budget"
                     className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter budget"
@@ -225,7 +224,7 @@ const MyContract: React.FC = () => {
                       <div>
                         <label className="block font-medium mb-1">Cost</label>
                         <Field
-                          type="text" // Changed from number to text
+                          type="text" 
                           name={`milestones.${index}.cost`}
                           className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Enter milestone cost"

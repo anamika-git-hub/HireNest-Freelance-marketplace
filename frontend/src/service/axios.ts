@@ -14,7 +14,7 @@ console.log('Setting up request interceptor');
 axiosConfig.interceptors.request.use(
     (config) => {
 
-        console.log('Request interceptor running', config);
+        // console.log('Request interceptor running', config);
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
@@ -35,7 +35,7 @@ axiosConfig.interceptors.request.use(
 
 axiosConfig.interceptors.response.use(
     (response) => {
-        console.log('Response interceptor success:', response);
+        // console.log('Response interceptor success:', response);
         return response;
     },
     
@@ -51,7 +51,6 @@ axiosConfig.interceptors.response.use(
             store.dispatch(logoutUser());
             window.location.href = '/login';
         } else if (error.response && error.response.status === 401) {
-            // Handle access token expiry
             const originalRequest = error.config;
             const refreshToken = localStorage.getItem('refreshToken');
 

@@ -4,7 +4,7 @@ import { Socket } from 'socket.io-client';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ArrowLeft, MoreVertical, Video, Search, X } from 'lucide-react';
 import axiosConfig from '../../service/axios';
-import OutgoingCall from '../shared/outgoingCall'; // Import the OutgoingCall component
+import OutgoingCall from '../shared/outgoingCall'; 
 
 interface Message {
   receiverId?: string;
@@ -89,7 +89,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     try {
       let adjustedUserId = userId;
       let userName = '';
-      // Get the correct user ID based on role
       if (role === 'freelancer') {
         const response = await axiosConfig(`/users/freelancer-profile/${userId}`);
         const data = await response.data;
@@ -106,22 +105,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         }
       }
       
-      // Create a unique room ID
       const sortedIds = [adjustedUserId, contacts._id].sort().join('-');
       const roomID = `room-${sortedIds}`;
       
-      // Set call details and show the outgoing call component
       setCallDetails({
         roomID,
         receiverId: contacts._id,
         receiverName: contacts.name || 'User'
       });
       setShowOutgoingCall(true);
-      // Emit event to notify the other user
       socket.emit('call_initiated', {
         roomID,
         callerId: userId, 
-        callerName: userName || 'You', // Use actual user name
+        callerName: userName || 'You', 
         receiverId: contacts._id,
         role 
       });

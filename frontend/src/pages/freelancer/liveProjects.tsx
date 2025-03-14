@@ -75,15 +75,12 @@ const FreelancerContractsList: React.FC = () => {
       m => m.status === 'completed' || m.status === 'paid'
     ).length;
 
-    // Calculate total earned from completed/paid milestones
     const totalEarned = contract.milestones
       .filter(m => m.status === 'completed' || m.status === 'paid')
-      .reduce((sum, m) => sum + (Number(m.cost) * 0.9), 0) // Assuming 10% platform fee
+      .reduce((sum, m) => sum + (Number(m.cost) * 0.9), 0) 
       .toString();
-    // Calculate remaining amount
     const remainingAmount = (Number(contract.budget) - Number(totalEarned)).toString();
 
-    // Find the next milestone (first non-completed/non-paid milestone)
     const nextMilestone = contract.milestones.find(
       m => m.status !== 'completed' && m.status !== 'paid'
     );

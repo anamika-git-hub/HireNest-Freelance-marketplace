@@ -185,8 +185,6 @@ export const TaskRepository = {
     getClientProposalStats:async(clientId:string, startDate:Date, endDate:Date) => {
         const ObjectId = mongoose.Types.ObjectId;
     
-    // We need to get tasks with bids information
-    // First, get all tasks by this client
     const clientTasks = await TaskSubmissionModel.find({
       clientId: new ObjectId(clientId),
       createdAt: { $gte: startDate, $lte: endDate }
@@ -194,7 +192,6 @@ export const TaskRepository = {
     
     const taskIds = clientTasks.map(task => task._id);
     
-    // Then, get bid data for these tasks from BidSubmissionModel
     const monthlyProposals = await BidSubmissionModel.aggregate([
       {
         $match: {
@@ -242,9 +239,7 @@ export const TaskRepository = {
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
     
-    // Similar for quarterly and yearly
     const quarterlyProposals = await BidSubmissionModel.aggregate([
-      // Similar to monthly but grouped by quarter
       {
         $match: {
           taskId: { $in: taskIds }
@@ -294,7 +289,6 @@ export const TaskRepository = {
     ]);
     
     const yearlyProposals = await BidSubmissionModel.aggregate([
-      // Similar to monthly but grouped by year
       {
         $match: {
           taskId: { $in: taskIds }

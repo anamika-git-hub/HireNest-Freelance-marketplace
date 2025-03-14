@@ -70,7 +70,7 @@ const ManageCategories: React.FC = () => {
       } catch (error) {
         console.error("Error deleting category:", error);
       }
-      setConfirmDelete(null); // Close modal
+      setConfirmDelete(null); 
     }
   };
 

@@ -5,7 +5,7 @@ const redis = new Redis();
 export const TempUserRepository = {
   storeTempUser: async (userData: any) => {
     const tempId = `tempUser:${Date.now()}`;
-    await redis.set(tempId, JSON.stringify(userData), "EX", 600); // Expire in 10 mins
+    await redis.set(tempId, JSON.stringify(userData), "EX", 600); 
     return tempId;
   },
 
@@ -23,7 +23,7 @@ export const TempUserRepository = {
     if (data) {
       const userData = JSON.parse(data);
       userData.otp = newOtp;
-      await redis.set(tempId, JSON.stringify(userData), "EX", 600); // Reset expiration
+      await redis.set(tempId, JSON.stringify(userData), "EX", 600); 
     }
   },
 };

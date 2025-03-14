@@ -32,7 +32,6 @@ const Notifications: React.FC = () => {
   const userId = localStorage.getItem('userId');
   const role = localStorage.getItem('role');
 
-  // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -43,7 +42,6 @@ const Notifications: React.FC = () => {
     };
   }, [searchTerm]);
 
-  // Focus input on mount
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();

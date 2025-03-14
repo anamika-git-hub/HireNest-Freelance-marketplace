@@ -4,7 +4,6 @@ import cloudinaryV2 from "../utils/cloudinary";
 import { FilterCriteria } from "../entities/filter";
 
 export const TaskUseCase = {
-    // Create a new task submission
     createTask: async (data: ITaskSubmissionForm, files: { [key: string]: Express.Multer.File[] }) => {
         try {
             const uploadToCloudinary = async (file: Express.Multer.File) => {
@@ -36,7 +35,6 @@ export const TaskUseCase = {
         }
     },
 
-    // Update an existing task submission
     updateTask: async (
         id: string,
         updates: Partial<ITaskSubmissionForm>,
@@ -77,7 +75,6 @@ export const TaskUseCase = {
         }
     },
 
-    // Delete a task submission
     deleteTask: async (id: string) => {
         try {
             return await TaskRepository.deleteTask(id);

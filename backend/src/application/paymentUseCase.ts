@@ -129,7 +129,6 @@ export const PaymentUseCase = {
       session
     );
 
-    // Add to transaction history
     await Paymentrepository.updateTransactionHistory(paymentIntent.id,null,'held',session,'Payment successful, funds held in escrow')
     
   },
@@ -200,7 +199,6 @@ export const PaymentUseCase = {
         throw new Error('Failed to update milestone');
       }
       
-      // Then update escrow status
       const updatedEscrow = await Paymentrepository.updateEscrowStatus(
         milestoneId,
         'released'
@@ -208,7 +206,6 @@ export const PaymentUseCase = {
       if (!updatedEscrow) {
         console.error('Warning: Milestone updated but escrow status update failed');
       }
-      // Add to transaction history
       await Paymentrepository.updateTransactionHistory(
         null, 
         milestoneId, 

@@ -18,7 +18,6 @@ export const MessageRepository = {
                 if (participantId !== userId) {
                     contactIds.add(participantId);
 
-                    // 🛠 Await the last message query
                     const lastMessage = await MessageModel.findOne({
                         $or: [
                             { senderId: userId, receiverId: participantId },
@@ -26,7 +25,6 @@ export const MessageRepository = {
                         ]
                     }).sort({ createdAt: -1 });
 
-                    // 🛠 Await the unread message count
                     const unreadCount = await MessageModel.countDocuments({
                         senderId: participantId,
                         receiverId: userId,
@@ -35,7 +33,7 @@ export const MessageRepository = {
 
                     contactData.push({
                         _id: participantId,
-                        lastMessage: lastMessage,  // ✅ Now lastMessage is an actual document
+                        lastMessage: lastMessage, 
                         unreadCount: unreadCount
                     });
                 }

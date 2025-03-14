@@ -56,12 +56,10 @@ const RequestList: React.FC = () => {
     useEffect(() => {
         let result = [...requests];
         
-        // Apply status filter
         if (activeFilter !== "all") {
             result = result.filter(request => request.status === activeFilter);
         }
         
-        // Apply search filter
         if (searchTerm) {
             result = result.filter(request => 
                 request.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,7 +68,7 @@ const RequestList: React.FC = () => {
         }
         
         setFilteredRequests(result);
-        setCurrentPage(1); // Reset to first page when filters change
+        setCurrentPage(1); 
     }, [searchTerm, activeFilter, requests]);
 
     const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);

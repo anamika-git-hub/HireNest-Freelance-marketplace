@@ -41,7 +41,6 @@ const MyAccount: React.FC = () => {
     }));
   };
   
-  // Fetch user details on component mount
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -72,7 +71,6 @@ const MyAccount: React.FC = () => {
   };
  
 
-// Function to update account type in the backend
 const updateAccountType = async (newRole: string) => {
   const userId = localStorage.getItem('userId')
   
@@ -88,7 +86,6 @@ const updateAccountType = async (newRole: string) => {
 
   toast.success(`Role changed to ${newRole}`);
       console.log('Account type updated successfully');
-      // window.location.reload();
 
     } else {
       console.error('Failed to update account type');

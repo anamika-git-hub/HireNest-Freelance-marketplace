@@ -53,7 +53,6 @@ export const ContractRepository = {
         try {
             const updateData: any = { 'milestones.$.status': status };
             
-            // Add additional data to the update if provided
             if (additionalData.completionDetails) {
               updateData['milestones.$.completionDetails'] = additionalData.completionDetails;
             }
@@ -76,7 +75,6 @@ export const ContractRepository = {
             throw error;
           }
     },
-   // Modify the updateMilestoneWithPayment function to make session optional
 updateMilestoneWithPayment: async (
     contractId: string,
     milestoneId: string,
@@ -212,7 +210,7 @@ updateMilestoneWithPayment: async (
       ]);
     },
     getTransactionHistory: async(period?: string, startDate?: string, endDate?: string, searchTerm?:string, skip?:number, limit?:number) => {
-      // Define date filters based on period parameter
+     
       let dateFilter = {};
       
       if (startDate && endDate) {
@@ -228,20 +226,16 @@ updateMilestoneWithPayment: async (
           
           switch(period) {
               case 'weekly':
-                  // Last 7 days
                   startDateTime = new Date(now);
                   startDateTime.setDate(now.getDate() - 7);
                   break;
               case 'monthly':
-                  // Current month
                   startDateTime = new Date(now.getFullYear(), now.getMonth(), 1);
                   break;
               case 'yearly':
-                  // Current year
                   startDateTime = new Date(now.getFullYear(), 0, 1);
                   break;
               default:
-                  // No filter
                   startDateTime = null;
           }
           
@@ -307,7 +301,6 @@ updateMilestoneWithPayment: async (
   getFreelancerEarnings: async(freelancerId:string, startDate:Date, endDate:Date) => {
     const ObjectId = mongoose.Types.ObjectId;
     
-    // Get monthly earnings
     const monthlyEarnings = await ContractModel.aggregate([
       {
         $match: {
@@ -361,7 +354,6 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
     
-    // Get quarterly earnings
     const quarterlyEarnings = await ContractModel.aggregate([
       {
         $match: {
@@ -417,7 +409,6 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1, "_id.quarter": 1 } }
     ]);
     
-    // Get yearly earnings
     const yearlyEarnings = await ContractModel.aggregate([
       {
         $match: {
@@ -470,7 +461,6 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1 } }
     ]);
     
-    // Calculate completion rates
     const taskCompletionStats = await ContractModel.aggregate([
       {
         $match: {
@@ -526,7 +516,6 @@ updateMilestoneWithPayment: async (
   getClientSpending: async(clientId:string, startDate:Date, endDate:Date) => {
     const ObjectId = mongoose.Types.ObjectId;
     
-    // Get monthly spending
     const monthlySpending = await ContractModel.aggregate([
       {
         $match: {
@@ -596,9 +585,7 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
     
-    // Get quarterly spending
     const quarterlySpending = await ContractModel.aggregate([
-      // Similar to monthly but grouped by quarter
       {
         $match: {
           clientId: new ObjectId(clientId),
@@ -669,9 +656,7 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1, "_id.quarter": 1 } }
     ]);
     
-    // Get yearly spending
     const yearlySpending = await ContractModel.aggregate([
-      // Similar to monthly but grouped by year
       {
         $match: {
           clientId: new ObjectId(clientId),
@@ -739,7 +724,6 @@ updateMilestoneWithPayment: async (
       { $sort: { "_id.year": 1 } }
     ]);
     
-    // Get task status distribution
     const taskStatusDistribution = await ContractModel.aggregate([
       {
         $match: {

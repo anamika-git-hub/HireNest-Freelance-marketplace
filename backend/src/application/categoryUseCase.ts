@@ -12,9 +12,8 @@ export const CategoryUseCase = {
                 return result.secure_url;
             };
     
-            // Handle category image upload (single file)
             const categoryImageUrl = file
-                ? await uploadToCloudinary(file.path) // File is now a single file, not an array
+                ? await uploadToCloudinary(file.path) 
                 : null;
     
             const categoryData = {
@@ -55,17 +54,15 @@ export const CategoryUseCase = {
                 return result.secure_url;
             };
     
-            // If a new image file is uploaded, upload it to Cloudinary and update the category image URL
             let categoryImageUrl = null;
             if (file) {
                 categoryImageUrl = await uploadToCloudinary(file.path);
             }
     
-            // Include the category image URL only if it's a new file or if the image needs to be updated
             const updatedCategoryData = {
                 ...updates,
                 name: updates.name || '',
-                image: categoryImageUrl || updates.image, // Retain the existing image if no new file is uploaded
+                image: categoryImageUrl || updates.image, 
             };
     
             return await CategoryRepository.updateCategory(id, updatedCategoryData);

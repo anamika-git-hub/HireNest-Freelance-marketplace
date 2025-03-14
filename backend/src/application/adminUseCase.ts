@@ -69,7 +69,6 @@ export const adminUseCase = {
         contracts.forEach(contract => {
           contract.milestones.forEach(milestone => {
             if (milestone.status === 'completed' && milestone.paymentDetails) {
-              // Convert string to number first, then add to total
               totalRevenue += parseFloat(milestone.paymentDetails.amount) || 0;
               platformCommission += parseFloat(milestone.paymentDetails.platformFee) || 0;
             }
@@ -93,7 +92,6 @@ export const adminUseCase = {
       
         const userGrowthData: UserGrowthData[] = [];
       
-        // Initialize with all months
         for (let i = 0; i < 7; i++) {
           const date = new Date(sevenMonthsAgo);
           date.setMonth(sevenMonthsAgo.getMonth() + i);
@@ -104,7 +102,6 @@ export const adminUseCase = {
           });
         }
       
-        // Fill in actual data
         userGrowthAgg.forEach(item => {
           const monthIndex = item._id.month - sevenMonthsAgo.getMonth() - 1;
           if (monthIndex >= 0 && monthIndex < userGrowthData.length) {
@@ -116,7 +113,6 @@ export const adminUseCase = {
           }
         });
       
-        // Calculate cumulative totals for each month
         let clientsRunningTotal = 0;
         let freelancersRunningTotal = 0;
       
@@ -162,7 +158,6 @@ export const adminUseCase = {
       getTransactionHistory: async(period?: string, startDate?: string, endDate?: string,searchTerm?:string,skip?:number,limit?:number) => {
         const transactions = await ContractRepository.getTransactionHistory(period, startDate, endDate, searchTerm, skip, limit);
         
-        // Calculate summary statistics
         const totalAmount = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.amount), 0);
         const totalCommission = transactions.reduce((sum, transaction) => sum + parseFloat(transaction.commission), 0);
         const transactionCount = transactions.length;

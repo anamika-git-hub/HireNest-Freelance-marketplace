@@ -1,4 +1,4 @@
-// Chat.tsx
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './chatArea';

@@ -101,7 +101,6 @@ export const BidRepository = {
     getFreelancerBidStats: async(freelancerId: string, startDate:Date, endDate:Date) => {
         const ObjectId = mongoose.Types.ObjectId;
     
-        // Get monthly bid statistics
         const monthlyBids = await BidSubmissionModel.aggregate([
           {
             $match: {
@@ -126,7 +125,6 @@ export const BidRepository = {
           { $sort: { "_id.year": 1, "_id.month": 1 } }
         ]);
         
-        // Get quarterly bid statistics
         const quarterlyBids = await BidSubmissionModel.aggregate([
           {
             $match: {
@@ -153,7 +151,6 @@ export const BidRepository = {
           { $sort: { "_id.year": 1, "_id.quarter": 1 } }
         ]);
         
-        // Get yearly bid statistics
         const yearlyBids = await BidSubmissionModel.aggregate([
           {
             $match: {

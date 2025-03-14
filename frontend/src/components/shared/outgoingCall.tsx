@@ -25,7 +25,6 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up timer for call duration (30 seconds timeout)
     timerRef.current = setTimeout(() => {
       setCallStatus('failed');
       setStatusMessage('No answer');
@@ -36,20 +35,17 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
       });
     }, 30000);
 
-    // Set up listeners
     const handleCallAccepted = (data: any) => {
       if (data.roomID === roomID) {
         console.log('Call accepted:', data);
         setCallStatus('accepted');
         setStatusMessage('Call accepted');
         
-        // Clear the timeout
         if (timerRef.current) {
           clearTimeout(timerRef.current);
           timerRef.current = null;
         }
         
-        // Navigate to video call
         navigate(`/video-call?roomID=${roomID}`);
       }
     };
@@ -59,13 +55,11 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
       setCallStatus('rejected');
       setStatusMessage('Call rejected');
       
-      // Clear the timeout
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
       
-      // Wait a bit before closing
       setTimeout(() => {
         onCallEnded();
       }, 2000);
@@ -76,13 +70,11 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
       setCallStatus('failed');
       setStatusMessage(data.reason || 'Call failed');
       
-      // Clear the timeout
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
       
-      // Wait a bit before closing
       setTimeout(() => {
         onCallEnded();
       }, 2000);
@@ -94,7 +86,6 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
     socket.on('call_failed', handleCallFailed);
     
     return () => {
-      // Clean up
       socket.off('global_call_accepted',handleCallAccepted)
       socket.off('call_accepted', handleCallAccepted);
       socket.off('global_call_rejected', handleCallRejected);
@@ -110,13 +101,11 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
   const endCall = () => {
     console.log('Ending call');
     
-    // Clear the timeout
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
     
-    // Notify server that call ended
     socket.emit('call_ended', {
       roomID,
       userId: 'caller'

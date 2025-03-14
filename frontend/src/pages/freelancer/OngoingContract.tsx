@@ -77,7 +77,6 @@ const CompletionModal: React.FC<{
       await onSubmit(milestone._id, description, file);
       onClose();
     } catch (error) {
-      // Error is handled in parent component
     } finally {
       setIsSubmitting(false);
     }

@@ -10,7 +10,6 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // State for dashboard data
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeClients: 0,
@@ -31,7 +30,6 @@ const AdminDashboard: React.FC = () => {
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [recentProjects, setRecentProjects] = useState<any[]>([]);
 
-  // Handle user verification
   const handleVerification = async (userId: string, action: 'approve' | 'reject') => {
     try {
       const response = await axiosConfig.post('/admin/verify-user', {
@@ -39,10 +37,8 @@ const AdminDashboard: React.FC = () => {
         action
       });
       
-      // Update the state to remove the processed verification
       setPendingVerifications(prev => prev.filter(user => user.id !== userId));
       
-      // Refresh dashboard stats
       getDashboardData();
     } catch (error) {
       console.error('Error processing verification:', error);
@@ -50,7 +46,6 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Fetch dashboard data
   const getDashboardData = async () => {
     try {
       setLoading(true);
@@ -58,7 +53,6 @@ const AdminDashboard: React.FC = () => {
       
       const response = await axiosConfig.get('/admin/dashboard');
       const data = response.data.result;
-      // Update all state variables with fetched data
       setStats(data.stats);
       setRevenueData(data.revenueData);
       setUserGrowthData(data.userGrowthData);
@@ -78,7 +72,6 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     getDashboardData();
     
-    // Set up refresh interval (every 5 minutes)
     const interval = setInterval(getDashboardData, 5 * 60 * 1000);
     
     return () => {
@@ -86,16 +79,12 @@ const AdminDashboard: React.FC = () => {
     };
   }, []);
 
-  // Handle period change
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
-    // In a real implementation, this would filter the data based on the selected period
-    // or make a new API call with the period as a parameter
   };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
   
-  // Card component for statistics
   const StatCard = ({ icon, title, value, footer, color }) => (
     <div className="bg-white rounded-lg shadow-md p-4 flex flex-col">
       <div className="flex items-center mb-2">

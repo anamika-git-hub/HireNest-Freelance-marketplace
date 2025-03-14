@@ -66,7 +66,6 @@ const ClientContractsList: React.FC = () => {
       m => m.status === 'completed'
     ).length;
 
-    // Find the next milestone (first non-completed milestone)
     const nextMilestone = contract.milestones.find(
       m => m.status !== 'completed'
     );

@@ -7,7 +7,6 @@ import Loader from '../../components/shared/Loader';
 import axiosConfig from "../../service/axios";
 import DashboardChart from '../../components/shared/dashboardChart';
 
-// Interfaces
 interface Notification {
   _id: string;
   text: string;
@@ -79,7 +78,6 @@ interface ProcessedContract {
 }
 
 const Dashboard: React.FC = () => {
-  // States
   const [tasks, setTasks] = useState<Task[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
   const [latestBids, setLatestBids] = useState<Bid[]>([]);
@@ -96,7 +94,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate()
   
   const userId = localStorage.getItem('userId');
-  const role = localStorage.getItem('role') || 'freelancer'; // Default to freelancer if not set
+  const role = localStorage.getItem('role') || 'freelancer'; 
   
   const processContract = (contract: RawContract): ProcessedContract => {
     const totalMilestones = contract.milestones.length;
@@ -128,7 +126,6 @@ const Dashboard: React.FC = () => {
     };
   };
   
-  // Fetch bids, calculate stats
   useEffect(() => {
     if (role === 'freelancer' && userId) {
       setLoading(true);
@@ -155,7 +152,6 @@ const Dashboard: React.FC = () => {
     }
   }, [userId, role]);
   
-  // Fetch completed projects count for freelancer
   useEffect(() => {
     if (role === 'freelancer' && userId) {
       axiosConfig
@@ -176,7 +172,6 @@ const Dashboard: React.FC = () => {
     
   }, [userId, role]);
 
-// Fetch completed projects count for clients
   useEffect(() => {
     if (role === 'client' && userId) {
       axiosConfig
@@ -196,12 +191,11 @@ const Dashboard: React.FC = () => {
     }
   }, [userId, role]);
 
-  // Fetch reviews count for freelancers
   useEffect(() => {
+    if(role === 'freelancer' && userId){
     const getReviews = async () => {
         try {
             const response = await axiosConfig.get(`/freelancers/reviews/${userId}`)
-            console.log(response.data.reviews)
             setReviews(response.data.reviews.length);
         } catch (error) {
             setError('Failed to load freelancer reviews')
@@ -210,11 +204,12 @@ const Dashboard: React.FC = () => {
         }
     }
     getReviews()
+  }
 },[]);
 
-// Fetch requests recieved count for freelancers
 
 useEffect(() => {
+  if(role === 'freelancer' && userId){
   const fetchRequests = async () => {
          try {
              const response = await axiosConfig.get(`/freelancers/freelancer-request`);
@@ -227,11 +222,10 @@ useEffect(() => {
          }
      };
      fetchRequests()
+    }
 },[])
 
 
-  
-  // Fetch ongoing projects (contracts) for freelancer
   useEffect(() => {
     if (role === 'freelancer' && userId) {
       const fetchContractsData = async () => {
@@ -245,10 +239,8 @@ useEffect(() => {
               status: 'ongoing'
             }
           });
-          console.log('freelancers contrr',response.data.contracts)
           const processedContracts = response.data.contracts.map(processContract);
 
-          console.log('contracts',processedContracts)
           setContracts(processedContracts);
         } catch (err) {
           console.error('Error fetching contracts:', err);
@@ -260,7 +252,6 @@ useEffect(() => {
     }
   }, [userId, role]);
   
-  // Fetch ongoing projects (contracts) for client
   useEffect(() => {
     if(role === 'client' && userId){
     
@@ -313,7 +304,6 @@ useEffect(() => {
     navigate(`/client/client-contract/${contractId}`);
   };
 
-  // Stats based on real data
   const stats = role === 'freelancer' 
     ? [
         { title: "Bids Won", value: bidsWon, color: "text-green-500" },
@@ -327,8 +317,6 @@ useEffect(() => {
         { title: "Completed Projects", value: completedProjects, color: "text-yellow-500" },
         { title: "Proposals Received", value: tasks.reduce((acc, task) => acc + (task.bids || 0), 0), color: "text-blue-500" }
       ];
-
-  // Fetch notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -354,7 +342,6 @@ useEffect(() => {
     fetchNotifications();
   }, [userId, role]);
 
-  // Fetch tasks for client
   useEffect(() => {
     if (role === 'client') {
       const fetchTasks = async () => {
@@ -369,7 +356,6 @@ useEffect(() => {
           
           setTasks(tasksWithTimeLeft);
           
-          // Fetch bid counts for each task
           tasksWithTimeLeft.forEach((task: Task) => {
             fetchBidCount(task._id);
           });
@@ -383,7 +369,6 @@ useEffect(() => {
     }
   }, [role]);
 
-  // Fetch bid count for a task
   const fetchBidCount = async (taskId: string) => {
     try {
       const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
@@ -445,7 +430,6 @@ useEffect(() => {
     }
   };
 
-  // Delete bid handler
   const handleDeleteBid = (bidId: string) => {
     axiosConfig
       .delete(`/users/bid/${bidId}`)
@@ -459,7 +443,6 @@ useEffect(() => {
       });
   };
 
-  // Edit bid handler
   const handleEditBid = (bidId: string) => {
     toast.success("Navigate to edit bid page");
   };

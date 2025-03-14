@@ -68,7 +68,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { Socket } from 'socket.io-client';
 
-// Function to get URL parameters
 export function getUrlParams(url = window.location.href) {
   let urlStr = url.split('?')[1];
   return new URLSearchParams(urlStr);
@@ -87,11 +86,9 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Get roomID from URL parameters
   const roomID = getUrlParams(location.search).get('roomID');
   
   useEffect(() => {
-    // Create audio element for call sounds
     audioRef.current = new Audio('/sounds/call-connected.mp3');
     
     if (!roomID) {
@@ -108,14 +105,12 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
       return;
     }
     
-    // Play connected sound
     try {
       if (audioRef.current) {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.error('Error playing sound:', err);
-            // Try again after user interaction
             document.addEventListener('click', function tryPlayAgain() {
               audioRef.current?.play();
               document.removeEventListener('click', tryPlayAgain);
@@ -127,17 +122,14 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
       console.error('Error playing sound:', err);
     }
     
-    // Let server know we've joined
     socket.emit('call_started', {
       roomID,
       userId
     });
     
-    // Setup call ended listener
     const handleCallEnded = () => {
       console.log('Call ended by other user');
       
-      // If we have access to Zego instance, clean it up
       if (zegoRef.current) {
         try {
           zegoRef.current.destroy();
@@ -151,23 +143,19 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
     
     socket.on('call_ended', handleCallEnded);
     
-    // Cleanup function
     return () => {
       socket.off('call_ended', handleCallEnded);
       
-      // Notify server that we're leaving the call
       socket.emit('call_ended', {
         roomID,
         userId
       });
       
-      // Stop audio
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
       
-      // Destroy Zego instance if it exists
       if (zegoRef.current) {
         try {
           zegoRef.current.destroy();
@@ -184,7 +172,6 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
     try {
       setIsLoading(true);
       
-      // generate Kit Token
       const appID = 144934725;
       const serverSecret = "b6e3f7ba590dd679abea06c777796dc8";
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
@@ -192,14 +179,12 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
         serverSecret, 
         roomID, 
         userId, 
-        userId  // Using userId for username too
+        userId  
       );
       
-      // Create instance object from Kit Token
       const zp = ZegoUIKitPrebuilt.create(kitToken);
-      zegoRef.current = zp; // Save reference for cleanup
+      zegoRef.current = zp; 
       
-      // start the call
       zp.joinRoom({
         container: element,
         sharedLinks: [
@@ -220,7 +205,6 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
           console.log('Joined room successfully');
         },
         onLeaveRoom: () => {
-          // When user leaves through UI
           socket?.emit('call_ended', {
             roomID,
             userId
@@ -240,7 +224,6 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
     }
   };
   
-  // Create ref handler compatible with both TypeScript and Zego expectations
   const handleRef = (element: HTMLDivElement | null) => {
     if (element) {
       myMeeting(element);

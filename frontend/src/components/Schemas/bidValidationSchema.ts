@@ -1,4 +1,4 @@
-// src/components/Schemas/bidValidationSchema.ts
+
 
 import * as Yup from 'yup';
 

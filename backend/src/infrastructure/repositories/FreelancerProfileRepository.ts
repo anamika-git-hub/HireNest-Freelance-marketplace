@@ -158,7 +158,6 @@ export const FreelancerProfileRepository = {
                     ? reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length 
                     : 0;
         
-                // Return combined data
                 return {
                     ...freelancer.toObject(),
                     reviews: reviews,
