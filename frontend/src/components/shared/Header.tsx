@@ -8,8 +8,8 @@ import { MdDashboard} from "react-icons/md";
 import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
 import { useUserRole } from '../../context/userRoleContext';
-import NotificationItem from './notificationItem';
-import CallNotification from './callNotification';
+import NotificationItem from '../Notification/notificationItem';
+import CallNotification from '../Notification/callNotification';
 
 interface UserDetail {
   profileImage: string;

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { FaBell, FaSearch} from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
-import NotificationItem from "../../components/shared/notificationItem";
+import NotificationItem from "../../components/Notification/notificationItem";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface Notification {

@@ -1,5 +1,5 @@
-import NotificationIcon from "../../components/shared/notificationIcon";
-import NotificationContent from "../../components/shared/notificationContent";
+import NotificationIcon from "./notificationIcon";
+import NotificationContent from "./notificationContent";
 
 interface Notification {
   role: string;
