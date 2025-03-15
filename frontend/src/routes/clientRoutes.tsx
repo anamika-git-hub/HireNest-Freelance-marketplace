@@ -14,7 +14,7 @@ import FreelancerBookmarks from '../pages/clients/freelancerBookamark';
 import FreelancerList from '../pages/freelancer/freelancerList';
 import FreelancerDetail from '../pages/freelancer/freelancerDetail';
 import MyContract from '../pages/clients/myContract';
-import ClientContractDetails from '../pages/clients/WorkContract';
+import ClientContractDetails from '../pages/clients/contractDetail';
 import ClientContractsList from '../pages/clients/clientContractList';
 
 const ClientRoutes = () => (
