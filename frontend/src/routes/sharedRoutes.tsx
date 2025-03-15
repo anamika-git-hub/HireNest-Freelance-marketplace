@@ -18,11 +18,10 @@ import Notifications from '../pages/shared/notification';
 import Chat from '../components/chat/chatPage';
 import MyAccount from '../pages/shared/MyAccount';
 import NotFoundPage from '../pages/shared/404';
-import App from '../components/chat/videoChat';
 import VideoCall from '../components/shared/videoCall';
 import { io } from 'socket.io-client';
 const userId = localStorage.getItem('userId') as string;
-const role = localStorage.getItem('role');
+const role = localStorage.getItem('role') as string;
 const socket = io('http://localhost:5001', {
   query: { userId, role },
 });
@@ -48,7 +47,7 @@ const SharedRoutes = () => (
   element={
     <UserPrivateRoute>
       <UserRoleProvider showSidebar={false}>
-        <VideoCall socket={socket} userId={userId} />
+        <VideoCall socket={socket} userId={userId} role={role}/>
       </UserRoleProvider>
     </UserPrivateRoute>
   } 

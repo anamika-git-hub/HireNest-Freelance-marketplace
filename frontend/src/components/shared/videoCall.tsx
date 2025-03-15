@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { Socket } from 'socket.io-client';
+import axiosConfig from '../../service/axios';
 
 function randomID(len: number): string {
   let result = '';
@@ -22,11 +23,15 @@ export function getUrlParams(url: string = window.location.href): URLSearchParam
 interface VideoCallProps {
   socket?: Socket;
   userId?: string;
+  role?: string;
 }
 
-const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
+const VideoCall: React.FC<VideoCallProps> = ({ socket, userId, role }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [displayName, setDisplayName] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const roomID = getUrlParams(location.search).get('roomID') || randomID(5);
   
@@ -59,22 +64,59 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
       }
     };
   }, [socket, userId, roomID]);
+
+  useEffect(() => {
+    const getDisplayName = async () => {
+      try {
+        if (role === 'freelancer') {
+          const response = await axiosConfig.get(`/users/freelancer-profile/${userId}`);
+          setDisplayName(response.data.name);
+          console.log('Display name set (freelancer):', response.data.name);
+        } else if (role === 'client') {
+          const response = await axiosConfig.get('/users/account-detail');
+          const name = `${response.data.userDetails.firstname} ${response.data.userDetails.lastname}`;
+          setDisplayName(name);
+          console.log('Display name set (client):', name);
+        } else {
+          setDisplayName(`User-${userId?.substring(0, 5) || randomID(3)}`);
+        }
+      } catch (error) {
+        console.error('Error fetching display name:', error);
+        setDisplayName(`User-${userId?.substring(0, 5) || randomID(3)}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getDisplayName();
+  }, [userId, role]);
+
+  useEffect(() => {
+    if (!isLoading && displayName && containerRef.current) {
+      initializeMeeting();
+    }
+  }, [isLoading, displayName]);
   
-  const myMeeting = async (element: HTMLDivElement) => {
+  const initializeMeeting = async () => {
+    if (!containerRef.current) return;
+    
     const appID = 144934725;
     const serverSecret = "b6e3f7ba590dd679abea06c777796dc8";
+    
+    console.log('Using display name for video call:', displayName);
+    
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appID, 
       serverSecret, 
       roomID, 
       userId || randomID(5), 
-      userId || randomID(5)
+      displayName
     );
     
     const zp = ZegoUIKitPrebuilt.create(kitToken);
     
     zp.joinRoom({
-      container: element,
+      container: containerRef.current,
       sharedLinks: [
         {
           name: 'Personal link',
@@ -91,10 +133,21 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId }) => {
     });
   };
   
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center w-screen h-screen bg-gray-900 text-white">
+        <div className="text-center">
+          <div className="text-xl mb-4">Preparing video call...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div
       className="myCallContainer"
-      ref={myMeeting}
+      ref={containerRef}
       style={{ width: '100vw', height: '100vh' }}
     ></div>
   );
