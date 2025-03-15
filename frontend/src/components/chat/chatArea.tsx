@@ -66,22 +66,18 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     receiverName: string;
   } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const messagesContainerRef = React.useRef<HTMLDivElement>(null);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
   };
 
-  // For initial load
-  useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }
-  }, []); 
-
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const { scrollHeight } = messagesContainerRef.current;
+      messagesContainerRef.current.scrollTop = scrollHeight;
+    }
   };
   
   useEffect(() => {
@@ -355,7 +351,11 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         </DropdownMenu.Root>
         </div>
       </div>
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto" onScroll={handleScroll}>
+      <div 
+       ref={messagesContainerRef}
+       className="flex-1 p-4 space-y-4 overflow-y-auto" 
+       style={{ scrollBehavior: 'smooth' }}
+       onScroll={handleScroll}>
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date}>
             <div className="flex justify-center mb-4">
@@ -420,7 +420,6 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             ))}
           </div>
         ))}
-        <div ref={messagesEndRef} />
       </div>
       {showScrollButton && (
       <button 
