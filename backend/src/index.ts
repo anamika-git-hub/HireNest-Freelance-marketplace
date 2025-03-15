@@ -240,7 +240,10 @@ io.on('connection',async(socket) => {
             text: msg.text,
             type: msg.type,
             time: msg.createdAt,
-            isRead: msg.isRead
+            isRead: msg.isRead,
+            mediaUrl: msg.mediaUrl,
+            mediaType: msg.mediaType,
+            fileName: msg.fileName
           }));
           socket.emit('message_history', messages);
         } catch (error) {
@@ -336,8 +339,9 @@ io.on('connection',async(socket) => {
 
       socket.on('send_message', async (data) => {
         try {
-          const { senderId, receiverId,role, text, type, time } = data;
+          const { senderId, receiverId,role, text, type, time, mediaUrl, mediaType, fileName } = data;
         
+console.log('Message data received:', data);
           let adjustedSenderId: string | null = senderId;
           let senderRef,receiverRef
           if (role === 'freelancer') {
@@ -373,18 +377,31 @@ io.on('connection',async(socket) => {
             receiverId,
             senderRef:senderRef,
             receiverRef:receiverRef,
-            text,
+            text: text || '',
             type,
             time,
             createdAt:new Date(),
             isRead: false, 
+            mediaUrl,
+            mediaType,
+            fileName
           });
           await message.save();
      
           chat.messages.push(message._id);
           await chat.save();
           io.to(socketId).emit('receive_message', message);
-          io.to(receiveId).emit('receive_message', message);
+          io.to(receiveId).emit('receive_message', {
+            senderId: message.senderId,
+            receiverId: message.receiverId,
+            text: message.text,
+            type: message.type,
+            time: message.createdAt,
+            isRead: message.isRead,
+            mediaUrl: message.mediaUrl,
+            mediaType: message.mediaType,
+            fileName: message.fileName
+          });
     
         } catch (error) {
           console.error('Error sending message:', error);

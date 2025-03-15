@@ -6,9 +6,12 @@ const MessageSchema = new Schema<IMessage>({
   senderId: { type: mongoose.Schema.Types.ObjectId,required: true },
   receiverId: { type: mongoose.Schema.Types.ObjectId,required: true },
   type: { type:String, enum:['sent','received' ]},
-  text: { type: String, required: true },
+  text: { type: String},
   createdAt: { type: Date, default: Date.now },
   isRead: { type: Boolean, default: false },
+  mediaUrl: {type: String},
+  mediaType: { type: String, enum: ['image', 'video', 'audio', 'file']},
+  fileName: {type: String}
 }, { timestamps: true});
 
 export const MessageModel = mongoose.model<IMessage>('Message', MessageSchema);

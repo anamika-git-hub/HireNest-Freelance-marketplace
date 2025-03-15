@@ -5,7 +5,10 @@ export interface IMessage {
     senderId: mongoose.Types.ObjectId;
     receiverId: mongoose.Types.ObjectId;
     type: string;
-    text: string;
-    createdAt: Date;
-    isRead: boolean;
+    text?: string;
+    createdAt?: Date;
+    isRead?: boolean;
+    mediaUrl?:string;
+    mediaType?:'image' | 'video' | 'audio' | 'file';
+    fileName?:string;
 }

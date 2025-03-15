@@ -160,8 +160,6 @@ const Chat: React.FC = () => {
       }
     });
 
-    
-
     return () => {
       socket.off('messages_marked_read');
       socket.off('receive_message');
@@ -179,6 +177,9 @@ const Chat: React.FC = () => {
         text: msg.text,
         time: msg.time,
         isRead: msg.isRead,
+        mediaUrl: msg.mediaUrl,
+        mediaType: msg.mediaType,
+        fileName: msg.fileName
       })) as Message[];
 
       setMessages(updatedHistory);
@@ -190,6 +191,9 @@ const Chat: React.FC = () => {
         text: data.text,
         time: new Date(),
         isRead: data.isRead,
+        mediaUrl: data.mediaUrl,
+        mediaType: data.mediaType,
+        fileName: data.fileName
       };
       setMessages((prevMessages) => [...prevMessages, formattedMessage]);
     });

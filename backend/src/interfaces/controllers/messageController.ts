@@ -26,5 +26,26 @@ export const MessageController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    fileUpload: async (req: Req, res: Res, next: Next) => {
+        try {
+            const file = req.file;
+            if(!file){
+                throw new Error('No file provided')
+            }console.log('Received file:', file.originalname, file.mimetype, file.size);
+
+            const result = await MessageUseCase.fileUpload(file);
+            console.log('Upload result:', result);
+            res.status(200).json({
+                success: true,
+                message: "File upload successful",
+                url: result.url,
+                fileName: result.fileName,
+                fileType: result.fileType
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 }

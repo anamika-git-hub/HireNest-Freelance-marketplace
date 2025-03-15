@@ -75,6 +75,21 @@ export const uploader = multer({
     },
   }).single('file'); 
 
+  export const messageFileUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 8000000,
+    },
+    fileFilter: function (req, file, cb) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".mp3", ".mp4"].includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Unsupported file type for chat"));
+      }
+    },
+  }).single('file'); 
+
 // Function to delete a file from S3
 // export const deleteFromS3 = async (key) => {
 //   try {

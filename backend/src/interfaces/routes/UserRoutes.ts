@@ -5,16 +5,16 @@ import { AccountDetailController } from '../controllers/accountDetailController'
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { BookMarkController } from '../controllers/bookmarkController';
 import { MessageController } from '../controllers/messageController';
-import { uploadProfileImages } from '../middlewares/uploadFileImages';
 import { BidController } from '../controllers/bidController';
 import { TaskController } from '../controllers/taskController';
 import { CategoryController } from '../controllers/categoryController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
-import { uploader,compressionMiddleware } from '../../utils/uploader';
+import { uploader,compressionMiddleware, messageFileUploader } from '../../utils/uploader';
 import { PaymentController } from '../controllers/PaymentController';
 import { RatingController } from '../controllers/ratingController';
+
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
@@ -47,6 +47,7 @@ router.delete('/bookmarks/:id',checkAuth('user'),BookMarkController.deleteBookma
 
 router.get('/get-receivers',checkAuth('user'),MessageController.getReceiver);
 router.post('/set-contacts',checkAuth('user'),MessageController.setContacts);
+router.post('/upload',messageFileUploader,checkAuth('user'),MessageController.fileUpload);
 
 router.get('/notifications',checkAuth('user'),UserController.getNotification);
 router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead)

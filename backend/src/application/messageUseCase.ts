@@ -1,6 +1,7 @@
 import { MessageRepository } from "../infrastructure/repositories/messageRepository";
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { AccountDetailRepository } from "../infrastructure/repositories/accountDetail";
+import { uploadToS3 } from "../utils/uploader";
 
 export const MessageUseCase = {
     getReceivers: async (userId:string,role:string)=>{
@@ -42,6 +43,50 @@ export const MessageUseCase = {
             return result;
         } catch (error) {
             throw new Error('Failed to post contacts')
+        }
+    },
+    fileUpload: async (file: Express.Multer.File) => {
+        try {
+            const uploadFile = async(file: Express.Multer.File, folderName: string) => {
+                try {
+                    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                    return await uploadToS3(
+                        file.buffer,
+                        `${folderName}/${uniqueFileName}`
+                    );
+                } catch (error) {
+                    console.error(`Error uploading to S3:`, error);
+                    throw new Error(`Failed to upload file to S3`);
+                }
+            };
+            
+            if (!file) {
+                throw new Error('No file provided');
+            }
+
+            let folderName = 'messages';
+            
+            if (file.mimetype.startsWith('image/')) {
+                folderName = 'images';
+            } else if (file.mimetype.startsWith('video/')) {
+                folderName = 'videos';
+            } else if (file.mimetype.startsWith('audio/')) {
+                folderName = 'audios';
+            } else {
+                folderName = 'documents';
+            }
+            
+            const uploadResult = await uploadFile(file, folderName);
+            
+            return {
+                url: uploadResult.Location,
+                key: uploadResult.Key,
+                fileName: file.originalname,
+                fileType: file.mimetype
+            };
+        } catch (error) {
+            console.error('Error in fileUpload usecase:', error);
+            throw error;
         }
     }
 }

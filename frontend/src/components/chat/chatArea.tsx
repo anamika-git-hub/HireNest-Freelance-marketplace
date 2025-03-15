@@ -53,17 +53,40 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   setContacts
 }) => {
   const [newMessage, setNewMessage] = React.useState('');
+  const [pendingMediaData,setPendingMediaData] = React.useState<any>('');
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showOutgoingCall, setShowOutgoingCall] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
   const [callDetails, setCallDetails] = useState<{
     roomID: string;
     receiverId: string;
     receiverName: string;
   } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
+  };
+
+  // For initial load
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }
+  }, []); 
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleClearChat = () => {
     socket.emit('clear_chat', {
@@ -196,17 +219,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
   const handleUpload = async (file: File) => {
     try {
+      
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
+      const response = await axiosConfig.post('/users/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
       
-      const data = await response.json();
-      
-      sendMessage('', {
+      const data = response.data;
+      setNewMessage('');
+      setPendingMediaData({
         mediaUrl: data.url,
         mediaType: getMediaType(file.type),
         fileName: file.name
@@ -228,7 +253,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     mediaType?: Message['mediaType'];
     fileName?: string
   }) => {
-    if (text.trim() !== '' || mediaData?.mediaUrl) {
+    if (newMessage.trim() !== '' || pendingMediaData) {
       const messageData: Message = {
         type: 'sent',
         text: text.trim(),
@@ -237,7 +262,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         isRead: false,
         senderId: userId,   
         receiverId: contacts._id,
-        ...mediaData
+        ...pendingMediaData
       };
       socket.emit('send_message', { ...messageData, senderId: userId, receiverId: contacts._id, role });
       setContacts(prevContacts => {
@@ -264,11 +289,12 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         text: text.trim(),
         time: new Date(),
         isRead: false,
-        ...mediaData
+        ...pendingMediaData
       };
       
       setMessages(prevMessages => [...prevMessages, newMsg]);
       setNewMessage('');
+      setPendingMediaData(null);
       setSelectedFile(null);
     }
   };
@@ -329,7 +355,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         </DropdownMenu.Root>
         </div>
       </div>
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto" onScroll={handleScroll}>
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date}>
             <div className="flex justify-center mb-4">
@@ -394,7 +420,16 @@ const ChatArea: React.FC<ChatAreaProps> = ({
             ))}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
+      {showScrollButton && (
+      <button 
+        onClick={scrollToBottom}
+        className="absolute bottom-24 right-6 bg-blue-500 text-white rounded-full p-2 shadow-md"
+      >
+        ↓
+      </button>
+    )}
       <div className="p-4 border-t">
         {selectedFile && (
           <div className="mb-2 p-2 bg-gray-100 rounded-md flex items-center justify-between">
