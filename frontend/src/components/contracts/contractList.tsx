@@ -2,62 +2,52 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronRight, FaSearch, FaChevronLeft, FaChevronRight as FaChevronRightPage } from 'react-icons/fa';
 import axiosConfig from '../../service/axios';
+import Loader from '../../components/shared/Loader';
 
-interface PaymentDetails {
-  amount: string;
-  platformFee: string;
-  netAmount: string;
-}
-
+// Common interface for milestone data
 interface Milestone {
   id: string;
   title: string;
   status: 'unpaid' | 'active' | 'completed' | 'paid';
   cost: string;
   dueDate: string;
-  paymentDetails?: PaymentDetails;
+  paymentDetails?: {
+    amount: string;
+    platformFee: string;
+    netAmount: string;
+  };
 }
 
-interface RawContract {
-  _id: string;
-  title: string;
-  clientId: string;
-  clientName: string;
-  budget: string;
-  status: 'ongoing' | 'completed' | 'accepted';
-  milestones: Array<{
-    title: string;
-    cost: string;
-    status: 'unpaid' | 'active' | 'completed' | 'paid';
-    dueDate: string;
-    _id: string;
-    paymentDetails?: PaymentDetails;
-  }>;
-  startDate: string;
-}
-
+// Common processed contract interface 
 interface ProcessedContract {
   id: string;
   title: string;
-  clientId: string;
-  clientName: string;
   budget: string;
   status: 'ongoing' | 'completed';
   nextMilestone?: Milestone;
   completedMilestones: number;
   totalMilestones: number;
   startDate: string;
-  totalEarned: string;
-  remainingAmount: string;
+  // Optional fields for freelancer view
+  totalEarned?: string;
+  remainingAmount?: string;
+  clientName?: string;
 }
 
-interface Bid {
-  _id: string;
-  title: string;
-  status: string;
+// Props for the common component
+interface ContractsListProps {
+  userType: 'client' | 'freelancer';
+  fetchDataFn: () => Promise<any[]>;
+  processContractFn: (contract: any) => ProcessedContract;
+  detailPagePath: string;
 }
 
-const FreelancerContractsList: React.FC = () => {
+const ContractsList: React.FC<ContractsListProps> = ({ 
+  userType, 
+  fetchDataFn, 
+  processContractFn,
+  detailPagePath 
+}) => {
   const [contracts, setContracts] = useState<ProcessedContract[]>([]);
   const [filteredContracts, setFilteredContracts] = useState<ProcessedContract[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,61 +59,21 @@ const FreelancerContractsList: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const processContract = (contract: RawContract): ProcessedContract => {
-    const totalMilestones = contract.milestones.length;
-    const completedMilestones = contract.milestones.filter(
-      m => m.status === 'completed' || m.status === 'paid'
-    ).length;
-
-    const totalEarned = contract.milestones
-      .filter(m => m.status === 'completed' || m.status === 'paid')
-      .reduce((sum, m) => sum + (Number(m.cost) * 0.9), 0) 
-      .toString();
-    const remainingAmount = (Number(contract.budget) - Number(totalEarned)).toString();
-
-    const nextMilestone = contract.milestones.find(
-      m => m.status !== 'completed' && m.status !== 'paid'
-    );
-
-    return {
-      id: contract._id,
-      title: contract.title,
-      clientId: contract.clientId,
-      clientName: contract.clientName,
-      budget: contract.budget,
-      status: contract.status === 'accepted' ? 'ongoing' : contract.status,
-      nextMilestone: nextMilestone ? {
-        id: nextMilestone._id,
-        title: nextMilestone.title,
-        status: nextMilestone.status,
-        cost: nextMilestone.cost,
-        dueDate: nextMilestone.dueDate,
-        paymentDetails: nextMilestone.paymentDetails
-      } : undefined,
-      completedMilestones,
-      totalMilestones,
-      startDate: contract.startDate,
-      totalEarned,
-      remainingAmount
-    };
-  };
-
   useEffect(() => {
-    const userId = localStorage.getItem('userId')
     const fetchContractsData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
-        const bidIds = bidResponse.data.bid.map((bid:Bid) => bid._id);
-        const response = await axiosConfig.get("/users/contracts", {
-          params: {
-            bidIds: bidIds,
-            status: 'filter'
-          }
-        });
-        const processedContracts = response.data.contracts.map(processContract);
-        setContracts(processedContracts);
+        
+        const data = await fetchDataFn();
+        
+        if (data.length === 0) {
+          setContracts([]);
+          setIsLoading(false);
+          return;
+        }
+        
+        setContracts(data);
         setIsLoading(false);
       } catch (err) {
         setError('Failed to fetch contracts. Please try again later.');
@@ -133,7 +83,7 @@ const FreelancerContractsList: React.FC = () => {
     };
 
     fetchContractsData();
-  }, []);
+  }, [fetchDataFn]);
 
   useEffect(() => {
     let result = [...contracts];
@@ -143,10 +93,15 @@ const FreelancerContractsList: React.FC = () => {
     }
     
     if (searchTerm) {
-      result = result.filter(contract => 
-        contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.clientName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      result = result.filter(contract => {
+        const titleMatch = contract.title.toLowerCase().includes(searchTerm.toLowerCase());
+        // Include client name search for freelancer view
+        const clientMatch = contract.clientName ? 
+          contract.clientName.toLowerCase().includes(searchTerm.toLowerCase()) : 
+          false;
+        
+        return titleMatch || clientMatch;
+      });
     }
     
     setFilteredContracts(result);
@@ -172,7 +127,7 @@ const FreelancerContractsList: React.FC = () => {
   };
 
   const handleContractClick = (contractId: string) => {
-    navigate(`/freelancer/freelancer-contract/${contractId}`);
+    navigate(`${detailPagePath}/${contractId}`);
   };
 
   const FilterButton: React.FC<{
@@ -192,13 +147,13 @@ const FreelancerContractsList: React.FC = () => {
   );
 
   if (isLoading) {
-    return (
+    return userType === 'client' ? 
+      <Loader visible={isLoading} /> : 
       <div className="min-h-screen bg-gray-100 pt-20 py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-600">Loading contracts...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   if (error) {
@@ -229,7 +184,9 @@ const FreelancerContractsList: React.FC = () => {
             <FaSearch className="absolute left-3 top-3 text-gray-400" />
             <input
               type="text"
-              placeholder="Search contracts by title or client..."
+              placeholder={userType === 'freelancer' ? 
+                "Search contracts by title or client..." : 
+                "Search contracts..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -252,29 +209,30 @@ const FreelancerContractsList: React.FC = () => {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className='flex gap-4'>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  <div className="flex-1">
+                    <div className="flex gap-4">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
                         {contract.title}
-                      </h2>
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${
-                          contract.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        </h2>
+                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-1 ${
+                        contract.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}
-                      </span>
-                      </div>
-                      <p className="text-gray-500 text-sm">
+                        {contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}
+                        </span>
+                    </div>
+                    <p className="text-gray-500 text-sm">
                         Started: {new Date(contract.startDate).toLocaleDateString()}
-                      </p>
+                    </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold text-gray-900">
                         ${Number(contract.budget).toLocaleString()}
                       </p>
-                      <p className="text-sm text-green-600 font-medium mt-1">
-                        Earned: ${Number(contract.totalEarned).toLocaleString()}
-                      </p>
-                      
+                      {userType === 'freelancer' && contract.totalEarned && (
+                        <p className="text-sm text-green-600 font-medium mt-1">
+                          Earned: ${Number(contract.totalEarned).toLocaleString()}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -305,14 +263,20 @@ const FreelancerContractsList: React.FC = () => {
                         </p>
                       </div>
                       <div className="flex items-center">
-                        <div className="text-right mr-2">
-                          <p className="font-medium text-gray-900">
+                        {userType === 'freelancer' ? (
+                          <div className="text-right mr-2">
+                            <p className="font-medium text-gray-900">
+                              ${Number(contract.nextMilestone.cost).toLocaleString()}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Net: ${(Number(contract.nextMilestone.cost) * 0.9).toLocaleString()}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="font-medium text-gray-900 mr-2">
                             ${Number(contract.nextMilestone.cost).toLocaleString()}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Net: ${(Number(contract.nextMilestone.cost) * 0.9).toLocaleString()}
-                          </p>
-                        </div>
+                          </span>
+                        )}
                         <FaChevronRight className="text-gray-400" />
                       </div>
                     </div>
@@ -359,7 +323,8 @@ const FreelancerContractsList: React.FC = () => {
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
-                         </button>
+                        {page}
+                      </button>
                     </React.Fragment>
                   );
                 }
@@ -397,4 +362,4 @@ const FreelancerContractsList: React.FC = () => {
   );
 };
 
-export default FreelancerContractsList;
+export default ContractsList;

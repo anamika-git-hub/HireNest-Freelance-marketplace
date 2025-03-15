@@ -13,7 +13,7 @@ import TaskList from '../pages/clients/taskList';
 import TaskDetail from '../pages/clients/taskDetail';
 import ContractDetails from '../pages/freelancer/contract';
 import FreelancerContractDetails from '../pages/freelancer/OngoingContract';
-import FreelancerContractsList from '../pages/freelancer/liveProjects';
+import FreelancerContractsList from '../pages/freelancer/freelancerContractList';
 import ReviewsList from '../pages/freelancer/reviews';
 
 const FreelancerRoutes = () => (
