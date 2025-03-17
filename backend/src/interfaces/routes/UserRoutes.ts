@@ -14,23 +14,26 @@ import { ContractController } from '../controllers/ContractController';
 import { uploader,compressionMiddleware, messageFileUploader } from '../../utils/uploader';
 import { PaymentController } from '../controllers/PaymentController';
 import { RatingController } from '../controllers/ratingController';
-
+import { validate } from '../middlewares/validationMiddleware';
+import { validateSignUp } from '../middlewares/validators/userValidator';
+import { validateAccountDetail } from '../middlewares/validators/accountDetailValidator';
+import { validateAccountUpdate } from '../middlewares/validators/myAccountValidator';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
 
-router.post ('/signup',UserController.signUp);
+router.post ('/signup',validateSignUp,validate,UserController.signUp);
 router.post ('/google-signup',UserController.googleSignUp)
 router.post ('/verify-otp',UserController.verifyOtp);
 router.post ('/resend-otp', UserController.resendOtp);
-router.post('/login', UserController.login);
+router.post('/login',UserController.login);
 router.post('/validate-password/:id',UserController.validatePassword);
 router.post('/forgot-password',UserController.forgotPassword);
 router.post('/reset-password',UserController.resetPassword);
 
 router.get('/categories',CategoryController.getAllCategories);
-router.post('/setup-account',uploader,compressionMiddleware,AccountDetailController.setUpAccount);
-router.put ('/update-account',uploader,compressionMiddleware,checkAuth('user'), AccountDetailController.updateAccount);
+router.post('/setup-account',validateAccountDetail,validate,uploader,compressionMiddleware,AccountDetailController.setUpAccount);
+router.put ('/update-account',validateAccountUpdate,validate,uploader,compressionMiddleware,checkAuth('user'), AccountDetailController.updateAccount);
 router.get('/account-detail',checkAuth('user'),AccountDetailController.getAccountDetail);
 router.post('/update-role',checkAuth('user'),UserController.updateRole);
 

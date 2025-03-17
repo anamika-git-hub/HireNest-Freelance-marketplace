@@ -8,13 +8,15 @@ import { upload, uploadFreelancerImages } from '../middlewares/uploadFileImages'
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
-import { milestoneUploader,compressionMiddleware } from '../../utils/uploader';
+import { milestoneUploader } from '../../utils/uploader';
 import { RatingController } from '../controllers/ratingController';
+import { validate } from '../middlewares/validationMiddleware';
+import { validateFreelancerProfile } from '../middlewares/validators/freelancerProfileValidator';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
 
-router.post("/setup-freelancer-profile", uploadFreelancerImages, FreelancerProfileController.createProfile);
+router.post("/setup-freelancer-profile",validateFreelancerProfile,validate, uploadFreelancerImages, FreelancerProfileController.createProfile);
 router.put("/update-freelancer-profile", uploadFreelancerImages,checkAuth('freelancer'), FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",checkAuth('freelancer'),TaskController.getTasks);

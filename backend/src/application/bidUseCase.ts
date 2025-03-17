@@ -6,6 +6,8 @@ import { NotificationRepository } from "../infrastructure/repositories/notificat
 import { IBidSubmissionForm } from "../entities/Bids";
 import { sendNotification } from "..";
 import { ITaskSubmissionForm } from "../entities/Tasks";
+import { getBidValidationRules } from "../interfaces/middlewares/validators/bidValidator";
+import { validationResult } from "express-validator";
 
 
 const getNotificationText = (status: 'accepted' | 'rejected', projectName: string): string => {
@@ -21,6 +23,26 @@ export const BidUseCase = {
     createBid: async (data: IBidSubmissionForm) => {
         try {
             const {taskId,bidderId} = data
+            const task = await TaskRepository.getTaskById(taskId.toString());
+            if (!task) {
+                throw new Error('Task not found');
+            }
+            
+            const minRate = task.minRate;
+            const maxRate = task.maxRate;
+            
+            const mockReq = {
+                body: data
+            };
+            const validationRules = getBidValidationRules(minRate as number, maxRate as number);
+            
+            for (const rule of validationRules) {
+                await rule.run(mockReq);
+            }
+            const errors = validationResult(mockReq);
+            if (!errors.isEmpty()) {
+                throw new Error(`Validation failed: ${errors.array()[0].msg}`);
+            }
              const user = await TaskRepository.getTaskById(taskId.toString());
              const sender = await FreelancerProfileRepository.getFreelancerByUserId(bidderId.toString());
                     const notificationData = {

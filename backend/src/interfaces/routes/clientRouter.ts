@@ -10,13 +10,17 @@ import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
 import { PaymentController } from '../controllers/PaymentController';
 import { RatingController } from '../controllers/ratingController';
+import { validateTaskSubmission } from '../middlewares/validators/taskValidator';
+import { validateRequestSubmission } from '../middlewares/validators/requestValidator';
+import { validateContract } from '../middlewares/validators/contractValidator';
+import { validate } from '../middlewares/validationMiddleware';
 
 const router = express.Router();
 
 router.use(checkTokenBlacklist);
 
-router.post("/create-task", uploadTaskFiles,checkAuth('client'), TaskController.createTask);
-router.put("/update-task/:id", uploadTaskFiles,checkAuth('client'), TaskController.updateTask);
+router.post("/create-task",validateTaskSubmission,validate,uploadTaskFiles,checkAuth('client'), TaskController.createTask);
+router.put("/update-task/:id",validateTaskSubmission,validate,uploadTaskFiles,checkAuth('client'), TaskController.updateTask);
 router.delete("/delete-task/:id",checkAuth('client'), TaskController.deleteTask);
 router.get('/my-tasks',checkAuth('client'),TaskController.getTasksByUserId);
 
@@ -25,15 +29,15 @@ router.get('/freelancer/:id',checkAuth('client'),FreelancerProfileController.get
 
 
 router.get("/task-bids/:taskId",checkAuth('client'), BidController.getBidsByTask);
-router.post("/create-request",checkAuth('client'),  RequestController.createRequest);
-router.put("/update-request/:id", checkAuth('client'), RequestController.updateRequest);
+router.post("/create-request",validateRequestSubmission,validate,checkAuth('client'),  RequestController.createRequest);
+router.put("/update-request/:id",validateRequestSubmission,validate,checkAuth('client'), RequestController.updateRequest);
 router.delete("/delete-request/:id",checkAuth('client'), RequestController.deleteRequest);
 router.get("/client-request",checkAuth('client'),RequestController.getRequestByUserId)
 router.get("/request/:id",checkAuth('client'), RequestController.getRequestById);
 
-router.post("/create-contract",checkAuth('client'),ContractController.createContract);
+router.post("/create-contract",validateContract,validate,checkAuth('client'),ContractController.createContract);
 router.patch("/bid-status/:id",checkAuth('client'),BidController.BidStatusUpdate);
-router.put("/update-contract/:id",checkAuth('client'),ContractController.updateContract);
+router.put("/update-contract/:id",validateContract,validate,checkAuth('client'),ContractController.updateContract);
 
 router.post("/create-payment-intent",checkAuth('client'),PaymentController.createPaymentIntent);
 router.post("/webhook", express.raw({type: 'application/json'}), PaymentController.createWebhook);
