@@ -224,6 +224,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                             role={role} 
                             handleNotificationClick={handleNotificationClick}
                             index={index}
+                            className="dropdown-size"
                           />
                         </div>
                       ))
