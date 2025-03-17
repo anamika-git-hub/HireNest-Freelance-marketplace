@@ -10,9 +10,9 @@ export const TaskController = {
     createTask: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body; 
-
+            
             const files = req.files as { [key: string]: Express.Multer.File[] };
-
+             console.log(data,files)
             const result = await TaskUseCase.createTask(data, files);
             res.status(201).json({ message: 'Task created successfully', task: result });
         } catch (error) {

@@ -27,7 +27,7 @@ export const RequestUseCase = {
                 text: `You have received a new request from ${sender?.firstname} ${sender?.lastname}.`,
                 isRead: false,
                 createdAt: new Date(),
-                types:'request'
+                types:'request_submission'
             }
             await NotificationRepository.createNotification(notification);
             return await RequestRepository.createRequest(data);

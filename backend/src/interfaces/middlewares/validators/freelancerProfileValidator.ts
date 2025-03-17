@@ -32,7 +32,7 @@ export const validateFreelancerProfile = [
   body('skills')
     .isArray({ min: 1 }).withMessage('At least one skill is required')
     .custom(skills => {
-      if (!skills.every((skill:string) => typeof skill === 'string')) {
+      if (!skills.every((skill: string) => typeof skill === 'string')) {
         throw new Error('All skills must be strings');
       }
       return true;
@@ -43,8 +43,9 @@ export const validateFreelancerProfile = [
     .isString().withMessage('Description must be a string')
     .isLength({ min: 50 }).withMessage('Description must be at least 50 characters'),
   
+  // For update profile, we shouldn't require profileImage as it might already exist and not be updated
   body('profileImage')
-    .notEmpty().withMessage('Profile image is required')
+    .optional()
     .isString().withMessage('Profile image must be a string (URL or path)'),
   
   body('userId')
@@ -57,16 +58,16 @@ export const validateFreelancerProfile = [
   
   body('attachments.*.file')
     .if(body('attachments').exists())
-    .notEmpty().withMessage('Attachment file is required')
+    .optional()
     .isString().withMessage('Attachment file must be a string (URL or path)'),
   
   body('attachments.*.title')
     .if(body('attachments').exists())
-    .notEmpty().withMessage('Attachment title is required')
+    .optional()
     .isString().withMessage('Attachment title must be a string'),
   
   body('attachments.*.description')
     .if(body('attachments').exists())
-    .notEmpty().withMessage('Attachment description is required')
+    .optional()
     .isString().withMessage('Attachment description must be a string')
 ];

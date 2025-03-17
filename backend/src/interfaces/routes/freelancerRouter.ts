@@ -16,8 +16,8 @@ import { validateFreelancerProfile } from '../middlewares/validators/freelancerP
 const router = express.Router();
 router.use(checkTokenBlacklist);
 
-router.post("/setup-freelancer-profile",validateFreelancerProfile,validate, uploadFreelancerImages, FreelancerProfileController.createProfile);
-router.put("/update-freelancer-profile", uploadFreelancerImages,checkAuth('freelancer'), FreelancerProfileController.updateProfile);
+router.post("/setup-freelancer-profile",uploadFreelancerImages,validateFreelancerProfile,validate,FreelancerProfileController.createProfile);
+router.put("/update-freelancer-profile", uploadFreelancerImages,checkAuth('freelancer'),validateFreelancerProfile,validate,FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",checkAuth('freelancer'),TaskController.getTasks);
 router.get("/freelancer-request",checkAuth('freelancer'),RequestController.getRequestByFreelancerId)

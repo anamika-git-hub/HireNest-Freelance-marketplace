@@ -14,13 +14,15 @@ import { validateTaskSubmission } from '../middlewares/validators/taskValidator'
 import { validateRequestSubmission } from '../middlewares/validators/requestValidator';
 import { validateContract } from '../middlewares/validators/contractValidator';
 import { validate } from '../middlewares/validationMiddleware';
+import { validateRequestUpdate } from '../middlewares/validators/requestUpdateValidator';
+import { validateTaskUpdate } from '../middlewares/validators/taskUpdateValidator';
 
 const router = express.Router();
 
 router.use(checkTokenBlacklist);
 
-router.post("/create-task",validateTaskSubmission,validate,uploadTaskFiles,checkAuth('client'), TaskController.createTask);
-router.put("/update-task/:id",validateTaskSubmission,validate,uploadTaskFiles,checkAuth('client'), TaskController.updateTask);
+router.post("/create-task",uploadTaskFiles,validateTaskSubmission,validate,checkAuth('client'), TaskController.createTask);
+router.put("/update-task/:id",uploadTaskFiles,validateTaskUpdate,validate,checkAuth('client'), TaskController.updateTask);
 router.delete("/delete-task/:id",checkAuth('client'), TaskController.deleteTask);
 router.get('/my-tasks',checkAuth('client'),TaskController.getTasksByUserId);
 
@@ -29,8 +31,8 @@ router.get('/freelancer/:id',checkAuth('client'),FreelancerProfileController.get
 
 
 router.get("/task-bids/:taskId",checkAuth('client'), BidController.getBidsByTask);
-router.post("/create-request",validateRequestSubmission,validate,checkAuth('client'),  RequestController.createRequest);
-router.put("/update-request/:id",validateRequestSubmission,validate,checkAuth('client'), RequestController.updateRequest);
+router.post("/create-request",checkAuth('client'),validateRequestSubmission,validate, RequestController.createRequest);
+router.put("/update-request/:id",checkAuth('client'),validateRequestUpdate,validate, RequestController.updateRequest);
 router.delete("/delete-request/:id",checkAuth('client'), RequestController.deleteRequest);
 router.get("/client-request",checkAuth('client'),RequestController.getRequestByUserId)
 router.get("/request/:id",checkAuth('client'), RequestController.getRequestById);
