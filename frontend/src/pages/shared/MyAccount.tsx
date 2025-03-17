@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import axiosConfig from "../../service/axios";
+import axiosConfig, { setAuthTokens } from "../../service/axios";
 import { FaEdit, FaEye, FaEyeSlash} from "react-icons/fa";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { MyAccountValidationSchema } from "../../components/Schemas/myAccountValidation";
@@ -77,10 +77,9 @@ const updateAccountType = async (newRole: string) => {
   try {
     const response = await axiosConfig.post('/users/update-role', { role: newRole,userId:userId });
     if (response.status === 200) {
-      localStorage.setItem("accessToken", response.data.token);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
+      setAuthTokens(response.data.token, response.data.refreshToken);
        localStorage.setItem("role", newRole);
-  setUserRole(newRole); 
+      setUserRole(newRole); 
 
   window.dispatchEvent(new Event("roleChange")); 
 

@@ -32,8 +32,8 @@ router.post('/forgot-password',UserController.forgotPassword);
 router.post('/reset-password',UserController.resetPassword);
 
 router.get('/categories',CategoryController.getAllCategories);
-router.post('/setup-account',validateAccountDetail,validate,uploader,compressionMiddleware,AccountDetailController.setUpAccount);
-router.put ('/update-account',validateAccountUpdate,validate,uploader,compressionMiddleware,checkAuth('user'), AccountDetailController.updateAccount);
+router.post('/setup-account',uploader,compressionMiddleware,validateAccountDetail,validate,AccountDetailController.setUpAccount);
+router.put ('/update-account',uploader,compressionMiddleware,validateAccountUpdate,validate,checkAuth('user'), AccountDetailController.updateAccount);
 router.get('/account-detail',checkAuth('user'),AccountDetailController.getAccountDetail);
 router.post('/update-role',checkAuth('user'),UserController.updateRole);
 

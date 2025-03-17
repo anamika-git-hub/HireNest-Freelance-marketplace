@@ -10,6 +10,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../../store/userSlice";
+import { setAuthTokens } from "../../service/axios";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
@@ -46,8 +47,7 @@ const Signup: React.FC = () => {
     if(response.data.token){
       const user = response.data.user;
 
-      localStorage.setItem("accessToken", response.data.token);
-      localStorage.setItem("refreshToken",response.data.refreshToken);
+      setAuthTokens(response.data.token, response.data.refreshToken);
       localStorage.setItem("userId",response.data.user._id)
       localStorage.setItem("role", response.data.user.role);
       localStorage.setItem("email", response.data.user.email);

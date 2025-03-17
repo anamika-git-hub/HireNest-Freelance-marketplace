@@ -3,6 +3,7 @@ import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { useDispatch, UseDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutAdmin } from "../../store/userSlice";
+import { clearAuthTokens } from "../../service/axios";
 
 const AdminHeader: React.FC = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -25,8 +26,7 @@ const AdminHeader: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearAuthTokens();
     dispatch(logoutAdmin()); 
     localStorage.removeItem("role"); 
     navigate("/admin/login");

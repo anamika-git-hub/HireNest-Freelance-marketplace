@@ -22,6 +22,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../store/userSlice";
 import ConfirmMessage from "./ConfirmMessage";
+import { clearAuthTokens } from "../../service/axios";
 
 
 const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,8 +61,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   const handleConfirmLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearAuthTokens();
     localStorage.removeItem("role");
     dispatch(logoutUser());
     navigate("/login");

@@ -6,6 +6,7 @@ import Footer from "./Footer";
 import { UserRoleProvider } from "../../context/userRoleContext";
 import { logoutUser } from "../../store/userSlice";
 import ConfirmMessage from "./ConfirmMessage";
+import { clearAuthTokens } from "../../service/axios";
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
@@ -17,8 +18,7 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   };
 
   const handleConfirmLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    clearAuthTokens();
     localStorage.removeItem("role");
     dispatch(logoutUser());
     navigate("/login");

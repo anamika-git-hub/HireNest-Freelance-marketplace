@@ -26,17 +26,29 @@ export const validateAccountDetail = [
     .notEmpty().withMessage('ID number is required')
     .isString().withMessage('ID number must be a string'),
   
-  body('profileImage')
-    .notEmpty().withMessage('Profile image is required')
-    .isString().withMessage('Profile image must be a string (URL or path)'),
+    body('profileImage')
+    .custom((value, { req }) => {
+      if (!req.files || !req.files.profileImage) {
+        throw new Error('Profile image is required');
+      }
+      return true;
+    }),
   
   body('idFrontImage')
-    .notEmpty().withMessage('ID front image is required')
-    .isString().withMessage('ID front image must be a string (URL or path)'),
+    .custom((value, { req }) => {
+      if (!req.files || !req.files.idFrontImage) {
+        throw new Error('ID front image is required');
+      }
+      return true;
+    }),
   
   body('idBackImage')
-    .notEmpty().withMessage('ID back image is required')
-    .isString().withMessage('ID back image must be a string (URL or path)'),
+    .custom((value, { req }) => {
+      if (!req.files || !req.files.idBackImage) {
+        throw new Error('ID back image is required');
+      }
+      return true;
+    }),
   
   body('userId')
     .optional()

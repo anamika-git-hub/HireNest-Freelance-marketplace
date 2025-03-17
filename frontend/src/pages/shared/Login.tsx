@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormik } from "formik";
-import axiosConfig from "../../service/axios";
+import axiosConfig, { setAuthTokens } from "../../service/axios";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../store/userSlice";
@@ -24,7 +24,7 @@ const Login: React.FC = () => {
 
       if (response.data.token) {
         const user = response.data.user;
-        localStorage.setItem("accessToken", response.data.token);
+        setAuthTokens(response.data.token, response.data.refreshToken);
         localStorage.setItem("role", response.data.user.role);
         localStorage.setItem("email", response.data.user.email);
 
@@ -50,8 +50,7 @@ const Login: React.FC = () => {
           const user = response.data.user;
           const userDetail = response.data.userDetails;
 
-          localStorage.setItem("accessToken", response.data.token);
-          localStorage.setItem("refreshToken", response.data.refreshToken);
+          setAuthTokens(response.data.token, response.data.refreshToken);
           localStorage.setItem("role", response.data.user.role);
           localStorage.setItem("email", response.data.user.email);
           localStorage.setItem("userId", response.data.user._id);

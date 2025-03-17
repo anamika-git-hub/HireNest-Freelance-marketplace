@@ -14,7 +14,6 @@ import { ChatModel } from './infrastructure/models/ChatModel';
 import { FreelancerProfileRepository } from './infrastructure/repositories/FreelancerProfileRepository';
 import { AccountDetailRepository } from './infrastructure/repositories/accountDetail';
 import { IMessage } from './entities/Message';
-import { ICallSignal } from './entities/CallSignal';
 import Stripe from 'stripe';
 import { INotification } from './entities/notification';
 
@@ -36,11 +35,12 @@ const io = new Server(server, {
 
  app.use('/api/client/webhook', express.raw({ type: 'application/json' }));
  app.use(express.json());
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization','refreshToken'],
-  }));
+ app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,             
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'refreshToken']
+}));
 
 app.use(express.json({limit: '10mb'}));
 app.use(express.urlencoded({extended: true, limit: '10mb'}))
