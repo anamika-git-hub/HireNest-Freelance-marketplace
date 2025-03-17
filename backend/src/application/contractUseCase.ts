@@ -1,10 +1,7 @@
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
 import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
-import { IContract } from "../entities/contract";
+import { IContract, IMilestoneSubmissionForm } from "../entities/contract";
 import { FilterCriteria } from "../entities/filter";
-import mongoose from "mongoose";
-import { FreelancerReviewRepository } from "../infrastructure/repositories/freelancerReviewRepository";
-import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { BidRepository } from "../infrastructure/repositories/BidRepository";
 import { NotificationRepository } from "../infrastructure/repositories/notificationRepository";
 import { sendNotification } from "..";
@@ -61,7 +58,7 @@ export const ContractUseCase = {
     getAllContracts: async (filters:FilterCriteria) => {
         return await ContractRepository.getAllContracts(filters);
     },
-    submitMilestone: async(contractId:string, milestoneId: string, submissionDetails: any) => {
+    submitMilestone: async(contractId:string, milestoneId: string, submissionDetails:IMilestoneSubmissionForm) => {
         try {
             const contract = await ContractRepository.getContractById(contractId);
             if(!contract){
@@ -122,8 +119,13 @@ export const ContractUseCase = {
                 clientId: contract.clientId,
                 projectName: contract.title
             };
-        } catch (error:any) {
-            throw new Error(`Error submitting milestone:${error}`)
+        } catch (error) {
+          if(error instanceof Error){
+            throw new Error(`Error submitting milestone:${error.message}`)
+          }else {
+              throw new Error(`Error submitting milestone due to an unknown error`);
+          }
+            
         }
     },
     getContractDetails:async(contractId:string) => {

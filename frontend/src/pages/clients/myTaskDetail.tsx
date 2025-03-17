@@ -75,9 +75,8 @@ const TaskDetailForm: React.FC = () => {
       } else {
         toast.error(`Error: ${response.data.message || "Failed to submit task"}`);
       }
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      toast.error(error.response?.data?.message || "An error occurred while submitting the task.");
+    } catch (error) {
+      toast.error("An error occurred while submitting the task.");
     } finally {
       setSubmitting(false);
     }

@@ -30,11 +30,8 @@ const AdminLogin: React.FC = () => {
           localStorage.setItem('role', response.data.admin.role);
           localStorage.setItem('email', response.data.admin.email);
         }
-      } catch (error: any) {
-        if (error.response) {
-          const errorMessage = error.response.data.error || 'An error occurred during login';
-          toast.error(errorMessage);
-        }
+      } catch (error) {
+          toast.error('An error occurred during login');
       }
     },
   });

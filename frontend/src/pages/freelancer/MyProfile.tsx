@@ -66,7 +66,7 @@ const MyProfile: React.FC = () => {
     profileImage: freelancerProfile?.profileImage || "",
   };
 
-  const handleAddSkill = (setFieldValue: (field: string, value: any) => void) => {
+  const handleAddSkill = (setFieldValue: (field: string, value: string[]) => void) => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
       const newSkills = [...skills, skillInput];
       setSkills(newSkills);
@@ -75,7 +75,7 @@ const MyProfile: React.FC = () => {
     }
   };
 
-  const handleRemoveSkill = (skill: string, setFieldValue: (field: string, value: any) => void) => {
+  const handleRemoveSkill = (skill: string, setFieldValue: (field: string, value: string[]) => void) => {
     const newSkills = skills.filter((s) => s !== skill);
     setSkills(newSkills);
     setFieldValue('skills', newSkills);

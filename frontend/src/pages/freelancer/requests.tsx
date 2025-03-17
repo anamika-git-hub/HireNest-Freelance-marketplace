@@ -112,8 +112,8 @@ const RequestList: React.FC = () => {
                 toast.success(`Request ${action}ed successfully`);
                 await fetchRequests();
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || `Failed to ${action} request`);
+        } catch (error) {
+            toast.error(`Failed to ${action} request`);
         } finally {
             setLoading(false);
             setConfirmAction(null);

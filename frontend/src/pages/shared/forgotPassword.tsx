@@ -16,8 +16,7 @@ const ForgotPassword: React.FC = () => {
           color: '#fff',
         },
       });
-    } catch (error: any) {
-      console.error("Error:", error.response?.data || error.message);
+    } catch (error) {
       toast.error("Something went wrong. Please try again.");
     }
   };

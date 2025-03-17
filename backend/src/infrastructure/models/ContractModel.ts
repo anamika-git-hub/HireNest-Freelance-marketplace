@@ -1,7 +1,8 @@
 
 import mongoose from 'mongoose';
+import { ICompletionDetails, IContract, IMilestone, IMilestoneFile, IPaymentDetails } from '../../entities/contract';
 
-const MilestoneFileSchema = new mongoose.Schema({
+const MilestoneFileSchema = new mongoose.Schema<IMilestoneFile>({
   fileName: {
     type: String,
     required: true
@@ -12,7 +13,7 @@ const MilestoneFileSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-const CompletionDetailsSchema = new mongoose.Schema({
+const CompletionDetailsSchema = new mongoose.Schema<ICompletionDetails>({
   description: {
     type: String,
     required: true
@@ -24,7 +25,7 @@ const CompletionDetailsSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-const PaymentDetailsSchema = new mongoose.Schema({
+const PaymentDetailsSchema = new mongoose.Schema<IPaymentDetails>({
   id: {
     type: String,
     required: true
@@ -51,7 +52,7 @@ const PaymentDetailsSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-const MilestoneSchema = new mongoose.Schema({
+const MilestoneSchema = new mongoose.Schema<IMilestone>({
   title: {
     type: String,
     required: true
@@ -77,7 +78,7 @@ const MilestoneSchema = new mongoose.Schema({
   rejectionReason: String
 });
 
-const ContractSchema = new mongoose.Schema({
+const ContractSchema = new mongoose.Schema<IContract>({
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TaskSubmission',

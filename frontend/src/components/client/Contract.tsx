@@ -87,9 +87,8 @@ const ContractSection: React.FC = () => {
         toast.success('Offer sent successfully');
         resetForm();
       }
-    } catch (error: any) {
-      console.error("There was an error submitting the form", error);
-      toast.error(error.response?.data?.message || 'Failed to send offer');
+    } catch (error) {
+        toast.error('Failed to send offer');
     } finally {
       setSubmitting(false);
     }

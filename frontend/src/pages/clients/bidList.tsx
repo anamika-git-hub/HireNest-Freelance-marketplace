@@ -121,8 +121,8 @@ const BiddersList: React.FC = () => {
         
         await fetchBids();
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || `Failed to ${action} bid`);
+    } catch (error) {
+      toast.error(`Failed to ${action} bid`);
     } finally {
       setLoading(false);
       setConfirmAction(null);

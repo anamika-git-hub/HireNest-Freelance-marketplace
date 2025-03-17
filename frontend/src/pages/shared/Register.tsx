@@ -60,7 +60,7 @@ const Signup: React.FC = () => {
     toast.error('There was an error during signUp')
    }
  }
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: {email:string,password:string,role:string}) => {
     const { email, password, role } = values;
 
     const newUser = { email, password, role };

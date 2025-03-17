@@ -30,8 +30,12 @@ export const PaymentUseCase = {
             let paymentIntent;
             try {
                 paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-            } catch (stripeError:any) {
+            } catch (stripeError) {
+              if(stripeError instanceof Error){
                 throw new Error(`Stripe error: ${stripeError.message}`);
+              }else {
+                  throw new Error(`Stripe error due to an unknown error`);
+              }
             }
     
             try {
@@ -49,9 +53,13 @@ export const PaymentUseCase = {
                         note: 'Payment initiated'
                     }]
                 });
-            } catch (dbError:any) {
+            } catch (dbError) {
                 await stripe.paymentIntents.cancel(paymentIntent.id);
-                throw new Error(`Database error: ${dbError.message}`);
+                if(dbError instanceof Error){
+                  throw new Error(`Database error: ${dbError.message}`);
+                }else {
+                    throw new Error(`Database error due to an unknown error`);
+                }
             }
     
             return {
@@ -59,8 +67,12 @@ export const PaymentUseCase = {
                 paymentIntentId: paymentIntent.id
             };
     
-        } catch (error:any) {
-            throw new Error(error.message || 'Failed to initialize payment');
+        } catch (error) {
+          if(error instanceof Error){
+            throw new Error(`Failed to initialize payment: ${error.message}`);
+          }else {
+              throw new Error(`Failed to initialize payment due to an unknown error`);
+          }
         }
     },
  handleWebhook: async (event: any) => {

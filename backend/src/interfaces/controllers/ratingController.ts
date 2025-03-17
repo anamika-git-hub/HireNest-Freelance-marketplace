@@ -27,7 +27,7 @@ export const RatingController = {
             res.status(result.isNewReview ? 201 : 200).json({
                 review: result.review
             });
-        } catch (error:any) {
+        } catch (error) {
             next(error);
         }
     },
