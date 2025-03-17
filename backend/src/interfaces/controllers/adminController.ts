@@ -25,7 +25,7 @@ export const AdminController = {
             const searchTerm = req.query.searchTerm as string || "";
 
             const skip = (page - 1)* limit;
-            const filters: any = {}
+            const filters: FilterCriteria = {}
              filters.role = 'freelancer'
             if(searchTerm && searchTerm.trim()) {
                 filters.email = {$regex : searchTerm, $options : "i"}

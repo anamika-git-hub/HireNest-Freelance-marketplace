@@ -1,5 +1,6 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { CategoryUseCase } from '../../application/categoryUseCase';
+import { FilterCriteria } from '../../entities/filter';
 
 
 export const CategoryController = {
@@ -22,7 +23,7 @@ export const CategoryController = {
             const searchTerm = req.query.searchTerm as string || "";
 
             const skip = (page - 1)* limit;
-            const filters: any = {}
+            const filters: FilterCriteria = {}
             if(searchTerm && searchTerm.trim()){
                 filters.name = {$regex: searchTerm, $options: "i"}
             }

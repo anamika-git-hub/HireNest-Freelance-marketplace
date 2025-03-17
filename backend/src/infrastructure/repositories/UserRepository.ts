@@ -1,16 +1,17 @@
 import { UserModel } from "../models/UserModel";
 import { Iuser } from "../../entities/User";
+import { FilterCriteria } from "../../entities/filter";
 
 export const UserRepository = {
 
     findUserByEmail: async (email: string) => UserModel.findOne({ email }),
     findUserById: async (id: string) => UserModel.findById(id),
-    findUserByRole: async (filters:any,skip:number, limit:number)  =>  {
+    findUserByRole: async (filters:FilterCriteria,skip:number, limit:number)  =>  {
         const result = await UserModel.find({...filters
         }).skip(skip).limit(limit);
         return result
     },
-    findUserCount: async (filters: any) => {
+    findUserCount: async (filters: FilterCriteria) => {
         return await UserModel.countDocuments({
             ...filters,
         });

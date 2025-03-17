@@ -19,5 +19,7 @@ export interface FilterCriteria {
     projectName?: { $regex: string; $options: string }; 
     review?: { $regex: string; $options: string }; 
     text?: { $regex: string; $options: string }; 
+    email?: {$regex: string; $options: string};
+    name?:{$regex: string; $options: string};
   }
   

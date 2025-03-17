@@ -149,7 +149,7 @@ export const ContractController = {
                     createdAt: new Date(),
                 }
                 await NotificationRepository.createNotification(notificationData)
-                sendNotification(contract.freelancerId,{
+                sendNotification(contract.freelancerId.toString(),{
                     ...notificationData
                 });
             }

@@ -69,19 +69,14 @@ export const validateTaskUpdate = [
       .isString().withMessage('Description must be a string')
       .isLength({ min: 10 }).withMessage('Description must be at least 10 characters'),
     
-    // Remove clientId validation since it shouldn't change during updates
-    
     body('attachments')
       .optional()
       .custom((value, { req }) => {
-        // Handle both string and array cases for attachments
         if (typeof value === 'string') {
-          return true; // Allow single attachment as string
+          return true; 
         } else if (Array.isArray(value)) {
-          return true; // Allow array of attachments
+          return true; 
         }
-        // If files are uploaded, they'll be handled by the uploadTaskFiles middleware
-        // so we can just return true here
         return true;
       }),
     

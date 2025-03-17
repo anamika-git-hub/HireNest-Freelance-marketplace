@@ -1,4 +1,5 @@
 import { Icategory } from "../entities/Category";
+import { FilterCriteria } from "../entities/filter";
 import { CategoryRepository } from "../infrastructure/repositories/CategoryRepository";
 import cloudinaryV2 from "../utils/cloudinary";
 
@@ -31,10 +32,10 @@ export const CategoryUseCase = {
             
         }
     },
-    getAllCategories: async ({filters,skip,limit}:{filters:any,skip:number, limit:number}) => {
+    getAllCategories: async ({filters,skip,limit}:{filters:FilterCriteria,skip:number, limit:number}) => {
         return await CategoryRepository.getAllCategories(filters,skip,limit);
     },
-    getCategoryCount: async(filters:any)=> {
+    getCategoryCount: async(filters:FilterCriteria)=> {
         return await CategoryRepository.getCategoryCount(filters)
     },
     getCategoryById: async (id: string) => {

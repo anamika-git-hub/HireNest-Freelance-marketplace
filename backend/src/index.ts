@@ -16,6 +16,7 @@ import { AccountDetailRepository } from './infrastructure/repositories/accountDe
 import { IMessage } from './entities/Message';
 import { ICallSignal } from './entities/CallSignal';
 import Stripe from 'stripe';
+import { INotification } from './entities/notification';
 
 export const stripe = new Stripe(Config.STRIPE_SECRET_KEY as string, {
   apiVersion:'2025-01-27.acacia'
@@ -186,7 +187,7 @@ notificationIo.on('connection', async (socket) => {
   });
 });
 
-export const sendNotification = (userId: any , notification: any) => {
+export const sendNotification = (userId: string , notification: INotification) => {
   const socketId = notificationConnections.get(userId);
   if (socketId) {
     notificationIo.to(socketId).emit('new_notification', notification);

@@ -43,7 +43,6 @@ export const validateFreelancerProfile = [
     .isString().withMessage('Description must be a string')
     .isLength({ min: 50 }).withMessage('Description must be at least 50 characters'),
   
-  // For update profile, we shouldn't require profileImage as it might already exist and not be updated
   body('profileImage')
     .optional()
     .isString().withMessage('Profile image must be a string (URL or path)'),

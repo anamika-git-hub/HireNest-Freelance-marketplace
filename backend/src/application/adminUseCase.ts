@@ -5,6 +5,7 @@ import { AccountDetailRepository } from "../infrastructure/repositories/accountD
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { ContractRepository } from "../infrastructure/repositories/contractRepository";
+import { FilterCriteria } from "../entities/filter";
 
 
   
@@ -42,10 +43,10 @@ export const adminUseCase = {
         const refreshToken = JwtService.generateRefreshToken({id: admin.id, email: admin.email, role: admin.role});
         return {token,refreshToken, admin};
     },
-    getAllUsers: async({filters,skip,limit}:{filters:any,skip:number, limit: number}) => {
+    getAllUsers: async({filters,skip,limit}:{filters:FilterCriteria,skip:number, limit: number}) => {
         return await UserRepository.findUserByRole(filters,skip,limit);
     },
-    getUsersCount: async(filters:any) => {
+    getUsersCount: async(filters:FilterCriteria) => {
         return await UserRepository.findUserCount(filters)
     },
     toggleBlockUser: async (userId: string, isBlocked: boolean) => {
