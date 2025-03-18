@@ -98,6 +98,9 @@ export const BidUseCase = {
     getBidsByTask: async (taskId: string) => {
         return await BidRepository.getBidsByTask(taskId);
     },
+    getAllBidsByTask: async (taskIds: string[]) => {
+        return await BidRepository.getAllBidsByTask(taskIds);
+      },
 
     getBidById: async (id: string) => {
         return await BidRepository.getBidByBidderId(id);

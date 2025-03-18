@@ -12,13 +12,21 @@ type RevenueData = {
   fixed: number;
 }
 
-type ActivityData = {
+type FreelancerActivityData = {
   month?: string;
   quarter?: string;
   year?: string;
   bidsPlaced: number;
   bidsWon: number;
   completion: number;
+}
+
+type ClientActivityData = {
+  month?: string;
+  quarter?: string;
+  year?: string;
+  requestsSubmitted: number;
+  requestsAccepted: number;
 }
 
 type RatingData = {
@@ -36,21 +44,12 @@ type SpendingData = {
   completed: number;
 }
 
-type ProposalData = {
-  month?: string;
-  quarter?: string;
-  year?: string;
-  proposals: number;
-  shortlisted: number;
-  hired: number;
-}
-
 type TaskStatusData = {
   name: string;
   value: number;
 }
 
-type ChartDataType = RevenueData | ActivityData | RatingData | SpendingData | ProposalData | TaskStatusData;
+type ChartDataType = RevenueData | FreelancerActivityData | ClientActivityData | RatingData | SpendingData | TaskStatusData;
 
 type DashboardData = {
   revenue?: {
@@ -59,9 +58,9 @@ type DashboardData = {
     yearly: RevenueData[];
   };
   activity?: {
-    monthly: ActivityData[];
-    quarterly: ActivityData[];
-    yearly: ActivityData[];
+    monthly: FreelancerActivityData[] | ClientActivityData[];
+    quarterly: FreelancerActivityData[] | ClientActivityData[];
+    yearly: FreelancerActivityData[] | ClientActivityData[];
   };
   rating?: {
     average: number;
@@ -76,11 +75,6 @@ type DashboardData = {
     monthly: SpendingData[];
     quarterly: SpendingData[];
     yearly: SpendingData[];
-  };
-  proposals?: {
-    monthly: ProposalData[];
-    quarterly: ProposalData[];
-    yearly: ProposalData[];
   };
   taskStatus?: {
     distribution: Array<{
@@ -120,8 +114,8 @@ const DashboardChart = ({ role }) => {
     } else {
       if (type === 'spending' && data.spending) {
         newData = data.spending[period] || [];
-      } else if (type === 'proposals' && data.proposals) {
-        newData = data.proposals[period] || [];
+      } else if (type === 'activity' && data.activity) {
+        newData = data.activity[period] || [];
       } else if (type === 'taskStatus' && data.taskStatus) {
         newData = data.taskStatus.distribution.map(item => ({
           name: item.status,
@@ -142,6 +136,7 @@ const DashboardChart = ({ role }) => {
         });
         
         const result = response.data.result;
+        console.log('Dashboard data:', result);
         setAllChartData(result);
         
         updateChartData(result, chartType, selectedPeriod);
@@ -165,7 +160,7 @@ const DashboardChart = ({ role }) => {
     updateChartData(allChartData, type, selectedPeriod);
   };
   
-  const renderFreeChart = () => {
+  const renderFreelancerChart = () => {
     const timeKey = selectedPeriod === 'monthly' 
       ? 'month' 
       : selectedPeriod === 'quarterly' 
@@ -257,7 +252,7 @@ const DashboardChart = ({ role }) => {
           </LineChart>
         </ResponsiveContainer>
       );
-    } else if (chartType === 'proposals') {
+    } else if (chartType === 'activity') {
       return (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -266,9 +261,8 @@ const DashboardChart = ({ role }) => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="proposals" fill="#0088FE" name="Proposals Received" />
-            <Bar dataKey="shortlisted" fill="#00C49F" name="Shortlisted" />
-            <Bar dataKey="hired" fill="#FFBB28" name="Hired" />
+            <Bar dataKey="requestsSubmitted" fill="#0088FE" name="Requests Submitted" />
+            <Bar dataKey="requestsAccepted" fill="#00C49F" name="Requests Accepted" />
           </BarChart>
         </ResponsiveContainer>
       );
@@ -317,6 +311,20 @@ const DashboardChart = ({ role }) => {
         count: chartData.reduce((acc, item) => 
           acc + ((item as SpendingData).tasks || 0), 0)
       };
+    } else if (role === 'client' && chartType === 'activity') {
+      return {
+        total: chartData.reduce((acc, item) => 
+          acc + ((item as ClientActivityData).requestsSubmitted || 0), 0),
+        accepted: chartData.reduce((acc, item) => 
+          acc + ((item as ClientActivityData).requestsAccepted || 0), 0)
+      };
+    } else if (role === 'freelancer' && chartType === 'activity') {
+      return {
+        placed: chartData.reduce((acc, item) => 
+          acc + ((item as FreelancerActivityData).bidsPlaced || 0), 0),
+        won: chartData.reduce((acc, item) => 
+          acc + ((item as FreelancerActivityData).bidsWon || 0), 0)
+      };
     }
     
     return { total: 0, count: 0 };
@@ -342,7 +350,7 @@ const DashboardChart = ({ role }) => {
               ? (chartType === 'revenue' ? 'Earnings Overview' : 
                  chartType === 'activity' ? 'Bidding Activity' : 'Client Ratings') 
               : (chartType === 'spending' ? 'Spending Overview' : 
-                 chartType === 'proposals' ? 'Proposal Analytics' : 'Task Status')}
+                 chartType === 'activity' ? 'Request Activity' : 'Task Status')}
           </h3>
           {/* Chart type selector */}
           <div className="flex space-x-1">
@@ -376,10 +384,10 @@ const DashboardChart = ({ role }) => {
                   Spending
                 </button>
                 <button 
-                  onClick={() => handleChartTypeChange('proposals')} 
-                  className={`px-2 py-1 text-xs rounded-md ${chartType === 'proposals' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  onClick={() => handleChartTypeChange('activity')} 
+                  className={`px-2 py-1 text-xs rounded-md ${chartType === 'activity' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                 >
-                  Proposals
+                  Requests
                 </button>
                 <button 
                   onClick={() => handleChartTypeChange('taskStatus')} 
@@ -407,7 +415,7 @@ const DashboardChart = ({ role }) => {
               ? (chartType === 'revenue' ? 'Earnings Overview' : 
                  chartType === 'activity' ? 'Bidding Activity' : 'Client Ratings') 
               : (chartType === 'spending' ? 'Spending Overview' : 
-                 chartType === 'proposals' ? 'Proposal Analytics' : 'Task Status')}
+                 chartType === 'activity' ? 'Request Activity' : 'Task Status')}
           </h3>
           <p className="text-gray-400 text-xs">
             {selectedPeriod === 'monthly' ? 'Last 6 Months' : 
@@ -446,10 +454,10 @@ const DashboardChart = ({ role }) => {
                   Spending
                 </button>
                 <button 
-                  onClick={() => handleChartTypeChange('proposals')} 
-                  className={`px-2 py-1 text-xs rounded-md ${chartType === 'proposals' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  onClick={() => handleChartTypeChange('activity')} 
+                  className={`px-2 py-1 text-xs rounded-md ${chartType === 'activity' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                 >
-                  Proposals
+                  Requests
                 </button>
                 <button 
                   onClick={() => handleChartTypeChange('taskStatus')} 
@@ -486,21 +494,35 @@ const DashboardChart = ({ role }) => {
         </div>
       </div>
       <div className="h-60">
-        {role === 'freelancer' ? renderFreeChart() : renderClientChart()}
+        {role === 'freelancer' ? renderFreelancerChart() : renderClientChart()}
       </div>
+      
       <div className="flex justify-between mt-2 text-xs text-gray-400">
-        {chartType !== 'rating' && chartType !== 'taskStatus' && (
+        {chartType === 'revenue' && role === 'freelancer' && (
           <>
-            <span>
-              {role === 'freelancer' 
-                ? `Total Earnings: $${summary.total.toLocaleString()}`
-                : `Total Spent: $${summary.total.toLocaleString()}`}
-            </span>
-            <span>
-              {role === 'freelancer'
-                ? `Projects: ${summary.count}`
-                : `Tasks: ${summary.count}`}
-            </span>
+            <span>Total Earnings: ${summary.total?.toLocaleString()}</span>
+            <span>Projects: {summary.count}</span>
+          </>
+        )}
+        
+        {chartType === 'spending' && role === 'client' && (
+          <>
+            <span>Total Spent: ${summary.total?.toLocaleString()}</span>
+            <span>Tasks: {summary.count}</span>
+          </>
+        )}
+        
+        {chartType === 'activity' && role === 'freelancer' && (
+          <>
+            <span>Bids Placed: {summary.placed}</span>
+            <span>Bids Won: {summary.won}</span>
+          </>
+        )}
+        
+        {chartType === 'activity' && role === 'client' && (
+          <>
+            <span>Requests Submitted: {summary.total}</span>
+            <span>Requests Accepted: {summary.accepted}</span>
           </>
         )}
       </div>

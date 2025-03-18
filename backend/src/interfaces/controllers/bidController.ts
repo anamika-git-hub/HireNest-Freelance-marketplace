@@ -43,6 +43,22 @@ export const BidController = {
             next(error);
         }
     },
+    getAllBidsByTask: async (req: Req, res: Res, next: Next) => {
+        try {
+          const taskIds = req.query.taskIds;
+          
+          const taskIdsArray: string[] = Array.isArray(taskIds) 
+            ? taskIds.map(id => String(id))
+            : typeof taskIds === 'string' 
+              ? [taskIds] 
+              : [];
+          
+          const bids = await BidUseCase.getAllBidsByTask(taskIdsArray);
+          res.status(200).json({ message: "Bids fetched successfully", bids });
+        } catch (error) {
+          next(error);
+        }
+      },
 
     getBidById: async (req: Req, res: Res, next: Next) => {
         try {

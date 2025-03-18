@@ -77,6 +77,8 @@ interface ProcessedContract {
   startDate: string;
 }
 
+
+
 const Dashboard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [bids, setBids] = useState<Bid[]>([]);
@@ -90,6 +92,7 @@ const Dashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [contracts, setContracts] = useState<ProcessedContract[]>([]);
   const [taskBidCounts, setTaskBidCounts] = useState<{[key: string]: number}>({});
+  const [totalBidsReceived, setTotalBidsReceived] = useState<number>(0);
 
   const navigate = useNavigate()
   
@@ -315,7 +318,7 @@ useEffect(() => {
         { title: "Active Tasks", value: tasks.filter(t => t.status === 'pending').length, color: "text-green-500" },
         { title: "Total Tasks", value: tasks.length, color: "text-pink-500" },
         { title: "Completed Projects", value: completedProjects, color: "text-yellow-500" },
-        { title: "Proposals Received", value: tasks.reduce((acc, task) => acc + (task.bids || 0), 0), color: "text-blue-500" }
+        { title: "Bids Received", value: totalBidsReceived, color: "text-blue-500" }
       ];
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -368,6 +371,38 @@ useEffect(() => {
       fetchTasks();
     }
   }, [role]);
+
+  useEffect(() => {
+    const fetchAllBidsCount = async () => {
+      try {
+        if (role === 'client' && tasks.length > 0) {
+          const taskIds = tasks.map(task => task._id);
+          const response = await axiosConfig.get("/client/all-task-bids", {
+            params: { taskIds }
+          });
+          setTotalBidsReceived(response.data.bids.length || 0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch total bids count:", error);
+        setTotalBidsReceived(0);
+      }
+    };
+    
+    if (role === 'client' && tasks.length > 0) {
+      fetchAllBidsCount();
+    }
+  }, [tasks, role]);
+
+  useEffect(()=>{
+    const fetchAllBidsCount = async()=>{
+      const taskIds = tasks.map(task => task._id);
+        const response = await axiosConfig.get("/client/all-task-bids", {
+          params: { taskIds: taskIds }
+        });
+        console.log(response)
+    }
+    fetchAllBidsCount()
+  },[])
 
   const fetchBidCount = async (taskId: string) => {
     try {

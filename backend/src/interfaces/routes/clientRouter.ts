@@ -31,6 +31,7 @@ router.get('/freelancer/:id',checkAuth('client'),FreelancerProfileController.get
 
 
 router.get("/task-bids/:taskId",checkAuth('client'), BidController.getBidsByTask);
+router.get('/all-task-bids',checkAuth('client'),BidController.getAllBidsByTask);
 router.post("/create-request",checkAuth('client'),validateRequestSubmission,validate, RequestController.createRequest);
 router.put("/update-request/:id",checkAuth('client'),validateRequestUpdate,validate, RequestController.updateRequest);
 router.delete("/delete-request/:id",checkAuth('client'), RequestController.deleteRequest);

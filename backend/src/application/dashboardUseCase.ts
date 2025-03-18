@@ -3,6 +3,7 @@ import { BidRepository } from '../infrastructure/repositories/BidRepository';
 import { ContractRepository } from '../infrastructure/repositories/contractRepository';
 import { FreelancerProfileRepository } from '../infrastructure/repositories/FreelancerProfileRepository';
 import { FreelancerReviewRepository } from '../infrastructure/repositories/freelancerReviewRepository';
+import { RequestRepository } from '../infrastructure/repositories/RequestRepository';
 import { TaskRepository } from '../infrastructure/repositories/TaskRepository';
 
 interface MonthlyIdentifier {
@@ -55,6 +56,29 @@ interface ClientProposal {
   proposals: number;
   shortlisted: number;
   hired: number;
+}
+
+// Add after the ClientProposal interface
+interface ClientRequest {
+  _id: MonthlyIdentifier | QuarterlyIdentifier | YearlyIdentifier;
+  requestsSubmitted: number;
+  requestsAccepted: number;
+}
+
+// Add after the ClientProposalData interface
+interface ClientRequestData {
+  monthlyRequests: ClientRequest[];
+  quarterlyRequests: ClientRequest[];
+  yearlyRequests: ClientRequest[];
+}
+
+// Add after the FormattedClientProposals interface
+interface FormattedClientActivity {
+  month?: string;
+  quarter?: string;
+  year?: string;
+  requestsSubmitted: number;
+  requestsAccepted: number;
 }
 
 interface TaskStatusDistribution {
@@ -169,10 +193,10 @@ interface ClientDashboardData {
     quarterly: FormattedClientSpending[];
     yearly: FormattedClientSpending[];
   };
-  proposals: {
-    monthly: FormattedClientProposals[];
-    quarterly: FormattedClientProposals[];
-    yearly: FormattedClientProposals[];
+  activity: {
+    monthly: FormattedClientActivity[];
+    quarterly: FormattedClientActivity[];
+    yearly: FormattedClientActivity[];
   };
   taskStatus: FormattedTaskStatusData;
 }
@@ -217,19 +241,19 @@ export const DashboardUseCase = {
         rating: ratingData
       };
     } else if (userRole === 'client') {
-         const accountDetail = await AccountDetailRepository.findUserDetailsById(userId);
+        const accountDetail = await AccountDetailRepository.findUserDetailsById(userId);
         const uniqueId = accountDetail ? accountDetail._id.toString() : null;
         if(!uniqueId)throw new Error('client is not found')
-      const { monthlySpending, quarterlySpending, yearlySpending, taskStatusDistribution } = 
+        const { monthlySpending, quarterlySpending, yearlySpending, taskStatusDistribution } = 
         await ContractRepository.getClientSpending(uniqueId, threeYearsAgo, currentDate);
       
-      const { monthlyProposals, quarterlyProposals, yearlyProposals } = 
-        await TaskRepository.getClientProposalStats(uniqueId, threeYearsAgo, currentDate);
+        const { monthlyRequests, quarterlyRequests, yearlyRequests } = 
+        await RequestRepository.getClientRequestStats(uniqueId, threeYearsAgo, currentDate);
       
-      const monthlyData = formatClientMonthlyData(monthlySpending, monthlyProposals, monthNames);
-      const quarterlyData = formatClientQuarterlyData(quarterlySpending, quarterlyProposals);
-      const yearlyData = formatClientYearlyData(yearlySpending, yearlyProposals);
-      const taskStatusData = formatTaskStatusData(taskStatusDistribution);
+        const monthlyData = formatClientMonthlyData(monthlySpending, monthlyRequests, monthNames);
+        const quarterlyData = formatClientQuarterlyData(quarterlySpending, quarterlyRequests);
+        const yearlyData = formatClientYearlyData(yearlySpending, yearlyRequests);
+        const taskStatusData = formatTaskStatusData(taskStatusDistribution);
       
       return {
         spending: {
@@ -237,10 +261,10 @@ export const DashboardUseCase = {
           quarterly: quarterlyData.spending,
           yearly: yearlyData.spending
         },
-        proposals: {
-          monthly: monthlyData.proposals,
-          quarterly: quarterlyData.proposals,
-          yearly: yearlyData.proposals
+        activity: { 
+          monthly: monthlyData.activity,
+          quarterly: quarterlyData.activity,
+          yearly: yearlyData.activity
         },
         taskStatus: taskStatusData
       };
@@ -406,12 +430,12 @@ function formatRatingData(ratings: FreelancerRating[]): FormattedRatingData {
   };
 }
 
+// Update formatClientMonthlyData function
 function formatClientMonthlyData(
   spending: ClientSpending[], 
-  proposals: ClientProposal[], 
+  requests: ClientRequest[], 
   monthNames: string[]
-): { spending: FormattedClientSpending[], proposals: FormattedClientProposals[] } {
- 
+): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { // Changed proposals to activity
   const last6Months = getLast6Months();
   
   const spendingData = last6Months.map(monthKey => {
@@ -429,30 +453,29 @@ function formatClientMonthlyData(
     };
   });
   
-  const proposalsData = last6Months.map(monthKey => {
+  // Replace proposals with requests
+  const activityData = last6Months.map(monthKey => {
     const [year, month] = monthKey.split('-');
-    const proposalEntry = proposals.find((p: ClientProposal) => 
-      p._id.year === parseInt(year) && 'month' in p._id && p._id.month === parseInt(month)
+    const requestEntry = requests.find((r: ClientRequest) => 
+      r._id.year === parseInt(year) && 'month' in r._id && r._id.month === parseInt(month)
     );
     
     return {
       month: monthNames[parseInt(month) - 1],
-      proposals: proposalEntry ? proposalEntry.proposals : 0,
-      shortlisted: proposalEntry ? proposalEntry.shortlisted : 0,
-      hired: proposalEntry ? proposalEntry.hired : 0
+      requestsSubmitted: requestEntry ? requestEntry.requestsSubmitted : 0,
+      requestsAccepted: requestEntry ? requestEntry.requestsAccepted : 0
     };
   });
   
-  return { spending: spendingData, proposals: proposalsData };
+  return { spending: spendingData, activity: activityData }; // Changed from proposals to activity
 }
 
+// Update formatClientQuarterlyData function
 function formatClientQuarterlyData(
   spending: ClientSpending[], 
-  proposals: ClientProposal[]
-): { spending: FormattedClientSpending[], proposals: FormattedClientProposals[] } {
-  
+  requests: ClientRequest[]
+): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { // Changed from proposals to activity
   const last4Quarters = getLast4Quarters();
-  
   
   const spendingData = last4Quarters.map(quarterKey => {
     const [year, quarter] = quarterKey.split('-');
@@ -469,28 +492,27 @@ function formatClientQuarterlyData(
     };
   });
   
-  const proposalsData = last4Quarters.map(quarterKey => {
+  // Replace proposals with requests
+  const activityData = last4Quarters.map(quarterKey => {
     const [year, quarter] = quarterKey.split('-');
-    const proposalEntry = proposals.find((p: ClientProposal) => 
-      p._id.year === parseInt(year) && 'quarter' in p._id && p._id.quarter === parseInt(quarter)
+    const requestEntry = requests.find((r: ClientRequest) => 
+      r._id.year === parseInt(year) && 'quarter' in r._id && r._id.quarter === parseInt(quarter)
     );
     
     return {
       quarter: `Q${quarter}`,
-      proposals: proposalEntry ? proposalEntry.proposals : 0,
-      shortlisted: proposalEntry ? proposalEntry.shortlisted : 0,
-      hired: proposalEntry ? proposalEntry.hired : 0
+      requestsSubmitted: requestEntry ? requestEntry.requestsSubmitted : 0,
+      requestsAccepted: requestEntry ? requestEntry.requestsAccepted : 0
     };
   });
   
-  return { spending: spendingData, proposals: proposalsData };
+  return { spending: spendingData, activity: activityData }; // Changed from proposals to activity
 }
 
 function formatClientYearlyData(
   spending: ClientSpending[], 
-  proposals: ClientProposal[]
-): { spending: FormattedClientSpending[], proposals: FormattedClientProposals[] } {
-  
+  requests: ClientRequest[]
+): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { 
   const last3Years = getLast3Years();
   
   const spendingData = last3Years.map(year => {
@@ -505,18 +527,17 @@ function formatClientYearlyData(
     };
   });
   
-  const proposalsData = last3Years.map(year => {
-    const proposalEntry = proposals.find((p: ClientProposal) => p._id.year === parseInt(year));
+  const activityData = last3Years.map(year => {
+    const requestEntry = requests.find((r: ClientRequest) => r._id.year === parseInt(year));
     
     return {
       year,
-      proposals: proposalEntry ? proposalEntry.proposals : 0,
-      shortlisted: proposalEntry ? proposalEntry.shortlisted : 0,
-      hired: proposalEntry ? proposalEntry.hired : 0
+      requestsSubmitted: requestEntry ? requestEntry.requestsSubmitted : 0,
+      requestsAccepted: requestEntry ? requestEntry.requestsAccepted : 0
     };
   });
   
-  return { spending: spendingData, proposals: proposalsData };
+  return { spending: spendingData, activity: activityData }; 
 }
 
 function formatTaskStatusData(taskStatusDistribution: TaskStatusDistribution[]): FormattedTaskStatusData {

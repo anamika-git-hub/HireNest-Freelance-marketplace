@@ -1,5 +1,6 @@
 import { RequestModel } from "../models/RequestModel";
 import { IRequest } from "../../entities/RequestForm";
+import mongoose from "mongoose";
 
 export const RequestRepository = {
     createRequest: async (data: IRequest) => {
@@ -95,4 +96,82 @@ export const RequestRepository = {
             }
         }
     },
+    getClientRequestStats: async (clientId: string, startDate: Date, endDate: Date) => {
+    try {
+      const monthlyRequests = await RequestModel.aggregate([
+        {
+          $match: {
+            requesterId: new mongoose.Types.ObjectId(clientId),
+            createdAt: { $gte: startDate, $lte: endDate }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" }
+            },
+            requestsSubmitted: { $sum: 1 },
+            requestsAccepted: {
+              $sum: { $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] }
+            }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]);
+  
+      const quarterlyRequests = await RequestModel.aggregate([
+        {
+          $match: {
+            requesterId: new mongoose.Types.ObjectId(clientId),
+            createdAt: { $gte: startDate, $lte: endDate }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$createdAt" },
+              quarter: { $ceil: { $divide: [{ $month: "$createdAt" }, 3] } }
+            },
+            requestsSubmitted: { $sum: 1 },
+            requestsAccepted: {
+              $sum: { $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] }
+            }
+          }
+        },
+        { $sort: { "_id.year": 1, "_id.quarter": 1 } }
+      ]);
+  
+      const yearlyRequests = await RequestModel.aggregate([
+        {
+          $match: {
+            requesterId: new mongoose.Types.ObjectId(clientId),
+            createdAt: { $gte: startDate, $lte: endDate }
+          }
+        },
+        {
+          $group: {
+            _id: { year: { $year: "$createdAt" } },
+            requestsSubmitted: { $sum: 1 },
+            requestsAccepted: {
+              $sum: { $cond: [{ $eq: ["$status", "accepted"] }, 1, 0] }
+            }
+          }
+        },
+        { $sort: { "_id.year": 1 } }
+      ]);
+  
+      return {
+        monthlyRequests,
+        quarterlyRequests,
+        yearlyRequests
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to get client request stats: ${error.message}`);
+      } else {
+        throw new Error(`Failed to get client request stats due to an unknown error`);
+      }
+    }
+  }
 };

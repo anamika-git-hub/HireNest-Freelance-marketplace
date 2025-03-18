@@ -50,7 +50,7 @@ export const TaskController = {
             const sortOption = req.query.sortOption as string || "Relevance";
             const searchTerm = req.query.searchTerm as string || ""; 
 
-        const bookmarkedTaskIds = req.query.bookmarkedTaskIds as string[] | undefined;
+            const bookmarkedTaskIds = req.query.bookmarkedTaskIds as string[] | undefined;
     
             const category = req.query.category as string | undefined;
             const skills = req.query.skills as string[] | undefined; 

@@ -56,7 +56,13 @@ export const BidRepository = {
             } 
         }
     },
-
+    getAllBidsByTask: async (taskIds: string[]) => {
+      const bids = await BidSubmissionModel.find({
+        'taskId': { $in: taskIds }
+      });
+      
+      return bids;
+    },
     getBidByBidderId: async (id: string) => {
         try {
             const bid = await BidSubmissionModel.find({bidderId:id}).populate("taskId");
