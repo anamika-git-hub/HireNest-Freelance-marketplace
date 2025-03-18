@@ -737,7 +737,6 @@ updateMilestoneWithPayment: async (
         }
       }
     ]);
-    console.log('monn',monthlySpending,quarterlySpending,yearlySpending,taskStatusDistribution)
     return { 
       monthlySpending, 
       quarterlySpending, 

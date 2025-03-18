@@ -58,21 +58,18 @@ interface ClientProposal {
   hired: number;
 }
 
-// Add after the ClientProposal interface
 interface ClientRequest {
   _id: MonthlyIdentifier | QuarterlyIdentifier | YearlyIdentifier;
   requestsSubmitted: number;
   requestsAccepted: number;
 }
 
-// Add after the ClientProposalData interface
 interface ClientRequestData {
   monthlyRequests: ClientRequest[];
   quarterlyRequests: ClientRequest[];
   yearlyRequests: ClientRequest[];
 }
 
-// Add after the FormattedClientProposals interface
 interface FormattedClientActivity {
   month?: string;
   quarter?: string;
@@ -248,7 +245,7 @@ export const DashboardUseCase = {
         await ContractRepository.getClientSpending(uniqueId, threeYearsAgo, currentDate);
       
         const { monthlyRequests, quarterlyRequests, yearlyRequests } = 
-        await RequestRepository.getClientRequestStats(uniqueId, threeYearsAgo, currentDate);
+        await RequestRepository.getClientRequestStats(userId, threeYearsAgo, currentDate);
       
         const monthlyData = formatClientMonthlyData(monthlySpending, monthlyRequests, monthNames);
         const quarterlyData = formatClientQuarterlyData(quarterlySpending, quarterlyRequests);
@@ -430,12 +427,11 @@ function formatRatingData(ratings: FreelancerRating[]): FormattedRatingData {
   };
 }
 
-// Update formatClientMonthlyData function
 function formatClientMonthlyData(
   spending: ClientSpending[], 
   requests: ClientRequest[], 
   monthNames: string[]
-): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { // Changed proposals to activity
+): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { 
   const last6Months = getLast6Months();
   
   const spendingData = last6Months.map(monthKey => {
@@ -453,7 +449,6 @@ function formatClientMonthlyData(
     };
   });
   
-  // Replace proposals with requests
   const activityData = last6Months.map(monthKey => {
     const [year, month] = monthKey.split('-');
     const requestEntry = requests.find((r: ClientRequest) => 
@@ -467,14 +462,13 @@ function formatClientMonthlyData(
     };
   });
   
-  return { spending: spendingData, activity: activityData }; // Changed from proposals to activity
+  return { spending: spendingData, activity: activityData }; 
 }
 
-// Update formatClientQuarterlyData function
 function formatClientQuarterlyData(
   spending: ClientSpending[], 
   requests: ClientRequest[]
-): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { // Changed from proposals to activity
+): { spending: FormattedClientSpending[], activity: FormattedClientActivity[] } { 
   const last4Quarters = getLast4Quarters();
   
   const spendingData = last4Quarters.map(quarterKey => {
@@ -492,7 +486,6 @@ function formatClientQuarterlyData(
     };
   });
   
-  // Replace proposals with requests
   const activityData = last4Quarters.map(quarterKey => {
     const [year, quarter] = quarterKey.split('-');
     const requestEntry = requests.find((r: ClientRequest) => 
@@ -506,7 +499,7 @@ function formatClientQuarterlyData(
     };
   });
   
-  return { spending: spendingData, activity: activityData }; // Changed from proposals to activity
+  return { spending: spendingData, activity: activityData }; 
 }
 
 function formatClientYearlyData(
