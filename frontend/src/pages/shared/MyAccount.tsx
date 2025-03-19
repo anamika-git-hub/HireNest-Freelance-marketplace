@@ -47,7 +47,7 @@ const MyAccount: React.FC = () => {
         const userId = localStorage.getItem("userId"); 
         if (userId) {
           const response = await axiosConfig.get(`/users/account-detail`);
-          setUserDetail(response.data.userDetails);
+          setUserDetail(response.data.result.userDetails);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);

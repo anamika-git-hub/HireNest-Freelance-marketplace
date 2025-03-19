@@ -1,12 +1,18 @@
 import { Req, Res, Next } from "../../infrastructure/types/serverPackageTypes";
 import { BidUseCase } from "../../application/bidUseCase";
+import { HttpStatusCode } from "../constants/httpStatusCodes";
+import { BidMessages } from "../constants/responseMessages";
+import { sendResponse } from "../../utils/responseHandler";
 
 export const BidController = {
     createBid: async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body;
             const result = await BidUseCase.createBid(data);
-            res.status(201).json({ message: "Bid created successfully", bid: result });
+            sendResponse(res, HttpStatusCode.CREATED, { 
+                message: BidMessages.CREATE_SUCCESS, 
+                bid: result 
+            });
         } catch (error) {
             next(error);
         }
@@ -18,7 +24,10 @@ export const BidController = {
             const updates = req.body;
 
             const result = await BidUseCase.updateBid(id, updates);
-            res.status(200).json({ message: "Bid updated successfully", bid: result });
+            sendResponse(res, HttpStatusCode.OK, { 
+                message: BidMessages.UPDATE_SUCCESS, 
+                bid: result 
+            });
         } catch (error) {
             next(error);
         }
@@ -28,7 +37,9 @@ export const BidController = {
         try {
             const { id } = req.params;
             await BidUseCase.deleteBid(id);
-            res.status(200).json({ message: "Bid deleted successfully" });
+            sendResponse(res, HttpStatusCode.OK, { 
+                message: BidMessages.DELETE_SUCCESS 
+            });
         } catch (error) {
             next(error);
         }
@@ -38,7 +49,10 @@ export const BidController = {
         try {
             const { taskId } = req.params;
             const bids = await BidUseCase.getBidsByTask(taskId);
-            res.status(200).json({ message: "Bids fetched successfully", bids });
+            sendResponse(res, HttpStatusCode.OK, { 
+                message: BidMessages.FETCH_MULTIPLE_SUCCESS, 
+                bids 
+            });
         } catch (error) {
             next(error);
         }
@@ -54,7 +68,10 @@ export const BidController = {
               : [];
           
           const bids = await BidUseCase.getAllBidsByTask(taskIdsArray);
-          res.status(200).json({ message: "Bids fetched successfully", bids });
+          sendResponse(res, HttpStatusCode.OK, { 
+            message: BidMessages.FETCH_MULTIPLE_SUCCESS, 
+            bids 
+        });
         } catch (error) {
           next(error);
         }
@@ -64,7 +81,10 @@ export const BidController = {
         try {
             const { id } = req.params;
             const bid = await BidUseCase.getBidById(id);
-            res.status(200).json({ message: "Bid fetched successfully", bid });
+            sendResponse(res, HttpStatusCode.OK, { 
+                message: BidMessages.FETCH_SUCCESS, 
+                bid 
+            });
         } catch (error) {
             next(error);
         }
@@ -74,7 +94,10 @@ export const BidController = {
             const { id } = req.params;
             const {status} = req.body;
             const updatedBid = await BidUseCase.updateBidStatus(id,status);
-            res.status(200).json({ message: "Bid updated successfully", updatedBid });
+            sendResponse(res, HttpStatusCode.OK, { 
+                message: BidMessages.UPDATE_SUCCESS, 
+                updatedBid 
+            });
         } catch (error) {
             next(error);
         }

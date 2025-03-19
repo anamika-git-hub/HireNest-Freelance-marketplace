@@ -1,5 +1,8 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { MessageUseCase } from '../../application/messageUseCase';
+import { HttpStatusCode } from '../constants/httpStatusCodes';
+import { sendResponse } from "../../utils/responseHandler";
+import { MessageMessages } from '../constants/responseMessages';
 
 interface CustomRequest extends Req {
     user?: { userId: string }; 
@@ -8,38 +11,47 @@ interface CustomRequest extends Req {
 export const MessageController = {
     getReceiver: async (req: Req, res: Res, next: Next) => {
         try {
+            const userId = req.query.userId as string;
+            const role = req.query.role as string;
+            const result = await MessageUseCase.getReceivers(userId, role);
             
-            const userId = req.query.userId as string ;
-            const role = req.query.role as string ;
-            const result = await MessageUseCase.getReceivers(userId,role);
-            res.status(200).json(result);
+            sendResponse(res, HttpStatusCode.OK, {
+                message: MessageMessages.RECEIVERS_FETCH_SUCCESS,
+                 result
+            });
         } catch (error) {
-            next(error)
+            next(error);
         }
     },
 
-    setContacts : async (req: Req, res: Res, next: Next) => {
+    setContacts: async (req: Req, res: Res, next: Next) => {
         try {
-            const {senderId,receiverId,role} = req.body;
-            const result = await MessageUseCase.setContacts(senderId,receiverId,role)
-            res.status(200).json(result);
+            const {senderId, receiverId, role} = req.body;
+            const result = await MessageUseCase.setContacts(senderId, receiverId, role);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: MessageMessages.CONTACTS_SET_SUCCESS,
+                result
+            });
         } catch (error) {
-            next(error)
+            next(error);
         }
     },
 
     fileUpload: async (req: Req, res: Res, next: Next) => {
         try {
             const file = req.file;
-            if(!file){
-                throw new Error('No file provided')
-            }console.log('Received file:', file.originalname, file.mimetype, file.size);
+            if (!file) {
+                throw new Error('No file provided');
+            }
+            console.log('Received file:', file.originalname, file.mimetype, file.size);
 
             const result = await MessageUseCase.fileUpload(file);
             console.log('Upload result:', result);
-            res.status(200).json({
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: MessageMessages.FILE_UPLOAD_SUCCESS,
                 success: true,
-                message: "File upload successful",
                 url: result.url,
                 fileName: result.fileName,
                 fileType: result.fileType
@@ -48,18 +60,20 @@ export const MessageController = {
             next(error);
         }
     },
+    
     getUnreadMessages: async (req: CustomRequest, res: Res, next: Next) => {
         try {
-          const userId = req.user?.userId || "";
-          const role = req.query.role as string;
-          
-          const result = await MessageUseCase.getUnreadMessages(userId, role);
-          
-          res.status(200).json({
-            result
-          });
+            const userId = req.user?.userId || "";
+            const role = req.query.role as string;
+            
+            const result = await MessageUseCase.getUnreadMessages(userId, role);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: MessageMessages.UNREAD_MESSAGES_FETCH_SUCCESS,
+                result
+            });
         } catch (error) {
-          next(error);
+            next(error);
         }
-      }
-}
+    }
+};

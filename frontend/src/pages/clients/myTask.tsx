@@ -36,7 +36,7 @@ const MyTaskList: React.FC = () => {
     const fetchTasks = async () => {
       try {
         const response = await axiosConfig.get("/client/my-tasks");
-        const fetchedTasks = response.data;
+        const fetchedTasks = response.data.task;
 
         const tasksWithTimeLeft = fetchedTasks.map((task: Task) => ({
           ...task,

@@ -175,7 +175,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
       >
         <FaClipboardList className="mr-3" />
-        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Live Contracts</span>
+        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Contracts</span>
       </NavLink>
     ) : (
       <NavLink
@@ -183,7 +183,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         className="flex items-center px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600"
       >
         <FaClipboardList className="mr-3" />
-        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Live Contracts</span>
+        <span className={`${!sidebarOpen && "hidden"} lg:inline`}>Contracts</span>
       </NavLink>
     );
   };

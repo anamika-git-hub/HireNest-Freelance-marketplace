@@ -50,7 +50,7 @@ const BiddersList: React.FC = () => {
           const freelancerProfileResponse = await axiosConfig.get(
             `/users/freelancer-profile/${bidder.bidderId}`
           );
-          return freelancerProfileResponse.data;
+          return freelancerProfileResponse.data.freelancer;
         })
       );
 

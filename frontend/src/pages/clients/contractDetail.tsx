@@ -132,7 +132,7 @@ const PaymentModal: React.FC<{
           contractId,
           freelancerId: freelancerId,
         });
-        setClientSecret(response.data.clientSecret);
+        setClientSecret(response.data.result.clientSecret);
       } catch (err) {
         toast.error('Failed to initialize payment');
         onClose();

@@ -74,7 +74,7 @@ const Chat: React.FC = () => {
           }
         });
   
-        const contactList: Contacts[] = response.data.map((receiver: Contacts) => ({
+        const contactList: Contacts[] = response.data.result.map((receiver: Contacts) => ({
           _id: receiver._id,
           name: receiver.name,
           profileImage: receiver.profileImage,

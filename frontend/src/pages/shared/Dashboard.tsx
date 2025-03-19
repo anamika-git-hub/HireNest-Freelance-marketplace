@@ -264,7 +264,7 @@ useEffect(() => {
         setError(null);
 
         const tasksResponse = await axiosConfig.get("/client/my-tasks");
-        const ongoingTasks = tasksResponse.data.filter((task: Task) => 
+        const ongoingTasks = tasksResponse.data.task.filter((task: Task) => 
           task.status === 'ongoing'
         );
         
@@ -352,7 +352,7 @@ useEffect(() => {
           const response = await axiosConfig.get("/client/my-tasks");
           const fetchedTasks = response.data;
           
-          const tasksWithTimeLeft = fetchedTasks.map((task: Task) => ({
+          const tasksWithTimeLeft = fetchedTasks.task.map((task: Task) => ({
             ...task,
             timeLeft: calculateTimeLeft(task.timeline),
           }));

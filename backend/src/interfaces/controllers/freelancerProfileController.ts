@@ -1,32 +1,43 @@
 import {Req, Res, Next} from '../../infrastructure/types/serverPackageTypes';
 import { FreelancerProfileUseCase } from '../../application/freelancerProfileUseCase';
 import { FilterCriteria } from '../../entities/filter';
+import { HttpStatusCode } from '../constants/httpStatusCodes';
+import { sendResponse } from "../../utils/responseHandler";
+import { FreelancerProfileMessages } from '../constants/responseMessages';
+
 interface CustomRequest extends Req {
     user?: { userId: string }; 
   }
   
-export const FreelancerProfileController = {
+  export const FreelancerProfileController = {
     createProfile : async (req: Req, res: Res, next: Next) => {
         try {
             const data = req.body;
             const files = req.files as { [key: string]: Express.Multer.File[]};
             const result = await FreelancerProfileUseCase.createProfile(data, files);
-            res.status(201).json({message: 'Profile setup successful', profile: result})
+            
+            sendResponse(res, HttpStatusCode.CREATED, {
+                message: FreelancerProfileMessages.CREATE_SUCCESS,
+                profile: result
+            });
         } catch (error) {
-            next (error)
-
+            next(error);
         }
     },
 
     updateProfile: async (req: CustomRequest, res: Res, next: Next) => {
         try {
             const updates = req.body;
-            const files = req.files as { [ key: string]: Express.Multer.File[]};
-            const id = req.user?.userId || ""
-            const result = await FreelancerProfileUseCase.updateProfile(id,updates, files);
-            res.status(200).json({message: 'Freelancer profile updated successfully', profile: result})
+            const files = req.files as { [key: string]: Express.Multer.File[]};
+            const id = req.user?.userId || "";
+            const result = await FreelancerProfileUseCase.updateProfile(id, updates, files);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: FreelancerProfileMessages.UPDATE_SUCCESS,
+                profile: result
+            });
         } catch (error) {
-            next (error);
+            next(error);
         }
     },
 
@@ -61,7 +72,8 @@ export const FreelancerProfileController = {
             if (bookmarkedFreelancerIds) {
                 filters._id = { $in: bookmarkedFreelancerIds };
             }
-             if (experience) {
+            
+            if (experience) {
                 const experienceMatch = experience.match(/^(\d+)(?:\+)?(?:-(\d+))?/);
                 if (experienceMatch) {
                     const minExperience = parseInt(experienceMatch[1], 10); 
@@ -73,42 +85,55 @@ export const FreelancerProfileController = {
                     };
                 }
             }
+            
             if (skills) filters.skills = { $all: skills };
             
             if (priceRange) {
                 const minRate = parseFloat(priceRange.min);
                 const maxRate = parseFloat(priceRange.max);
-                if (!isNaN(minRate)) filters.hourlyRate = {$gte: minRate};
-                if (!isNaN(maxRate)) filters.hourlyRate = {$lte: maxRate};
+                if (!isNaN(minRate)) filters.hourlyRate = { ...filters.hourlyRate, $gte: minRate };
+                if (!isNaN(maxRate)) filters.hourlyRate = { ...filters.hourlyRate, $lte: maxRate };
             }
-            
 
-            const freelancers = await FreelancerProfileUseCase.getFreelancers({filters,sortCriteria,skip,limit});
-
+            const freelancers = await FreelancerProfileUseCase.getFreelancers({filters, sortCriteria, skip, limit});
             const totalFreelancers = await FreelancerProfileUseCase.getFreelancersCount(filters);
             const totalPages = Math.ceil(totalFreelancers/limit);
-            res.status(200).json({data:freelancers,totalPages,message: 'Listed freelancers successfully'})
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: FreelancerProfileMessages.FETCH_SUCCESS,
+                data: freelancers,
+                totalPages
+            });
         } catch (error) {
             next(error);
         }
     },
 
-     getFreelancerByUserId: async (req: Req, res: Res, next: Next) => {
-            try {
-                const {id} = req.params;
-                const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(id);
-                res.status(200).json(freelancer);
-            } catch (error) {
-                next(error); 
-            }
-        },
-        getFreelancerById: async (req: Req, res: Res, next: Next) => {
-            try {
-                const { id } = req.params; 
-                const freelancer = await FreelancerProfileUseCase.getFreelancerById(id);
-                res.status(200).json({ freelancer, message: 'Task fetched successfully' });
-            } catch (error) {
-                next(error); 
-            }
+    getFreelancerByUserId: async (req: Req, res: Res, next: Next) => {
+        try {
+            const {id} = req.params;
+            const freelancer = await FreelancerProfileUseCase.getFreelancerByUserId(id);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: FreelancerProfileMessages.FETCH_ONE_SUCCESS,
+                freelancer
+            });
+        } catch (error) {
+            next(error); 
         }
+    },
+    
+    getFreelancerById: async (req: Req, res: Res, next: Next) => {
+        try {
+            const { id } = req.params; 
+            const freelancer = await FreelancerProfileUseCase.getFreelancerById(id);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: FreelancerProfileMessages.FETCH_ONE_SUCCESS,
+                freelancer
+            });
+        } catch (error) {
+            next(error); 
+        }
+    }
 }

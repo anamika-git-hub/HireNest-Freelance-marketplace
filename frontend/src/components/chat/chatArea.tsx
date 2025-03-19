@@ -111,14 +111,14 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       let userName = '';
       if (role === 'freelancer') {
         const response = await axiosConfig(`/users/freelancer-profile/${userId}`);
-        const data = await response.data;
+        const data = await response.data.freelancer;
         if (data && data._id) {
           adjustedUserId = data._id
           userName = data.name
         }
       } else if (role === 'client') {
         const response = await axiosConfig(`/users/account-detail`);
-        const data = await response.data.userDetails;
+        const data = await response.data.result.userDetails;
         if (data && data._id) {
           adjustedUserId = data._id;
           userName = data.firstname+' '+ data.lastname

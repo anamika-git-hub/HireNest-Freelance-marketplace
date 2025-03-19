@@ -78,7 +78,7 @@ const ContractSection: React.FC = () => {
         ...formattedValues,
         bidId,
         taskId,
-        clientId:account.data.userDetails._id,
+        clientId:account.data.result.userDetails._id,
         freelancerId
       });
 

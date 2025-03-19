@@ -70,11 +70,11 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId, role }) => {
       try {
         if (role === 'freelancer') {
           const response = await axiosConfig.get(`/users/freelancer-profile/${userId}`);
-          setDisplayName(response.data.name);
-          console.log('Display name set (freelancer):', response.data.name);
+          setDisplayName(response.data.freelancer.name);
+          console.log('Display name set (freelancer):', response.data.freelancer.name);
         } else if (role === 'client') {
           const response = await axiosConfig.get('/users/account-detail');
-          const name = `${response.data.userDetails.firstname} ${response.data.userDetails.lastname}`;
+          const name = `${response.data.result.userDetails.firstname} ${response.data.result.userDetails.lastname}`;
           setDisplayName(name);
           console.log('Display name set (client):', name);
         } else {

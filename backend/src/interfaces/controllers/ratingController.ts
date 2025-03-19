@@ -2,17 +2,18 @@
 import { FreelancerReviewUseCase } from "../../application/freelancerReviewUseCase";
 import { FilterCriteria } from "../../entities/filter";
 import { Next, Req, Res } from "../../infrastructure/types/serverPackageTypes";
-
-
+import { HttpStatusCode } from '../constants/httpStatusCodes';
+import { sendResponse } from "../../utils/responseHandler";
+import { RatingMessages } from "../constants/responseMessages";
 
 interface CustomRequest extends Req {
     user?: { userId: string }; 
   }
 
-export const RatingController = {
+  export const RatingController = {
     reviewFreelancer: async (req: CustomRequest, res: Res, next: Next) => {
         try {
-            const { freelancerId,taskId, contractId, rating, review } = req.body;
+            const { freelancerId, taskId, contractId, rating, review } = req.body;
             const clientId = req.user?.userId || '';
             
             const result = await FreelancerReviewUseCase.reviewFreelancer(
@@ -24,34 +25,40 @@ export const RatingController = {
                 review || ''
             );
             
-            res.status(result.isNewReview ? 201 : 200).json({
+            const statusCode = result.isNewReview ? HttpStatusCode.CREATED : HttpStatusCode.OK;
+            const message = result.isNewReview ? RatingMessages.REVIEW_CREATE_SUCCESS : RatingMessages.REVIEW_UPDATE_SUCCESS;
+            
+            sendResponse(res, statusCode, {
+                message: message,
                 review: result.review
             });
         } catch (error) {
             next(error);
         }
     },
+    
     getFreelancerReviews: async (req: Req, res: Res, next: Next) => {
         try {
             const userId = req.params.id;
-            const page = parseInt(req.query.page as string , 10) || 1;
+            const page = parseInt(req.query.page as string, 10) || 1;
             const limit = parseInt(req.query.limit as string, 10) || 10;
             const searchTerm = req.query.searchTerm as string || '';
-            const skip = (page-1) * limit;
-            const filters:FilterCriteria = {};
+            const skip = (page - 1) * limit;
+            const filters: FilterCriteria = {};
 
-            if(searchTerm && searchTerm.trim()) {
+            if (searchTerm && searchTerm.trim()) {
                 filters.$or = [
-                    {projectName: { $regex: searchTerm,$options: 'i'}},
-                    {review :{ $regex: searchTerm,$options: "i"}}
-                ]
+                    { projectName: { $regex: searchTerm, $options: 'i' } },
+                    { review: { $regex: searchTerm, $options: "i" } }
+                ];
             }
 
-            const reviews = await FreelancerReviewUseCase.getFreelancerReviews(userId,filters,skip,limit);
+            const reviews = await FreelancerReviewUseCase.getFreelancerReviews(userId, filters, skip, limit);
             const totalReviews = await FreelancerReviewUseCase.getReviewsCount(filters);
-            const totalPages = Math.ceil(totalReviews/limit);
-            res.status(200).json({
-                message: 'Reviews retrieved successfully',
+            const totalPages = Math.ceil(totalReviews / limit);
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: RatingMessages.REVIEWS_FETCH_SUCCESS,
                 reviews,
                 totalPages
             });
@@ -61,12 +68,16 @@ export const RatingController = {
         }
     },
 
-    getFreelancerRatings: async(req: Req, res: Res, next: Next) => {
+    getFreelancerRatings: async (req: Req, res: Res, next: Next) => {
         try {
             const ratings = await FreelancerReviewUseCase.getAggregatedRatings();
-            res.status(200).json({ratings,message: 'Freelancer ratings retrieved successfully'})
+            
+            sendResponse(res, HttpStatusCode.OK, {
+                message: RatingMessages.RATINGS_FETCH_SUCCESS,
+                ratings
+            });
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 }

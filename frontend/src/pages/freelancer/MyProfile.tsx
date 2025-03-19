@@ -45,8 +45,8 @@ const MyProfile: React.FC = () => {
         const userId = localStorage.getItem("userId");
         if (userId) {
           const response = await axiosConfig.get(`/users/freelancer-profile/${userId}`);
-          setFreelancerProfile(response.data);
-          setSkills(response.data.skills || []);
+          setFreelancerProfile(response.data.freelancer);
+          setSkills(response.data.freelancer.skills || []);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);

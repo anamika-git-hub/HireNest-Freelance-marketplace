@@ -57,11 +57,11 @@ const ClientContractsList: React.FC = () => {
   const fetchContractsData = async () => {
     const tasksResponse = await axiosConfig.get("/client/my-tasks");
     
-    if (tasksResponse.data.length === 0) {
+    if (tasksResponse.data.task.length === 0) {
       return [];
     }
 
-    const taskIds = tasksResponse.data.map((task: Task) => task._id);
+    const taskIds = tasksResponse.data.task.map((task: Task) => task._id);
     const contractsResponse = await axiosConfig.get("/users/contracts", {
       params: {
         taskIds: taskIds,
