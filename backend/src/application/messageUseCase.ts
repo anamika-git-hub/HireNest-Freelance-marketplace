@@ -88,5 +88,38 @@ export const MessageUseCase = {
             console.error('Error in fileUpload usecase:', error);
             throw error;
         }
-    }
+    },
+    getUnreadMessages: async (userId: string, role: string) => {
+        try {
+          let adjustedUserId: string | null = userId;
+          if (role === 'freelancer') {
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(userId);
+            adjustedUserId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          } else if (role === 'client') {
+            const clientProfile = await AccountDetailRepository.findUserDetailsById(userId);
+            adjustedUserId = clientProfile ? clientProfile._id.toString() : null;
+          }
+          
+          const messages = await MessageRepository.getUnreadMessages(adjustedUserId, role);
+          
+          const messagesWithSenders = await Promise.all(messages.map(async (message) => {
+            let senderDetails = null;
+            
+            if (role === 'freelancer') {
+              senderDetails = await AccountDetailRepository.findUserDetailsById(message.userId.toString());
+            } else if (role === 'client') {
+              senderDetails = await FreelancerProfileRepository.getFreelancerByUserId(message.userId.toString());
+            }
+            
+            return {
+              ...message.toObject(),
+              senderDetails: senderDetails || {}
+            };
+          }));
+          
+          return messagesWithSenders;
+        } catch (error) {
+          throw new Error('Failed to fetch unread messages');
+        }
+      }
 }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { logoutUser } from '../../store/userSlice';
 import axiosConfig from '../../service/axios';
 import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
 import { MdDashboard} from "react-icons/md";
@@ -44,11 +43,15 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const [userDetail,setUserDetail] = useState<UserDetail | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
+  const [unreadMessageList, setUnreadMessageList] = useState<any[]>([]);
+  const [showMessageDropdown, setShowMessageDropdown] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationMenuRef = useRef<HTMLDivElement>(null);
+  const messageMenuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -99,6 +102,47 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
     };
   }, []);
 
+  useEffect(() => {
+    socket.on('receive_message', (message) => {
+      if (message.receiverId === userId && message.senderId !== userId) {
+        setUnreadMessages(prev => prev + 1);
+        setUnreadMessageList(prev => [message, ...prev]);
+      }
+    });
+  
+    socket.on('messages_marked_read', () => {
+      setUnreadMessages(0);
+      setUnreadMessageList([]);
+    });
+  
+    return () => {
+      socket.off('receive_message');
+      socket.off('messages_marked_read');
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      try {
+        const { data } = await axiosConfig.get('/users/unread-messages', {
+          params: {
+            role: userRole
+          }
+        });
+        setUnreadMessages(data.result.length);
+        setUnreadMessageList(data.result);
+      } catch (error) {
+        console.error("Error fetching unread messages:", error);
+      }
+    };
+    
+    if (userId) {
+      fetchUnreadMessages();
+    }
+  }, [userId, userRole]);
+
+
+
   const getNavLinks = () => {
     if (userRole === "freelancer") {
       return (
@@ -146,6 +190,11 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
         !notificationMenuRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
+      } else if (
+        messageMenuRef.current && 
+        !messageMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowMessageDropdown(false);
       }
     };
 
@@ -162,6 +211,13 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
       navigate('/notification')
       return updatedNotifications;
     });
+  };
+
+  const handleMessageIconClick = () => {
+    setShowMessageDropdown(!showMessageDropdown);
+    if (!showMessageDropdown) {
+      setUnreadMessages(0);
+    }
   };
 
   return (
@@ -204,6 +260,86 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           </span>
         )}
       </button>
+      <button
+              onClick={handleMessageIconClick}
+              className="relative text-gray-700 hover:text-blue-600"
+            >
+              <span className="text-xl text-blue-600">✉️</span>
+              {unreadMessages > 0 && (
+                <span className="absolute top-0 right-0 left-3 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {unreadMessages}
+                </span>
+              )}
+            </button>
+            
+            {showMessageDropdown && (
+            <div 
+              className="absolute right-0 top-full mt-4 w-80 bg-white shadow-lg rounded-lg p-3 border border-gray-200 max-h-96 overflow-y-auto" 
+              ref={messageMenuRef}
+              style={{
+                maxHeight: 'calc(80vh - 100px)', 
+                zIndex: 1000
+              }}
+            >
+              <h3 className="text-gray-700 font-semibold mb-2">Messages</h3>
+              <div className="space-y-2">
+                {unreadMessageList.length > 0 ? (
+                  <>
+                    {unreadMessageList.map((msg, idx) => (
+                      <div 
+                        key={idx} 
+                        className="p-2 border-b border-gray-100 hover:bg-gray-50 rounded cursor-pointer"
+                        onClick={() => {
+                          navigate('/messages'); 
+                          setShowMessageDropdown(false);
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <img 
+                            src={msg.senderDetails?.profileImage || "https://i.pinimg.com/474x/43/6c/ac/436cac73f5fff533999f31147c3538b7.jpg"} 
+                            alt="Sender" 
+                            className="w-8 h-8 rounded-full mr-2"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {msg.senderDetails?.firstname || 'Unknown'} {msg.senderDetails?.lastname || ''}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">{msg.text}</p>
+                          </div>
+                          <span className="text-xs text-gray-400">
+                            {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => {
+                        navigate('/messages');
+                        setShowMessageDropdown(false);
+                      }}
+                      className="w-full text-center py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 mt-2"
+                    >
+                      View All Messages
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-center text-gray-500 py-2">No unread messages</p>
+                    <button 
+                      onClick={() => {
+                        navigate('/messages');
+                        setShowMessageDropdown(false);
+                      }}
+                      className="w-full text-center py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      Go to Messages
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
               {/* Notification Dropdown */}
               {showDropdown && (
                 <div 
@@ -235,7 +371,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 </div>
               )}
 
-            <button className="relative hover:text-blue-200">✉️</button>
+            
             <div className="relative" ref={profileMenuRef}>
   <img
     src={

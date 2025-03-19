@@ -51,6 +51,7 @@ router.delete('/bookmarks/:id',checkAuth('user'),BookMarkController.deleteBookma
 router.get('/get-receivers',checkAuth('user'),MessageController.getReceiver);
 router.post('/set-contacts',checkAuth('user'),MessageController.setContacts);
 router.post('/upload',messageFileUploader,checkAuth('user'),MessageController.fileUpload);
+router.get('/unread-messages', checkAuth('user'), MessageController.getUnreadMessages);
 
 router.get('/notifications',checkAuth('user'),UserController.getNotification);
 router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead)

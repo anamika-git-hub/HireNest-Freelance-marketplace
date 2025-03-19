@@ -85,5 +85,13 @@ export const MessageRepository = {
             });
             await chat.save();
           }
-    }
+    },
+    getUnreadMessages: async (userId: string | null, role: string) => {
+        const messages = await MessageModel.find({
+          receiverId: userId,
+          isRead: false
+        }).sort({ createdAt: -1 }); 
+        
+        return messages;
+      }
 }

@@ -47,5 +47,19 @@ export const MessageController = {
         } catch (error) {
             next(error);
         }
-    }
+    },
+    getUnreadMessages: async (req: CustomRequest, res: Res, next: Next) => {
+        try {
+          const userId = req.user?.userId || "";
+          const role = req.query.role as string;
+          
+          const result = await MessageUseCase.getUnreadMessages(userId, role);
+          
+          res.status(200).json({
+            result
+          });
+        } catch (error) {
+          next(error);
+        }
+      }
 }

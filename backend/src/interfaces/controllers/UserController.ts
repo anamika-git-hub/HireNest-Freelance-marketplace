@@ -141,7 +141,6 @@ export const UserController = {
             const userId = req.user?.userId || '';
             const role = req.query.role as string ;
            const dashboardData = await DashboardUseCase.getUserDashboardStats(userId,role);
-           console.log('dddd',dashboardData)
            res.status(200).json({result: dashboardData});
         } catch (error) {
             next(error)

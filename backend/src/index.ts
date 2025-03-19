@@ -251,6 +251,37 @@ io.on('connection',async(socket) => {
           console.error('Error fetching messages:', error);
         }
       });
+
+      //------------------unread count --------------------------//
+      
+      socket.on('get_unread_count', async ({ userId, role }) => {
+        try {
+          let adjustedUserId = userId;
+          if (role === 'freelancer') {
+            const freelancerProfile = await FreelancerProfileRepository.getFreelancerByUserId(userId);
+            adjustedUserId = freelancerProfile ? freelancerProfile._id.toString() : null;
+          } else if (role === 'client') {
+            const accountDetail = await AccountDetailRepository.findUserDetailsById(userId);
+            adjustedUserId = accountDetail ? accountDetail._id.toString() : null;
+          }
+          
+          if (!adjustedUserId) return;
+          
+          const messages = await MessageModel.find({
+            receiverId: adjustedUserId,
+            isRead: false
+          })
+          let unreadCount = messages.length;
+         
+          
+          const socketId = socketConnection.get(adjustedUserId);
+          if (socketId) {
+            io.to(socketId).emit('unread_count_update', { count: unreadCount });
+          }
+        } catch (error) {
+          console.error('Error getting unread count:', error);
+        }
+      });
      //-----------------------clear chat------------------------//
 
       socket.on('clear_chat', async ({ senderId, receiverId, role }) => {
@@ -342,7 +373,6 @@ io.on('connection',async(socket) => {
         try {
           const { senderId, receiverId,role, text, type, time, mediaUrl, mediaType, fileName } = data;
         
-console.log('Message data received:', data);
           let adjustedSenderId: string | null = senderId;
           let senderRef,receiverRef
           if (role === 'freelancer') {
