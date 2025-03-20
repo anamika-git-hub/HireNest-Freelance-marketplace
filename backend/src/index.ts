@@ -49,7 +49,7 @@ app.use(express.urlencoded({extended: true, limit: '10mb'}))
 app.use('/users',userRouter);
 app.use('/admin',adminRouter);
 app.use('/freelancers',freelancerRouter);
-app.use('/client/',clientRouter);
+app.use('/client',clientRouter);
 
 app.use(catchError);
 
