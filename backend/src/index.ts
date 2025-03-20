@@ -33,7 +33,7 @@ const io = new Server(server, {
     allowEIO3: true,
   });
 
- app.use('/api/client/webhook', express.raw({ type: 'application/json' }));
+ app.use('/client/webhook', express.raw({ type: 'application/json' }));
  app.use(express.json());
  app.use(cors({
   origin: 'http://hirenest.space',
@@ -46,10 +46,10 @@ app.use(express.json({limit: '10mb'}));
 app.use(express.urlencoded({extended: true, limit: '10mb'}))
 
 
-app.use('/api/users',userRouter);
-app.use('/api/admin',adminRouter);
-app.use('/api/freelancers',freelancerRouter);
-app.use('/api/client/',clientRouter);
+app.use('/users',userRouter);
+app.use('/admin',adminRouter);
+app.use('/freelancers',freelancerRouter);
+app.use('/client/',clientRouter);
 
 app.use(catchError);
 
