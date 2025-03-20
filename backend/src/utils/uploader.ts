@@ -95,6 +95,21 @@ export const uploader = multer({
     { name: 'attachments', maxCount: 10 } 
   ]);
 
+  export const categoryImageUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5000000, 
+    },
+    fileFilter: function (req, file, cb) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png"].includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only JPG, JPEG, and PNG files are allowed for category images"));
+      }
+    },
+  }).single('image'); 
+
   export const milestoneUploader = multer({
     storage: multer.memoryStorage(),
     limits: {
