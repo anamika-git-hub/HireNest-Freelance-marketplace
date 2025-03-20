@@ -36,7 +36,7 @@ const io = new Server(server, {
  app.use('/client/webhook', express.raw({ type: 'application/json' }));
  app.use(express.json());
  app.use(cors({
-  origin: 'http://hirenest.space',
+  origin: 'http://localhost:3000',
   credentials: true,             
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'refreshToken']
