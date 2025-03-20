@@ -8,7 +8,7 @@ export const CategoryUseCase = {
         try {
             const uploadToCloudinary = async (filePath: string) => {
                 const result = await cloudinaryV2.uploader.upload(filePath, {
-                    folder: "categories",
+                    
                 });
                 return result.secure_url;
             };
@@ -50,7 +50,7 @@ export const CategoryUseCase = {
         try {
             const uploadToCloudinary = async (filePath: string) => {
                 const result = await cloudinaryV2.uploader.upload(filePath, {
-                    folder: "categories",
+                   
                 });
                 return result.secure_url;
             };

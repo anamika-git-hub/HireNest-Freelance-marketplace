@@ -60,6 +60,24 @@ export const uploader = multer({
     { name: 'idBackImage', maxCount: 1 }
   ]);
 
+  export const freelancerUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 8000000,
+    },
+    fileFilter: function (req, file, cb) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"].includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only JPG, JPEG, PNG, PDF, DOC, and DOCX files are allowed"));
+      }
+    },
+  }).fields([
+    { name: 'profileImage', maxCount: 1 },
+    { name: 'attachments', maxCount: 10 } 
+  ]);
+
   export const milestoneUploader = multer({
     storage: multer.memoryStorage(),
     limits: {

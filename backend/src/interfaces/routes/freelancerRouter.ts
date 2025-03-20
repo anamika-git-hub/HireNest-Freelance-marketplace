@@ -12,11 +12,18 @@ import { milestoneUploader } from '../../utils/uploader';
 import { RatingController } from '../controllers/ratingController';
 import { validate } from '../middlewares/validationMiddleware';
 import { validateFreelancerProfile } from '../middlewares/validators/freelancerProfileValidator';
+import { freelancerUploader } from '../../utils/uploader';
+import { compressionMiddleware } from '../../utils/uploader';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
-
-router.post("/setup-freelancer-profile",uploadFreelancerImages,validateFreelancerProfile,validate,FreelancerProfileController.createProfile);
+router.post("/setup-freelancer-profile", 
+    freelancerUploader, 
+    compressionMiddleware, 
+    validateFreelancerProfile, 
+    validate, 
+    FreelancerProfileController.createProfile
+  );
 router.put("/update-freelancer-profile", uploadFreelancerImages,checkAuth('freelancer'),validateFreelancerProfile,validate,FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",checkAuth('freelancer'),TaskController.getTasks);

@@ -8,7 +8,7 @@ export const TaskUseCase = {
         try {
             const uploadToCloudinary = async (file: Express.Multer.File) => {
                 const result = await cloudinaryV2.uploader.upload(file.path, {
-                    folder: "tasks"
+                    
                 });
                 return result.secure_url;
             };
@@ -43,7 +43,7 @@ export const TaskUseCase = {
         try {
             const uploadToCloudinary = async (file: Express.Multer.File) => {
                 const result = await cloudinaryV2.uploader.upload(file.path, {
-                    folder: "tasks"
+                   
                 });
                 return result.secure_url;
             };
