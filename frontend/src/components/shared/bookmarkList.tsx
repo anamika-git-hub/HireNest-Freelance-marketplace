@@ -73,6 +73,12 @@ function BookmarksList<T extends BaseItem>({
             setLoading(true);
             try {
                 const bookmarkResponse = await axiosConfig.get("/users/bookmarks");
+                if(!bookmarkResponse.data.bookmark) {
+                    setBookmarks([])
+                    setTotalPages(1);
+                    setLoading(false);
+                    return;
+                }
                 const bookmarksData = bookmarkResponse.data.bookmark.items;
                 
                 const bookmarkedItemIds = bookmarksData
