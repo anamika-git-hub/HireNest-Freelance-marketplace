@@ -40,7 +40,7 @@ const Signup: React.FC = () => {
    const user = {email}
    try {
     const response = await axios.post(
-      "http://localhost:5001/api/users/google-signup",
+      `${process.env.REACT_APP_BASE_URL!}users/google-signup`,
       user
     );
 
@@ -68,7 +68,7 @@ const Signup: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5001/api/users/signup",
+        `${process.env.REACT_APP_BASE_URL!}users/signup`,
         newUser
       );
 
