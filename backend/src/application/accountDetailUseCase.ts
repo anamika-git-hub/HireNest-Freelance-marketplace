@@ -1,9 +1,7 @@
 
 import { AccountDetailRepository } from "../infrastructure/repositories/accountDetail";
 import { IUserDetail } from "../entities/UserDetail";
-import cloudinaryV2 from "../utils/cloudinary";
 import { uploadToS3 } from "../utils/uploader";
-import { UserRepository } from "../infrastructure/repositories/UserRepository";
 
 export const AccountDetailUseCase = {
     setUpProfile: async (data: IUserDetail, files: { [key: string]: Express.Multer.File[] }) => {

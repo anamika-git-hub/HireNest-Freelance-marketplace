@@ -4,7 +4,6 @@ import { FreelancerProfileController } from '../controllers/freelancerProfileCon
 import { BidController} from '../controllers/bidController';
 import { TaskController } from '../controllers/taskController';
 import { RequestController } from '../controllers/requestController';
-import { upload, uploadFreelancerImages } from '../middlewares/uploadFileImages';
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
@@ -17,14 +16,8 @@ import { compressionMiddleware } from '../../utils/uploader';
 
 const router = express.Router();
 router.use(checkTokenBlacklist);
-router.post("/setup-freelancer-profile", 
-    freelancerUploader, 
-    compressionMiddleware, 
-    validateFreelancerProfile, 
-    validate, 
-    FreelancerProfileController.createProfile
-  );
-router.put("/update-freelancer-profile", uploadFreelancerImages,checkAuth('freelancer'),validateFreelancerProfile,validate,FreelancerProfileController.updateProfile);
+router.post("/setup-freelancer-profile", freelancerUploader,compressionMiddleware,validateFreelancerProfile,validate,FreelancerProfileController.createProfile);
+router.put("/update-freelancer-profile", freelancerUploader,compressionMiddleware,checkAuth('freelancer'),validateFreelancerProfile,validate,FreelancerProfileController.updateProfile);
 
 router.get("/tasks-list",checkAuth('freelancer'),TaskController.getTasks);
 router.get("/freelancer-request",checkAuth('freelancer'),RequestController.getRequestByFreelancerId)

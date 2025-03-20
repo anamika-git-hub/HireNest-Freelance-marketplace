@@ -1,6 +1,5 @@
 import { FreelancerProfileRepository } from "../infrastructure/repositories/FreelancerProfileRepository";
 import { IFreelancerProfile } from "../entities/freelancerProfile";
-import cloudinaryV2 from "../utils/cloudinary";
 import { FilterCriteria } from "../entities/filter";
 import { uploadToS3 } from "../utils/uploader";
 

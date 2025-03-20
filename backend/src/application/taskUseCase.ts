@@ -1,79 +1,94 @@
 import { TaskRepository } from "../infrastructure/repositories/TaskRepository";
 import { ITaskSubmissionForm } from "../entities/Tasks";
-import cloudinaryV2 from "../utils/cloudinary";
 import { FilterCriteria } from "../entities/filter";
+import { uploadToS3 } from "../utils/uploader";
 
 export const TaskUseCase = {
-    createTask: async (data: ITaskSubmissionForm, files: { [key: string]: Express.Multer.File[] }) => {
-        try {
-            const uploadToCloudinary = async (file: Express.Multer.File) => {
-                const result = await cloudinaryV2.uploader.upload(file.path, {
-                    
-                });
-                return result.secure_url;
-            };
+createTask: async (data: ITaskSubmissionForm, files: { [key: string]: Express.Multer.File[] }) => {
+    try {
+        const uploadFile = async (file: Express.Multer.File) => {
+            try {
+                const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                const result = await uploadToS3(
+                    file.buffer,
+                    `taskAttachments/${uniqueFileName}`
+                );
+                return result.Location || `https://${process.env.S3_BUCKET_NAME}.s3.ap-south-1.amazonaws.com/taskAttachments/${uniqueFileName}`;
+            } catch (error) {
+                console.error(`Error uploading to S3:`, error);
+                throw new Error(`Failed to upload file to S3`);
+            }
+        };
 
-            const attachments = await Promise.all(
-                (files.attachments || []).map(async (file) => {
-                    const uploadedFileUrl = await uploadToCloudinary(file);
-                    return uploadedFileUrl; 
+        const attachments = await Promise.all(
+            (files.attachments || []).map(async (file) => {
+                const uploadedFileUrl = await uploadFile(file);
+                return uploadedFileUrl;
+            })
+        );
+
+        const taskData = {
+            ...data,
+            attachments,
+        };
+
+        return await TaskRepository.createTask(taskData);
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Failed to create task: ${error.message}`);
+        } else {
+            throw new Error(`Failed to create task due to an unknown error`);
+        }
+    }
+},
+
+updateTask: async (
+    id: string,
+    updates: Partial<ITaskSubmissionForm>,
+    files: { [key: string]: Express.Multer.File[] }
+) => {
+    try {
+        const uploadFile = async (file: Express.Multer.File) => {
+            try {
+                const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                const result = await uploadToS3(
+                    file.buffer,
+                    `taskAttachments/${uniqueFileName}`
+                );
+                return result.Location || `https://${process.env.S3_BUCKET_NAME}.s3.ap-south-1.amazonaws.com/taskAttachments/${uniqueFileName}`;
+            } catch (error) {
+                console.error(`Error uploading to S3:`, error);
+                throw new Error(`Failed to upload file to S3`);
+            }
+        };
+        
+        let updatedAttachments = Array.isArray(updates.attachments) ? updates.attachments : 
+            (typeof updates.attachments === 'string' ? [updates.attachments] : []);
+
+        if (files.attachments) {
+            const newAttachments = await Promise.all(
+                files.attachments.map(async (file) => {
+                    const uploadedFileUrl = await uploadFile(file);
+                    return uploadedFileUrl;
                 })
             );
-
-            const taskData = {
-                ...data,
-                attachments, 
-            };
-
-            return await TaskRepository.createTask(taskData);
-        } catch (error) {
-            if(error instanceof Error){
-                throw new Error(`Failed to create task : ${error.message}`);
-            }else {
-                throw new Error(`Failed to create task due to an unknown error`);
-            } 
+            updatedAttachments.push(...newAttachments);
         }
-    },
 
-    updateTask: async (
-        id: string,
-        updates: Partial<ITaskSubmissionForm>,
-        files: { [key: string]: Express.Multer.File[] }
-    ) => {
-        try {
-            const uploadToCloudinary = async (file: Express.Multer.File) => {
-                const result = await cloudinaryV2.uploader.upload(file.path, {
-                   
-                });
-                return result.secure_url;
-            };
-               let updatedAttachments = Array.isArray(updates.attachments) ? updates.attachments : 
-                (typeof updates.attachments === 'string' ? [updates.attachments] : []);
+        const updatedTaskData = {
+            ...updates,
+            attachments: updatedAttachments,
+        };
 
-            if (files.attachments) {
-                const newAttachments = await Promise.all(
-                    files.attachments.map(async (file) => {
-                        const uploadedFileUrl = await uploadToCloudinary(file);
-                        return uploadedFileUrl; 
-                    })
-                );
-                updatedAttachments.push(...newAttachments);
-            }
-
-            const updatedTaskData = {
-                ...updates,
-                attachments: updatedAttachments,
-            };
-
-            return await TaskRepository.updateTask(id, updatedTaskData);
-        } catch (error) {
-            if(error instanceof Error){
-                throw new Error(`Failed to update Task: ${error.message}`);
-            }else {
-                throw new Error(`Failed to update Task due to an unknown error`);
-            } 
+        return await TaskRepository.updateTask(id, updatedTaskData);
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Failed to update Task: ${error.message}`);
+        } else {
+            throw new Error(`Failed to update Task due to an unknown error`);
         }
-    },
+    }
+},
 
     deleteTask: async (id: string) => {
         try {

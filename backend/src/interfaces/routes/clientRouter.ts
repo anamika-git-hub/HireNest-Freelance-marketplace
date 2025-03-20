@@ -3,8 +3,7 @@ import express from 'express';
 import { TaskController } from '../controllers/taskController';
 import { FreelancerProfileController } from '../controllers/freelancerProfileController';
 import { BidController } from '../controllers/bidController';
-import { RequestController } from '../controllers/requestController';
-import { uploadTaskFiles } from '../middlewares/uploadFileImages';  
+import { RequestController } from '../controllers/requestController'; 
 import checkTokenBlacklist from '../middlewares/TokenBlocklist';
 import { checkAuth } from '../middlewares/auth';
 import { ContractController } from '../controllers/ContractController';
@@ -16,13 +15,13 @@ import { validateContract } from '../middlewares/validators/contractValidator';
 import { validate } from '../middlewares/validationMiddleware';
 import { validateRequestUpdate } from '../middlewares/validators/requestUpdateValidator';
 import { validateTaskUpdate } from '../middlewares/validators/taskUpdateValidator';
+import { compressionMiddleware, taskFileUploader } from '../../utils/uploader';
 
 const router = express.Router();
 
 router.use(checkTokenBlacklist);
-
-router.post("/create-task",uploadTaskFiles,validateTaskSubmission,validate,checkAuth('client'), TaskController.createTask);
-router.put("/update-task/:id",uploadTaskFiles,validateTaskUpdate,validate,checkAuth('client'), TaskController.updateTask);
+router.post("/create-task",  taskFileUploader, compressionMiddleware,validateTaskSubmission, validate, checkAuth('client'), TaskController.createTask);
+router.put("/update-task/:id", taskFileUploader, compressionMiddleware, validateTaskUpdate, validate, checkAuth('client'), TaskController.updateTask);
 router.delete("/delete-task/:id",checkAuth('client'), TaskController.deleteTask);
 router.get('/my-tasks',checkAuth('client'),TaskController.getTasksByUserId);
 

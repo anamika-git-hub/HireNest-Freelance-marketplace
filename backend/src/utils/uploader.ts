@@ -78,6 +78,23 @@ export const uploader = multer({
     { name: 'attachments', maxCount: 10 } 
   ]);
 
+  export const taskFileUploader = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 8000000, 
+    },
+    fileFilter: function (req, file, cb) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if ([".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx", ".zip"].includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Invalid file type for task submission"));
+      }
+    },
+  }).fields([
+    { name: 'attachments', maxCount: 10 } 
+  ]);
+
   export const milestoneUploader = multer({
     storage: multer.memoryStorage(),
     limits: {
