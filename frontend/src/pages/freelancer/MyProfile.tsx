@@ -45,8 +45,10 @@ const MyProfile: React.FC = () => {
         const userId = localStorage.getItem("userId");
         if (userId) {
           const response = await axiosConfig.get(`/users/freelancer-profile/${userId}`);
+          console.log('response',response.data.freelancer)
           setFreelancerProfile(response.data.freelancer);
           setSkills(response.data.freelancer.skills || []);
+          setAttachments(response.data.freelancer.attachments || []);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -64,6 +66,7 @@ const MyProfile: React.FC = () => {
     hourlyRate: freelancerProfile?.hourlyRate || 10,
     description: freelancerProfile?.description || "",
     profileImage: freelancerProfile?.profileImage || "",
+    
   };
 
   const handleAddSkill = (setFieldValue: (field: string, value: string[]) => void) => {
@@ -111,7 +114,12 @@ const MyProfile: React.FC = () => {
     updatedData.append("hourlyRate", values.hourlyRate.toString());
     skills.forEach((skill) => updatedData.append("skills[]", skill));
     updatedData.append("description", values.description);
-
+    attachments.forEach((attachment, index) => {
+      updatedData.append(`attachments[${index}][id]`, attachment.id);
+      updatedData.append(`attachments[${index}][title]`, attachment.title);
+      updatedData.append(`attachments[${index}][description]`, attachment.description);
+      updatedData.append(`attachments[${index}][file]`, attachment.file);
+    });
     if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
       updatedData.append("profileImage", fileInputRef.current.files[0]);
     }
@@ -356,20 +364,27 @@ const MyProfile: React.FC = () => {
           </div>
         )}
   
-        {/* Attachments List */}
+       {/* Attachments List */}
         <div className="mt-6">
           <h4 className="text-lg font-semibold text-gray-800 mb-4">Attachments</h4>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {attachments.map((attachment) => (
-              <div key={attachment.id} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="mr-4">{attachment.title}</span>
-                  <span className="text-sm text-gray-500">{attachment.description}</span>
+              <div key={attachment.id} className="border rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden">
+                  <img 
+                    src={attachment.file} 
+                    alt={attachment.title} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                <div className="flex-1">
+                  <h5 className="font-medium text-gray-800">{attachment.title}</h5>
+                  <p className="text-sm text-gray-500 mt-1">{attachment.description}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveAttachment(attachment.id)}
-                  className="text-red-500 text-xs"
+                  className="text-red-500 text-sm px-3 py-1 border border-red-300 rounded hover:bg-red-50"
                 >
                   Remove
                 </button>
