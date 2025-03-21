@@ -1,14 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './chatArea';
+import EmptyChatState from './emptyChat';
 import { io } from 'socket.io-client';
 import axiosConfig from '../../service/axios';
 
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || '';
 
-const socket = io(process.env.REACT_APP_BASE_URL, {
+const socket = io('https://hirenest.space', {
   query: { userId, role },
 });
 
@@ -42,6 +42,7 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const role = localStorage.getItem('role') || '';
   const userId = localStorage.getItem('userId') || '';
 
@@ -66,6 +67,7 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await axiosConfig.get('/users/get-receivers', {
           params: {
@@ -94,6 +96,8 @@ const Chat: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching requests:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
   
@@ -164,7 +168,7 @@ const Chat: React.FC = () => {
       socket.off('messages_marked_read');
       socket.off('receive_message');
     };
-  }, [userId,selectedContactId]);
+  }, [userId, selectedContactId]);
 
   const initializeChat = (contactId: string) => {
     socket.off('message_history');
@@ -221,16 +225,19 @@ const Chat: React.FC = () => {
     setShowChat(false);
   };
 
-  return (
-    <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
-      {(!isMobileView || (isMobileView && !showChat)) && (
-        <Sidebar 
-          contacts={contacts} 
-          onSelectContact={handleContactSelect} 
-          selectedContactId={selectedContactId}
-        />
-      )}
-      {(!isMobileView || (isMobileView && showChat)) && selectedContact && (
+  const renderEmptyState = () => {
+    if (contacts.length === 0 && !isLoading) {
+      return (
+        <div className="w-full h-screen flex items-center justify-center">
+          <EmptyChatState />
+        </div>
+      );
+    }
+    return null;
+  };
+  const renderChatOrEmpty = () => {
+    if ((!isMobileView || (isMobileView && showChat)) && selectedContact) {
+      return (
         <ChatArea
           contacts={selectedContact}
           messages={messages}
@@ -242,7 +249,42 @@ const Chat: React.FC = () => {
           isMobileView={isMobileView}
           setContacts={setContacts}
         />
+      );
+    } else if (!isMobileView && !selectedContact && contacts.length > 0) {
+      return <EmptyChatState />;
+    }
+    return null;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-gray-100 flex items-center justify-center pt-24">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading chats...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (contacts.length === 0) {
+    return (
+      <div className="h-screen bg-gray-100 flex flex-col pt-24">
+        {renderEmptyState()}
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen bg-gray-100 flex flex-col lg:flex-row p-4 pt-24">
+      {(!isMobileView || (isMobileView && !showChat)) && (
+        <Sidebar 
+          contacts={contacts} 
+          onSelectContact={handleContactSelect} 
+          selectedContactId={selectedContactId}
+        />
       )}
+      {renderChatOrEmpty()}
     </div>
   );
 };
