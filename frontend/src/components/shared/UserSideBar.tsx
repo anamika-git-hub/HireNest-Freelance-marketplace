@@ -32,23 +32,23 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleStorageChange = () => {
       setUserRole(localStorage.getItem("role") || "client");
     };
-
+  
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownContainerRef.current && !dropdownContainerRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
     };
-
+  
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("roleChange", handleStorageChange);
     document.addEventListener("mousedown", handleClickOutside);
-
+  
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("roleChange", handleStorageChange);
@@ -88,7 +88,7 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (userRole !== "freelancer") return null;
 
     return (
-      <div className="relative">
+      <div className="relative" ref={dropdownContainerRef}>
         <button
           className={`flex items-center w-auto px-4 py-4 text-gray-600 hover:bg-gray-100 hover:text-blue-600 ${
             dropdownOpen ? 'bg-gray-100 text-blue-600' : ''
@@ -101,7 +101,8 @@ const UserSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </button>
 
         {dropdownOpen && (
-          <div className="absolute left-0 right-0 mt-1 py-2 bg-white border border-gray-200 shadow-lg rounded-md z-20">
+          <div 
+          className="absolute left-0 right-0 mt-1 py-2 bg-white border border-gray-200 shadow-lg rounded-md z-20">
             <NavLink
               to="/freelancer/my-profile"
               className="flex items-center px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
