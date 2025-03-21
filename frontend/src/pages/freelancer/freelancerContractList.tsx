@@ -75,6 +75,9 @@ const FreelancerContractsList: React.FC = () => {
   const fetchContractsData = async () => {
     const userId = localStorage.getItem('userId');
     const bidResponse = await axiosConfig.get(`/users/bid/${userId}`);
+    if (bidResponse.data.bid.length === 0) {
+      return [];
+    }
     const bidIds = bidResponse.data.bid.map((bid: Bid) => bid._id);
     
     const response = await axiosConfig.get("/users/contracts", {
