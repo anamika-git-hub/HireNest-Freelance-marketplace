@@ -71,7 +71,10 @@ const Signup: React.FC = () => {
         `${process.env.REACT_APP_BASE_URL!}users/signup`,
         newUser
       );
-
+       if(response && response.data.error){
+        toast.error(response.data.error);
+          return; 
+       }
       if (response.status === 201) {
         dispatch(registerUser({...response.data.user, id: response.data.user._id,role:response.data.user.role}));
         toast.success("User registered successfully. Redirecting to OTP page...");

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import axiosConfig, { setAuthTokens } from "../../service/axios";
 import { useDispatch } from "react-redux";
@@ -13,15 +13,16 @@ import { Link } from "react-router-dom";
 const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const googleSubmit = async (googleData: any) => {
-    const decodeResponse: any = jwtDecode(googleData.credential);
-
-    const { email } = decodeResponse;
-    const user = { email };
     try {
+      const decodeResponse: any = jwtDecode(googleData.credential);
+      const { email } = decodeResponse;
+      const user = { email };
+      
       const response = await axiosConfig.post("/users/google-signup", user);
-
+  
       if (response.data.token) {
         const user = response.data.user;
         setAuthTokens(response.data.token, response.data.refreshToken);
@@ -32,8 +33,9 @@ const Login: React.FC = () => {
         toast.success("User logged in successfully");
         navigate("/account-setup");
       }
-    } catch (error) {
-      toast.error("There was an error during signUp");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "There was an error during sign up";
+      toast.error(errorMessage);
     }
   };
 
@@ -44,29 +46,40 @@ const Login: React.FC = () => {
     },
     validationSchema: loginValidationSchema,
     onSubmit: async (values) => {
+      setIsSubmitting(true);
       try {
         const response = await axiosConfig.post("users/login", values);
+        
+        if (response.data && response.data.message && response.data.statusCode) {
+          toast.error(response.data.message);
+          return; 
+        }
+        
         if (response.status === 200) {
           const user = response.data.user;
           const userDetail = response.data.userDetails;
-
+    
           setAuthTokens(response.data.token, response.data.refreshToken);
           localStorage.setItem("role", response.data.user.role);
           localStorage.setItem("email", response.data.user.email);
           localStorage.setItem("userId", response.data.user._id);
-
+    
           dispatch(loginUser({ user, userDetail }));
-
+    
           toast.success("User logged in successfully");
-          navigate("/");
+          navigate("/");  
           window.location.reload();
         }
       } catch (error: any) {
         console.log("Login failed:", error);
         if (error.response) {
-          const errorMessage = error.response.data.error || "An error occurred";
+          const errorMessage = error.response.data.message || error.response.data.error || "An error occurred";
           toast.error(errorMessage);
+        } else {
+          toast.error("Network error. Please try again later.");
         }
+      } finally {
+        setIsSubmitting(false);
       }
     },
   });
@@ -94,6 +107,7 @@ const Login: React.FC = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                disabled={isSubmitting}
               />
               {formik.errors.email && formik.touched.email && (
                 <div className="text-red-500 text-sm mt-2">{formik.errors.email}</div>
@@ -109,6 +123,7 @@ const Login: React.FC = () => {
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 className="w-full p-3 rounded-lg border border-gray-300 bg-white/70 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                disabled={isSubmitting}
               />
               {formik.errors.password && formik.touched.password && (
                 <div className="text-red-500 text-sm mt-2">{formik.errors.password}</div>
@@ -116,9 +131,12 @@ const Login: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className={`w-full bg-blue-600 text-white py-3 rounded-lg font-semibold ${
+                isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"
+              } transition`}
+              disabled={isSubmitting}
             >
-              Login
+              {isSubmitting ? "Logging in..." : "Login"}
             </button>
           </form>
           <Link to={"/forgot-password"} className="text-start my-4 text-blue-700">
@@ -130,7 +148,7 @@ const Login: React.FC = () => {
             <GoogleLogin
               onSuccess={googleSubmit}
               onError={() => {
-                console.log("Login Failed");
+                toast.error("Google login failed");
               }}
             />
           </div>

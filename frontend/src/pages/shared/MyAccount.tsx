@@ -63,9 +63,8 @@ const MyAccount: React.FC = () => {
       const response = await axiosConfig.post(`/users/validate-password/${userId}`, {
         currentPassword
       });
-      return response.status === 200;
+      return response.data;
     } catch (error) {
-      toast.error("Incorrect current password.");
       return false;
     }
   };
@@ -107,16 +106,19 @@ const initialValues = {
   profileImage: userDetail?.profileImage || "",
 };
 
-  const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
+  const handleSubmit = async (values: typeof initialValues, { setSubmitting, setFieldError, resetForm, setValues }: any) => {
     
-    const isPasswordValid = values.currentPassword ? 
-    await validateCurrentPassword(values.currentPassword) : true;
-
-  if (!isPasswordValid) {
-    setSubmitting(false);
-    return;
-  }
-  
+    if (values.currentPassword || values.newPassword || values.confirmPassword) {
+      const isPasswordValid = await validateCurrentPassword(values.currentPassword);
+      
+      if (isPasswordValid === false) {
+        setFieldError('currentPassword', 'This is not the current password');
+        toast.error("Incorrect current password.");
+        setSubmitting(false);
+        return;
+      }
+    }
+    
     const updatedData = new FormData();
 
     updatedData.append("firstname", values.firstName);
@@ -138,13 +140,34 @@ if (values.newPassword) {
         });
         console.log("User details updated:", response.data);
         if(response.status === 200){
-          toast.success("user details updated")
+          toast.success("User details updated");
+          
+          setValues({
+            ...values,
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: ""
+          });
+          
+          fetchUserDetails();
         }
     } catch (error) {
       console.error("Error updating user details:", error);
       toast.error("Error updating user details")
     } finally {
       setSubmitting(false)
+    }
+  };
+  
+  const fetchUserDetails = async () => {
+    try {
+      const userId = localStorage.getItem("userId"); 
+      if (userId) {
+        const response = await axiosConfig.get(`/users/account-detail`);
+        setUserDetail(response.data.result.userDetails);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
     }
   };
   
