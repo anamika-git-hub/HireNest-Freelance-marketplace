@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormik } from "formik";
-import axiosConfig from "../../service/axios";
+import axiosConfig, {setAuthTokens} from "../../service/axios";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../store/userSlice";
 import { useNavigate } from "react-router-dom";
@@ -21,14 +21,12 @@ const AdminLogin: React.FC = () => {
       try {
         const response = await axiosConfig.post("admin/login", values);
         if (response.status === 200) {
-          // const  userData = {user:response.data.admin}
-          dispatch(loginUser(response.data.admin));
-          navigate('/admin/dashboard');
-          toast.success('Admin logged in successfully');
-          localStorage.setItem('accessToken', response.data.token);
-          localStorage.setItem('refreshToken',response.data.refreshToken);
+          setAuthTokens(response.data.token,response.data.refreshToken);
           localStorage.setItem('role', response.data.admin.role);
           localStorage.setItem('email', response.data.admin.email);
+          dispatch(loginUser(response.data.admin));
+          toast.success('Admin logged in successfully');
+          navigate('/admin/dashboard');
         }
       } catch (error) {
           toast.error('An error occurred during login');

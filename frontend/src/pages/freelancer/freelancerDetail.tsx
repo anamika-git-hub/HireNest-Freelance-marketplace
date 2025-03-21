@@ -15,7 +15,13 @@ interface FreelancerDetail {
   skills: string[];
   description: string;
   profileImage: string | null;
-  attachments: string[];
+  attachments: {
+    id: string;
+    file: string;
+    title: string;
+    description: string;
+    _id: string;
+  }[];
   averageRating: number;
   totalReviews: number;
   reviews: Review[];
@@ -419,25 +425,31 @@ const FreelancerDetail: React.FC = () => {
         </div>
         {/* Attachments Section */}
         <div className="p-6 px-32 mb-8">
-          <h2 className="text-lg font-semibold mb-4">📎 Attachments</h2>
-          <div className="flex gap-6 overflow-x-auto">
-            {freelancerDetail.attachments.map((attachment, index) => (
-              <div key={index} className="border rounded-lg shadow-sm overflow-hidden w-1/2 sm:w-1/3 md:w-1/4">
-                <img
-                  src={attachment}
-                  alt="Attachment"
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">{attachment}</h3>
-                  <a href="#" className="text-blue-600 hover:underline text-sm">
-                    View more &rarr;
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
+  <h2 className="text-lg font-semibold mb-4">📎 Attachments</h2>
+  <div className="flex gap-6 overflow-x-auto">
+    {freelancerDetail.attachments && freelancerDetail.attachments.map((attachment, index) => (
+      <div key={index} className="border rounded-lg shadow-sm overflow-hidden w-1/2 sm:w-1/3 md:w-1/4">
+        <img
+          src={attachment.file} 
+          alt={attachment.title || "Attachment"} 
+          className="w-full h-40 object-cover"
+        />
+        <div className="p-4">
+          <h3 className="font-semibold mb-2">{attachment.title}</h3>
+          <p className="text-gray-600 text-sm mb-2">{attachment.description}</p>
+          <a 
+            href={attachment.file} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-600 hover:underline text-sm"
+          >
+            View more &rarr;
+          </a>
         </div>
+      </div>
+    ))}
+  </div>
+</div>
       </div>
     </div>
   );

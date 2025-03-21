@@ -72,24 +72,30 @@ const FreelancerProfile: React.FC = () => {
   const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
 
-formData.append("userId",currentUserId || "");    
-formData.append("name", values.name);
-formData.append("location", values.location);
-formData.append("tagline", values.tagline);
-formData.append("experience", values.experience);
-formData.append("hourlyRate", values.hourlyRate.toString());
-skills.forEach((skill) => formData.append("skills[]", skill));
-formData.append("description", values.description);
-
-if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
-  formData.append("profileImage", fileInputRef.current.files[0]);
-}
-
-attachments.forEach((attachment, index) => {
-  formData.append(`attachments`, attachment.file);
-  formData.append(`attachments[${index}].title`, attachment.title);
-  formData.append(`attachments[${index}].description`, attachment.description);
-});
+    formData.append("userId", currentUserId || "");    
+    formData.append("name", values.name);
+    formData.append("location", values.location);
+    formData.append("tagline", values.tagline);
+    formData.append("experience", values.experience);
+    formData.append("hourlyRate", values.hourlyRate.toString());
+    skills.forEach((skill) => formData.append("skills[]", skill));
+    formData.append("description", values.description);
+    
+    if (fileInputRef.current?.files && fileInputRef.current.files[0]) {
+      formData.append("profileImage", fileInputRef.current.files[0]);
+    }
+    
+    const attachmentsMetadata = attachments.map(attachment => ({
+      id: attachment.id,
+      title: attachment.title,
+      description: attachment.description
+    }));
+    
+    formData.append("attachmentsMetadata", JSON.stringify(attachmentsMetadata));
+    
+    attachments.forEach(attachment => {
+      formData.append("attachments", attachment.file);
+    });
     try {
       const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },

@@ -1,20 +1,27 @@
 import mongoose from "mongoose";
 
-export interface IFreelancerProfile {
-    _id?:string;
-    userId: mongoose.Types.ObjectId;
-    name: string; 
-    location: string;
-    tagline: string;
-    experience: string;
-    hourlyRate: number;
-    skills: string[];
-    description: string; 
-    profileImage: string | null;
-    attachments: {
-        id: string; 
-        file: String; 
-        title: string;
-        description: string;
-    }[]; 
-}
+declare namespace Express {
+    interface Request {
+      attachmentsMetadata?: string;
+    }
+  }
+  
+  export interface IFreelancerProfile {
+      _id?: string;
+      userId: mongoose.Types.ObjectId | string;
+      name: string; 
+      location: string;
+      tagline: string;
+      experience: string;
+      hourlyRate: number | string; 
+      skills: string[] | string;
+      description: string; 
+      profileImage: string | null;
+      attachments: {
+          id: string; 
+          file: string; 
+          title: string;
+          description: string;
+      }[];
+      attachmentsMetadata?: string; 
+  }

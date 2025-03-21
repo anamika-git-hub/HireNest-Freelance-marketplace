@@ -2,55 +2,67 @@ import { FreelancerProfileRepository } from "../infrastructure/repositories/Free
 import { IFreelancerProfile } from "../entities/freelancerProfile";
 import { FilterCriteria } from "../entities/filter";
 import { uploadToS3 } from "../utils/uploader";
+import mongoose from "mongoose";
 
 export const FreelancerProfileUseCase = {
-createProfile: async (data: IFreelancerProfile, files: { [key: string]: Express.Multer.File[] }) => {
-    try {
-        const uploadImage = async (file: Express.Multer.File, folderName: string) => {
-            try {
-                const uniqueFileName = `${Date.now()}-${file.originalname}`;
-                const result = await uploadToS3(
-                    file.buffer,
-                    `${folderName}/${uniqueFileName}`
-                );
-                return result.Location || `https://${process.env.S3_BUCKET_NAME}.s3.ap-south-1.amazonaws.com/${folderName}/${uniqueFileName}`;
-            } catch (error) {
-                console.error(`Error uploading to S3:`, error);
-                throw new Error(`Failed to upload file to S3`);
+    createProfile: async (data: IFreelancerProfile, files: { [key: string]: Express.Multer.File[] }) => {
+        try {
+            const uploadImage = async (file: Express.Multer.File, folderName: string) => {
+                try {
+                    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+                    const result = await uploadToS3(
+                        file.buffer,
+                        `${folderName}/${uniqueFileName}`
+                    );
+                    return result.Location || `https://${process.env.S3_BUCKET_NAME}.s3.ap-south-1.amazonaws.com/${folderName}/${uniqueFileName}`;
+                } catch (error) {
+                    console.error(`Error uploading to S3:`, error);
+                    throw new Error(`Failed to upload file to S3`);
+                }
+            };
+    
+            const profileImageUrl = files.profileImage ? 
+                await uploadImage(files.profileImage[0], 'freelancerProfiles') : null;
+            
+            const attachmentsMetadata = data.attachmentsMetadata ? 
+                JSON.parse(data.attachmentsMetadata as string) : [];
+            
+            const attachments = await Promise.all(
+                (files.attachments || []).map(async (file, index) => {
+                    const uploadedFileUrl = await uploadImage(file, 'freelancerAttachments');
+                    const metadata = attachmentsMetadata[index] || {};
+                    
+                    return {
+                        id: metadata.id || `${Date.now()}-${index}`,
+                        file: uploadedFileUrl, 
+                        title: metadata.title || 'Default Title',
+                        description: metadata.description || 'Default description'
+                    };
+                })
+            );
+    
+            const profileData: IFreelancerProfile = {
+                userId: new mongoose.Types.ObjectId(data.userId as string),
+                name: data.name,
+                location: data.location,
+                tagline: data.tagline,
+                experience: data.experience,
+                hourlyRate: Number(data.hourlyRate),
+                skills: Array.isArray(data.skills) ? data.skills : [],
+                description: data.description,
+                profileImage: profileImageUrl,
+                attachments: attachments,
+            };
+            
+            return await FreelancerProfileRepository.createProfile(profileData);
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Failed to setup profile: ${error.message}`);
+            } else {
+                throw new Error(`Failed to setup profile due to an unknown error`);
             }
-        };
-
-        const profileImageUrl = files.profileImage ? 
-            await uploadImage(files.profileImage[0], 'freelancerProfiles') : null;
-        
-        const attachments = await Promise.all(
-            (files.attachments || []).map(async (file, index) => {
-                const uploadedFile = await uploadImage(file, 'freelancerAttachments');
-                
-                return {
-                    id: data.attachments[index]?.id || `${Date.now()}-${index}`,
-                    file: uploadedFile,
-                    title: data.attachments[index]?.title || 'Default Title',
-                    description: data.attachments[index]?.description || 'Default description'
-                };
-            })
-        );
-
-        const profileData = {
-            ...data, 
-            profileImage: profileImageUrl,
-            attachments,
-        };
-        
-        return await FreelancerProfileRepository.createProfile(profileData);
-    } catch (error) {
-        if (error instanceof Error) {
-            throw new Error(`Failed to setup profile: ${error.message}`);
-        } else {
-            throw new Error(`Failed to setup profile due to an unknown error`);
         }
-    }
-},
+    },
 
 updateProfile: async (
     id: string,
