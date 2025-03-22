@@ -206,17 +206,23 @@ export const compressionMiddleware = async (
 ) => {
     console.log('Compression middleware started');
     try {
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-        if (!files) {
-            return next(new Error('No files uploaded'));
-        }
-
+      if (req.file) {
+        const file = req.file;
+        const { compressedBuffer, compressedSize } = await compressFile(file.buffer);
+        file.buffer = compressedBuffer;
+        file.size = compressedSize;
+        return next();
+    }
+    
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    if (files && Object.keys(files).length > 0) {
         for (const fieldName in files) {
             const file = files[fieldName][0]; 
             const { compressedBuffer, compressedSize } = await compressFile(file.buffer);
             file.buffer = compressedBuffer;
             file.size = compressedSize;
         }
+    }
 
         next();
     } catch (error) {
