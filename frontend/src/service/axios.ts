@@ -43,7 +43,7 @@ const axiosConfig = axios.create({
   withCredentials: true 
 });
 
-console.log('Setting up request interceptor');
+console.log('Setting up request interceptor testing');
 axiosConfig.interceptors.request.use(
   (config) => {
     const accessToken = getCookie('accessToken');
