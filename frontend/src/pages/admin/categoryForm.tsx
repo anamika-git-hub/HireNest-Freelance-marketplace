@@ -61,13 +61,13 @@ const CategoryForm: React.FC = () => {
           setApiError(null); 
           const response = await axiosConfig.get(`/admin/categories/${id}`);
           formik.setValues({
-            name: response.data.name || "",
-            description: response.data.description || "",
+            name: response.data.category.name || "",
+            description: response.data.category.description || "",
             image: null, 
           });
 
-          if (response.data.image) {
-            setImagePreview(response.data.image); 
+          if (response.data.category.image) {
+            setImagePreview(response.data.category.image); 
           }
         } catch (err) {
           console.error("Error fetching category data", err);

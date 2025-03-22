@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { JwtService } from "../../infrastructure/services/JwtService";
 import checkTokenBlacklist from "./TokenBlocklist";
+import { UserModel } from '../../infrastructure/models/UserModel';
 
 interface CustomRequest extends Request {
     user?: { userId: string };
@@ -9,12 +10,12 @@ interface CustomRequest extends Request {
 export const checkAuth = (userRole: string) => {
     return async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
+            
             const authHeader = req.headers['authorization'] as string;
             if (!authHeader) {
                 res.status(401).send({ message: 'No authorization token provided' });
                 return;
             }
-
             const accessToken = authHeader.split(' ')[1];
             try {
                 const userData = JwtService.verifyToken(accessToken) as { id: string, role: string };
@@ -24,6 +25,18 @@ export const checkAuth = (userRole: string) => {
                         res.status(403).json({ message: 'Insufficient permissions' });
                         return;
                     }
+                }
+                const user = await UserModel.findById(userData.id);
+                if (!user) {
+                    res.status(404).json({ message: 'User not found' });
+                    return;
+                }
+                if (user.isBlocked) {
+                    res.status(403).json({ 
+                        message: 'Your account has been blocked. Please contact an administrator.',
+                        code: 'USER_BLOCKED'
+                    });
+                    return;
                 }
                 
                 req.user = { userId: userData.id };

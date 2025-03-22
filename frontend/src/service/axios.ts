@@ -39,7 +39,7 @@ const axiosConfig = axios.create({
   headers: {
     "Content-Type": 'application/json',
   },
-  validateStatus: null,
+  validateStatus: (status) => status < 400,
   withCredentials: true 
 });
 
@@ -78,8 +78,10 @@ axiosConfig.interceptors.response.use(
     if (error.response && error.response.status === 403) {
       toast.error('Your account has been blocked by the admin.');
       store.dispatch(logoutUser());
+      localStorage.removeItem("role");
       clearAuthTokens();
       window.location.href = '/login';
+      
     } else if (error.response && error.response.status === 401) {
       const originalRequest = error.config;
       const refreshToken = getCookie('refreshToken');
