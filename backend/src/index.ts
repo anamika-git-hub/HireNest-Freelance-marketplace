@@ -16,6 +16,7 @@ import { AccountDetailRepository } from './infrastructure/repositories/accountDe
 import { IMessage } from './entities/Message';
 import Stripe from 'stripe';
 import { INotification } from './entities/notification';
+import { PaymentController } from './interfaces/controllers/PaymentController';
 
 export const stripe = new Stripe(Config.STRIPE_SECRET_KEY as string, {
   apiVersion:'2025-01-27.acacia'
@@ -33,8 +34,8 @@ const io = new Server(server, {
     allowEIO3: true,
   });
 
- app.use('/client/webhook', express.raw({ type: 'application/json' }));
- app.use(express.json());
+ app.use('/client/webhook', express.raw({ type: 'application/json' }), PaymentController.createWebhook);
+ 
  app.use(cors({
   origin: ['https://hirenest.space','http://localhost:3000'],
   credentials: true,             

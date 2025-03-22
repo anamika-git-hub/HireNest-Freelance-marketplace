@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import axiosConfig from '../../service/axios';
 import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
 import { MdDashboard} from "react-icons/md";
@@ -24,7 +23,7 @@ interface Notification {
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || 'guest';
 
-const notificationSocket = io(`${process.env.REACT_APP_BASE_URL}/notifications`, {
+const notificationSocket = io(`${process.env.REACT_APP_BASE_URL}notifications`, {
   query: { userId ,role},
 });
 const socket = io(process.env.REACT_APP_BASE_URL, {
@@ -185,19 +184,23 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
         !profileMenuRef.current.contains(event.target as Node)
       ) {
         setIsProfileMenuOpen(false);
-      } else if (
+      }
+      
+      if (
         notificationMenuRef.current && 
         !notificationMenuRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
-      } else if (
+      }
+      
+      if (
         messageMenuRef.current && 
         !messageMenuRef.current.contains(event.target as Node)
       ) {
         setShowMessageDropdown(false);
       }
     };
-
+  
     document.addEventListener('mousedown', handleOutsideClick);
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick);
