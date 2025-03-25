@@ -18,7 +18,7 @@ export const FreelancerReviewUseCase = {
                 contractId,
                 taskId,
                 freelancerId,
-                'accepted'
+                'completed'
             );
             
             if (!contract) {

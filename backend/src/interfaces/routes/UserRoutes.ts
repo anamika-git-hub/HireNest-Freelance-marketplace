@@ -60,7 +60,6 @@ router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead
 router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
 router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);
 
-router.post('/release-escrow',checkAuth('user'),PaymentController.releaseEscrow);
 
 router.get('/freelancer-ratings',checkAuth('user'),RatingController.getFreelancerRatings);
 router.get('/dashboard-data',checkAuth('user'),UserController.getUserDashboardStats);

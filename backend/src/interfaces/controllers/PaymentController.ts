@@ -36,19 +36,4 @@ export const PaymentController = {
             next(error);
         }
     },
-    
-    releaseEscrow: async (req: Req, res: Res, next: Next) => {
-        try {
-            const { contractId, milestoneId, freelancerId } = req.body;
-            const result = await PaymentUseCase.releaseEscrow(contractId, milestoneId, freelancerId);
-            
-            sendResponse(res, HttpStatusCode.OK, {
-                message: PaymentMessages.ESCROW_RELEASE_SUCCESS,
-                success: true,
-                result
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
 };

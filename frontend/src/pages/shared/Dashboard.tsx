@@ -393,24 +393,16 @@ useEffect(() => {
     }
   }, [tasks, role]);
 
-  useEffect(()=>{
-    const fetchAllBidsCount = async()=>{
-      const taskIds = tasks.map(task => task._id);
-        const response = await axiosConfig.get("/client/all-task-bids", {
-          params: { taskIds: taskIds }
-        });
-        console.log(response)
-    }
-    fetchAllBidsCount()
-  },[])
 
   const fetchBidCount = async (taskId: string) => {
     try {
-      const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
-      setTaskBidCounts(prev => ({
-        ...prev,
-        [taskId]: response.data.length
-      }));
+      if(role === 'client'){
+        const response = await axiosConfig.get(`/client/task-bids/${taskId}`);
+        setTaskBidCounts(prev => ({
+          ...prev,
+          [taskId]: response.data.length
+        }));
+      }
     } catch (err) {
       console.error("Failed to fetch bid count for task:", taskId, err);
     }

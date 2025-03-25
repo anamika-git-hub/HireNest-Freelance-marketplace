@@ -161,9 +161,11 @@ interface CustomRequest extends Req {
       try {
         const { contractId, milestoneId } = req.body;
         const contract = await ContractUseCase.getContractDetails(contractId);
-        await PaymentUseCase.releaseEscrow(contractId, milestoneId, contract.freelancerId);
         const result = await ContractUseCase.acceptMilestone(contractId, milestoneId);
-        
+        console.log('ree',result)
+        const payment = await PaymentUseCase.releaseEscrow(contractId, milestoneId, contract.freelancerId);
+        console.log('ppp',payment)
+       
         sendResponse(res, HttpStatusCode.OK, {
           message: ContractMessages.MILESTONE_ACCEPT_SUCCESS,
           success: true,

@@ -24,10 +24,10 @@ interface Notification {
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || 'guest';
 
-const notificationSocket = io(`${process.env.REACT_APP_BASE_URL}/notifications`, {
+const notificationSocket = io(`${process.env.REACT_APP_BASE_URL_NEW}/notifications`, {
   query: { userId ,role},
 });
-const socket = io(process.env.REACT_APP_BASE_URL, {
+const socket = io(process.env.REACT_APP_BASE_URL_NEW, {
   query: { userId, role },
 });
 interface HeaderProps {

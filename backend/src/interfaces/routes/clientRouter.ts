@@ -44,9 +44,8 @@ router.put("/update-contract/:id",validateContract,validate,checkAuth('client'),
 router.post("/create-payment-intent",checkAuth('client'),PaymentController.createPaymentIntent);
 router.post("/webhook", express.raw({type: 'application/json'}), PaymentController.createWebhook);
 
-router.post('/accept-milestone', checkAuth('client'), ContractController.acceptMilestone);
+router.post('/accept-milestone', ContractController.acceptMilestone);
 router.post('/reject-milestone', checkAuth('client'), ContractController.rejectMilestone);
-router.post('/release-escrow', checkAuth('client'), PaymentController.releaseEscrow);
 
 router.post('/review-freelancer',checkAuth('client'),RatingController.reviewFreelancer);
 router.post('/complete-contract',checkAuth('client'),ContractController.updateContractStatus);

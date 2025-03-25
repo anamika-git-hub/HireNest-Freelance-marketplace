@@ -35,7 +35,7 @@ export const clearAuthTokens = (): void => {
 };
 
 const axiosConfig = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL!,
+  baseURL: process.env.REACT_APP_BASE_URL_NEW,
   headers: {
     "Content-Type": 'application/json',
   },
@@ -88,7 +88,7 @@ axiosConfig.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post('/auth/refresh-token', { refreshToken });
+          const response = await axios.post(`${process.env.REACT_APP_BASE_URL}/auth/refresh-token`, { refreshToken });
           setCookie('accessToken', response.data.accessToken);
           originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
           return axios(originalRequest);
