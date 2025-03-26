@@ -61,7 +61,7 @@ const FreelancerDetail: React.FC = () => {
   useEffect(() => {
     const getFreelancerDetail = async () => {
       try {
-        const response = await axiosConfig.get(`client/freelancer/${id}`);
+        const response = await axiosConfig.get(`/client/freelancer/${id}`);
         setFreelancerDetail(response.data.freelancer);
         if (response.data.freelancer.reviews) {
           setReviews(response.data.freelancer.reviews);
@@ -79,7 +79,7 @@ const FreelancerDetail: React.FC = () => {
 
   const handleSubmit = async (values: RequestFormData, { setSubmitting, resetForm }: any) => {
     try {
-      const response = await axiosConfig.post(`client/create-request`, { ...values, freelancerId: id, requesterId: userId });
+      const response = await axiosConfig.post(`/client/create-request`, { ...values, freelancerId: id, requesterId: userId });
       toast.success("Request placed successfully!");
       setShowModal(false);
       resetForm();

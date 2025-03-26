@@ -8,7 +8,7 @@ import axiosConfig from '../../service/axios';
 const userId = localStorage.getItem('userId') || '';
 const role = localStorage.getItem('role') || '';
 
-const socket = io('https://hirenest.space', {
+const socket = io(process.env.REACT_APP_BASE_URL_NEW, {
   query: { userId, role },
 });
 

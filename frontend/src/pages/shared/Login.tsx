@@ -48,7 +48,7 @@ const Login: React.FC = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        const response = await axiosConfig.post("users/login", values);
+        const response = await axiosConfig.post("/users/login", values);
         
         if (response.data && response.data.message && response.data.statusCode) {
           toast.error(response.data.message);

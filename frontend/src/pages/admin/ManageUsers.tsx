@@ -41,7 +41,7 @@ const ManageUsers: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const endpoint = userType === "freelancer" ? "admin/freelancers" : "admin/clients";
+      const endpoint = userType === "freelancer" ? "/admin/freelancers" : "/admin/clients";
       const response = await axiosConfig.get(endpoint,{
         params: {
           page: currentPage,

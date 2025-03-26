@@ -19,7 +19,7 @@ const AdminLogin: React.FC = () => {
     validationSchema: loginValidationSchema, 
     onSubmit: async (values) => {
       try {
-        const response = await axiosConfig.post("admin/login", values);
+        const response = await axiosConfig.post("/admin/login", values);
         if (response.status === 200) {
           setAuthTokens(response.data.token,response.data.refreshToken);
           localStorage.setItem('role', response.data.admin.role);

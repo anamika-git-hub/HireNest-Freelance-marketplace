@@ -111,7 +111,7 @@ export const userUseCase = {
         const userId: string = user._id.toString(); 
        const token =  await  encrypt(userId);
        
-        const resetLink = `http://localhost:3000/reset-password/${token}`
+        const resetLink = `https://hirenest.space/reset-password/${token}`
        await forgotPassword(email,resetLink)
        
     },

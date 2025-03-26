@@ -35,7 +35,7 @@ export const clearAuthTokens = (): void => {
 };
 
 const axiosConfig = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL_NEW,
+  baseURL:process.env.REACT_APP_BASE_URL_NEW,
   headers: {
     "Content-Type": 'application/json',
   },

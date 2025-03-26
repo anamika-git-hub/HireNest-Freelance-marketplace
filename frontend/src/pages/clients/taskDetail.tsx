@@ -53,7 +53,7 @@ const TaskDetail: React.FC = () => {
   useEffect(() => {
     const fetchTaskDetails = async () => {
       try {
-        const response = await axiosConfig.get(`users/tasks/${id}`);
+        const response = await axiosConfig.get(`/users/tasks/${id}`);
         setTaskDetails(response.data.task);
 
         const schema = BidValidationSchema({
@@ -113,7 +113,7 @@ const TaskDetail: React.FC = () => {
   const handleSubmit = async (values: BidFormValues, { setSubmitting, resetForm }: any) => {
     try {
     
-    await axiosConfig.post(`freelancers/create-bid`, {
+    await axiosConfig.post(`/freelancers/create-bid`, {
       ...values, 
       taskId: id, 
       bidderId: userId
