@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ArrowLeft, MoreVertical, Video, Search, X } from 'lucide-react';
@@ -373,7 +372,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                   {msg.mediaUrl && (
                     <div className="mb-2">
                       {msg.mediaType === 'image' && (
-                        <img src={msg.mediaUrl} alt="Shared image" className="rounded-lg max-w-full" />
+                        <img src={msg.mediaUrl} alt="Shared" className="rounded-lg max-w-full" />
                       )}
                       {msg.mediaType === 'video' && (
                         <video controls className="rounded-lg max-w-full">

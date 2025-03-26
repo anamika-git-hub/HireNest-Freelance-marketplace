@@ -158,7 +158,7 @@ const Login: React.FC = () => {
         <div className="w-full lg:w-1/2 flex items-center justify-center" style={{ flexGrow: 1 }}>
           <img
             src="/assets/login.png"
-            alt="Your Image"
+            alt="Login"
             className="object-cover w-full h-48 lg:h-full rounded-lg"
           />
         </div>

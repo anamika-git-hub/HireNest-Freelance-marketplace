@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosConfig from "../../service/axios";
 import Loader from "../../components/shared/Loader";
 import toast from "react-hot-toast";

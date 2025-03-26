@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import React, { useEffect, useState} from "react";
 import { FaTimes, FaStar, FaRegStar } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { useParams } from "react-router-dom";
@@ -49,11 +49,6 @@ const FreelancerDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [formData, setFormData] = useState<RequestFormData>({
-    fullName: "",
-    email: "",
-    description: "",
-  });
 
   const { id } = useParams<{ id: string }>();
   const userId = localStorage.getItem("userId");
@@ -79,7 +74,7 @@ const FreelancerDetail: React.FC = () => {
 
   const handleSubmit = async (values: RequestFormData, { setSubmitting, resetForm }: any) => {
     try {
-      const response = await axiosConfig.post(`/client/create-request`, { ...values, freelancerId: id, requesterId: userId });
+      await axiosConfig.post(`/client/create-request`, { ...values, freelancerId: id, requesterId: userId });
       toast.success("Request placed successfully!");
       setShowModal(false);
       resetForm();

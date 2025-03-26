@@ -221,7 +221,7 @@ const Signup: React.FC = () => {
         <div className="w-full md:w-1/2 flex items-center justify-center" style={{ flexGrow: 1 }}>
           <img
             src="/assets/login.png" 
-            alt="Your Image"
+            alt="Register"
             className="object-cover w-full h-full rounded-lg"
           />
         </div>

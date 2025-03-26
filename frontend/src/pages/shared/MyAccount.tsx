@@ -26,9 +26,7 @@ const MyAccount: React.FC = () => {
     confirmPassword: false,
   });
 
-
   const email = localStorage.getItem('email');
-  const role = localStorage.getItem('role');
 
   const handleEditClick = () => {
     fileInputRef.current?.click();
@@ -68,7 +66,6 @@ const MyAccount: React.FC = () => {
       return false;
     }
   };
- 
 
 const updateAccountType = async (newRole: string) => {
   const userId = localStorage.getItem('userId')

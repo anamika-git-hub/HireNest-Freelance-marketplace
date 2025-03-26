@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronRight, FaSearch, FaChevronLeft, FaChevronRight as FaChevronRightPage } from 'react-icons/fa';
-import axiosConfig from '../../service/axios';
 import Loader from '../../components/shared/Loader';
 
 // Common interface for milestone data

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Phone, PhoneOff } from 'lucide-react';
+import { PhoneOff } from 'lucide-react';
 import { Socket } from 'socket.io-client';
 
 interface OutgoingCallProps {
@@ -20,7 +20,6 @@ const OutgoingCall: React.FC<OutgoingCallProps> = ({
 }) => {
   const [callStatus, setCallStatus] = useState<'calling' | 'accepted' | 'rejected' | 'failed'>('calling');
   const [statusMessage, setStatusMessage] = useState('Calling...');
-  const [callDuration, setCallDuration] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
 

@@ -208,8 +208,7 @@ const Dashboard: React.FC = () => {
     }
     getReviews()
   }
-},[]);
-
+},[role,userId]);
 
 useEffect(() => {
   if(role === 'freelancer' && userId){
@@ -226,8 +225,7 @@ useEffect(() => {
      };
      fetchRequests()
     }
-},[])
-
+},[role,userId])
 
   useEffect(() => {
     if (role === 'freelancer' && userId) {

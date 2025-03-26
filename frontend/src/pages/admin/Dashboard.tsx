@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { FaDollarSign, FaUserTie, FaUser, FaClipboardList, FaChartLine, FaCog, FaShieldAlt, FaFileInvoiceDollar } from 'react-icons/fa';
-import { MdAssignment, MdPayment, MdVerifiedUser, MdBlock } from 'react-icons/md';
+import { FaDollarSign, FaClipboardList } from 'react-icons/fa';
+import {MdVerifiedUser } from 'react-icons/md';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import axiosConfig from '../../service/axios';
 import { Link } from 'react-router-dom';
@@ -32,7 +32,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleVerification = async (userId: string, action: 'approve' | 'reject') => {
     try {
-      const response = await axiosConfig.post('/admin/verify-user', {
+      await axiosConfig.post('/admin/verify-user', {
         userId,
         action
       });

@@ -97,7 +97,7 @@ const FreelancerProfile: React.FC = () => {
       formData.append("attachments", attachment.file);
     });
     try {
-      const response = await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
+      await axiosConfig.post("/freelancers/setup-freelancer-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Profile submitted successfully!");

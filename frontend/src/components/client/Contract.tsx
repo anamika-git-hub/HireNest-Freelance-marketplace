@@ -29,13 +29,6 @@ const ContractSection: React.FC = () => {
     cost: "", 
   };
 
-  const initialValues: ContractFormValues = {
-    title: "",
-    budget: "",
-    description: "",
-    milestones: [initialMilestone]
-  };
-
   const ContractValidationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     budget: Yup.number().positive("Budget must be positive").required("Budget is required"),

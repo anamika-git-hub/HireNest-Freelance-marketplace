@@ -147,13 +147,6 @@ const TransactionHistory: React.FC = () => {
     groupedData[key].count += 1;
   });
   
-  const chartArray = Object.entries(groupedData).map(([name, data]) => ({
-    name,
-    revenue: parseFloat(data.amount.toFixed(2)),
-    commission: parseFloat(data.commission.toFixed(2)),
-    transactions: data.count
-  }));
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilter(prev => ({ ...prev, [name]: value }));

@@ -81,7 +81,7 @@ const TaskDetail: React.FC = () => {
     };
 
     fetchTaskDetails();
-  }, [id]);
+  }, [id,userId]);
 
   useEffect(() => {
     if (!taskDetails) return;
@@ -90,7 +90,6 @@ const TaskDetail: React.FC = () => {
       const deadline = new Date(taskDetails.timeline);
       const now = new Date();
       const timeDiff = deadline.getTime() - now.getTime();
-      const defaultDeliveryTime = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); 
 
       if (timeDiff <= 0) {
         setTimeLeft("Task deadline reached");

@@ -12,7 +12,7 @@ const OTPVerification: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const { email, role } = location.state || {}; 
+  const {role } = location.state || {}; 
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -137,7 +137,7 @@ const OTPVerification: React.FC = () => {
         <div className="hidden md:flex w-full md:w-1/3 lg:w-1/2 items-center justify-center">
           <img
             src="/assets/otp.avif"
-            alt="OTP Image"
+            alt="OTP"
             className="object-cover w-full h-full rounded-lg"
           />
         </div>

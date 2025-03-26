@@ -12,11 +12,6 @@ interface Review {
     createdAt: string;
   }
 
-interface ApiResponse {
-  data: Review[];
-  totalPages: string;
-}  
-
 const ReviewsList:React.FC = () => {
     const [reviews,setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -65,7 +60,7 @@ const ReviewsList:React.FC = () => {
             }
         }
         getReviews()
-    },[currentPage,debouncedSearchTerm]);
+    },[currentPage,debouncedSearchTerm,userId]);
 
      const renderStars = (rating: number) => {
         return Array(5)

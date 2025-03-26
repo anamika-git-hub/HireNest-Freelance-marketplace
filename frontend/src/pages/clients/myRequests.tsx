@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUser, FaTrash, FaTimes, FaSearch, FaChevronLeft, FaChevronRight, FaEdit } from "react-icons/fa";
+import { FaTrash, FaTimes, FaSearch, FaChevronLeft, FaChevronRight, FaEdit } from "react-icons/fa";
 import axiosConfig from "../../service/axios";
 import { Link } from "react-router-dom";
 import Loader from "../../components/shared/Loader";

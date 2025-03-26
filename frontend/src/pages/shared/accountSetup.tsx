@@ -1,4 +1,4 @@
-import React, { useState, useRef, useDebugValue } from "react";
+import React, { useState, useRef} from "react";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -28,10 +28,6 @@ const AccountSetup: React.FC = () => {
  
 
   const currentUserId = useSelector((state: RootState) => state.user.userId);
-  const currentRole = useSelector((state:RootState)=> state.user.userRole);
-  
- 
-  
 
   const initialValues = {
     firstName: "",
@@ -41,8 +37,6 @@ const AccountSetup: React.FC = () => {
     selectedID: "debit_card",
     IDNumber: "",
   };
-
-
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,7 +73,6 @@ const AccountSetup: React.FC = () => {
     }
   };
 
-
   const handleSubmit = async (values: typeof initialValues) => {
     const formData = new FormData();
     formData.append("firstname", values.firstName);
@@ -93,8 +86,6 @@ const AccountSetup: React.FC = () => {
     if (imageFile) formData.append("profileImage", imageFile);
     if (imageFrontFile) formData.append("idFrontImage", imageFrontFile);
     if (imageBackFile) formData.append("idBackImage", imageBackFile);
-
-    
 
     try {
       const response = await axiosConfig.post("/users/setup-account",formData, {

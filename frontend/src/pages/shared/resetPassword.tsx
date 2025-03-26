@@ -11,7 +11,7 @@ const ResetPassword: React.FC = () => {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axiosConfig.post("/users/reset-password", { password, id });
+      await axiosConfig.post("/users/reset-password", { password, id });
       toast.success("Password has been reset successfully");
     } catch (error) {
       toast.error("Something went wrong. Please try again.");

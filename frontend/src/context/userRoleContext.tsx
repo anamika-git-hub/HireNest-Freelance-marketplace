@@ -25,7 +25,7 @@ export const UserRoleProvider: React.FC<{ children: React.ReactNode, showSidebar
     };
   }, []);
 
-  if(showSidebar == true){
+  if(showSidebar === true){
     return (
       <UserRoleContext.Provider value={{ userRole, setUserRole }}>
        <UserSidebar>{children}</UserSidebar>
