@@ -138,7 +138,10 @@ export const userUseCase = {
         const result = await NotificationRepository.notificationRead(notificationId);
         return result
     },
-    
+    notificationReadAll: async(userId: string,role: string) => {
+        const result = await NotificationRepository.notificationReadAll(userId,role);
+        return result
+    },
 
    
 }

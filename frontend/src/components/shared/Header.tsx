@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import axiosConfig from '../../service/axios';
 import {FaSignOutAlt,FaCog,FaBell} from "react-icons/fa";
 import { MdDashboard} from "react-icons/md";
@@ -9,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { useUserRole } from '../../context/userRoleContext';
 import NotificationItem from '../Notification/notificationItem';
 import CallNotification from '../Notification/callNotification';
+import { CheckSquare } from 'lucide-react';
 
 interface UserDetail {
   profileImage: string;
@@ -185,12 +185,15 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
         !profileMenuRef.current.contains(event.target as Node)
       ) {
         setIsProfileMenuOpen(false);
-      } else if (
+      } 
+       if (
         notificationMenuRef.current && 
         !notificationMenuRef.current.contains(event.target as Node)
       ) {
         setShowDropdown(false);
-      } else if (
+      }
+      
+       if (
         messageMenuRef.current && 
         !messageMenuRef.current.contains(event.target as Node)
       ) {
@@ -212,6 +215,16 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
       return updatedNotifications;
     });
   };
+
+  const handleMarkAllNotificationsAsRead = async () => {
+    try {
+      await axiosConfig.put('/users/mark-all-notifications-read',{role:userRole});
+      setNotifications([]);
+      setShowDropdown(false);
+    } catch (error) {
+      console.error("Error marking all notifications as read");
+    }
+  }
 
   const handleMessageIconClick = () => {
     setShowMessageDropdown(!showMessageDropdown);
@@ -350,7 +363,18 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                     zIndex: 1000
                   }}
                 >
+                  <div className="flex justify-between items-center mb-2">
                   <h3 className="text-gray-700 font-semibold mb-2">Notifications</h3>
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={handleMarkAllNotificationsAsRead}
+                      className="text-gray-500 hover:text-blue-600 transition-colors"
+                      title="Mark all as read"
+                    >
+                      <CheckSquare />
+                    </button>
+                  )}
+                  </div>
                   <div className="space-y-2">
                     {notifications.length > 0 ? (
                       notifications.map((notification, index) => (

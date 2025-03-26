@@ -55,7 +55,7 @@ router.get('/unread-messages', checkAuth('user'), MessageController.getUnreadMes
 
 router.get('/notifications',checkAuth('user'),UserController.getNotification);
 router.put('/mark-as-read/:id',checkAuth('user'),UserController.notificationRead)
-
+router.put('/mark-all-notifications-read', checkAuth('user'), UserController.notificationReadAll)
 
 router.get("/contract/:id",checkAuth('user'),ContractController.getContract);
 router.get("/contracts",checkAuth('user'),ContractController.getAllContracts);

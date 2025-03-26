@@ -27,5 +27,17 @@ export const NotificationRepository = {
     },
     notificationRead: async (notificationId:string) => {
         return await NotificationModel.findByIdAndUpdate(notificationId,{isRead:true})
+    },
+    notificationReadAll: async (userId: string, role: string) => {
+        return await NotificationModel.updateMany(
+            { 
+                userId: userId, 
+                role: role,
+                isRead: false 
+            },
+            { 
+                isRead: true 
+            }
+        );
     }
 }

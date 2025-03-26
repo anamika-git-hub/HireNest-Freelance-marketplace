@@ -136,6 +136,16 @@ export const UserController = {
           next(error)
         }
     },
+    notificationReadAll: async (req: CustomRequest, res: Res, next: Next) => {
+        try {
+            const userId = req.user?.userId || ''; 
+            const role = req.body.role;
+            const result = await userUseCase.notificationReadAll(userId,role)
+            res.status(200).json(result)
+        } catch (error) {
+            next(error)
+        }
+    },
     getUserDashboardStats: async(req: CustomRequest, res: Res, next: Next) => {
         try {
             const userId = req.user?.userId || '';
