@@ -27,7 +27,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-      origin: ['http://localhost:3000', 'https://hirenest.space'], 
+      origin: ['http://localhost:3000', 'https://hirenest.space', 'https://hire-nest-freelance-marketplace.vercel.app'], 
       methods: ['GET', 'POST'],
     },
     allowEIO3: true,
@@ -36,7 +36,7 @@ const io = new Server(server, {
  app.use('/client/webhook', express.raw({ type: 'application/json' }));
  app.use(express.json());
  app.use(cors({
-  origin: ['http://localhost:3000', 'https://hirenest.space'],
+  origin: ['http://localhost:3000', 'https://hirenest.space', 'https://hire-nest-freelance-marketplace.vercel.app'],
   credentials: true,             
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'refreshToken']
