@@ -100,8 +100,8 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId, role }) => {
   const initializeMeeting = async () => {
     if (!containerRef.current) return;
     
-    const appID = 144934725;
-    const serverSecret = "b6e3f7ba590dd679abea06c777796dc8";
+    const appID = 2047547384;
+    const serverSecret = "6d2996a15c0f9143c020297ab07e274c";
     
     console.log('Using display name for video call:', displayName);
     
