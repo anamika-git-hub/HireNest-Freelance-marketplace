@@ -105,7 +105,7 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId, role }) => {
     
     console.log('Using display name for video call:', displayName);
     
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
       appID, 
       serverSecret, 
       roomID, 
