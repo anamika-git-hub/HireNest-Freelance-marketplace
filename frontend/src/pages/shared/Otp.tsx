@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
+import axiosConfig from "../../service/axios";
 
 const OTPVerification: React.FC = () => {
   const [otp, setOtp] = useState(Array(6).fill("")); 
@@ -44,7 +45,7 @@ const OTPVerification: React.FC = () => {
 
   const handleResendOTP = async () => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BASE_URL}users/resend-otp`,{
+      const response = await axiosConfig.post(`/users/resend-otp`,{
         email:localStorage.getItem('email'),
       });
       if (response.status === 200) {
@@ -68,7 +69,7 @@ const OTPVerification: React.FC = () => {
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BASE_URL}users/verify-otp`, {
+      const response = await axiosConfig.post(`/users/verify-otp`, {
         otp: enteredOtp,
         email:localStorage.getItem('email')
       });

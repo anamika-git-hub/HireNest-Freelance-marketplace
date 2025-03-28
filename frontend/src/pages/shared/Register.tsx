@@ -10,7 +10,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../../store/userSlice";
-import { setAuthTokens } from "../../service/axios";
+import axiosConfig, { setAuthTokens } from "../../service/axios";
 
 const Signup: React.FC = () => {
   const dispatch = useDispatch();
@@ -39,8 +39,8 @@ const Signup: React.FC = () => {
    const {email} = decodeResponse
    const user = {email}
    try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_BASE_URL!}users/google-signup`,
+    const response = await axiosConfig.post(
+      `/users/google-signup`,
       user
     );
 
@@ -64,11 +64,10 @@ const Signup: React.FC = () => {
     const { email, password, role } = values;
 
     const newUser = { email, password, role };
-   
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_URL!}users/signup`,
+      const response = await axiosConfig.post(
+        `/users/signup`,
         newUser
       );
        if(response && response.data.error){

@@ -22,7 +22,7 @@ import VideoCall from '../components/shared/videoCall';
 import { io } from 'socket.io-client';
 const userId = localStorage.getItem('userId') as string;
 const role = localStorage.getItem('role') as string;
-const socket = io(process.env.REACT_APP_BASE_URL, {
+const socket = io(process.env.REACT_APP_BASE_URL_NEW, {
   query: { userId, role },
 });
 

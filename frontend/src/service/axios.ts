@@ -88,7 +88,7 @@ axiosConfig.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post(`${process.env.REACT_APP_BASE_URL}/auth/refresh-token`, { refreshToken });
+          const response = await axios.post(`${process.env.REACT_APP_BASE_URL_NEW}/auth/refresh-token`, { refreshToken });
           setCookie('accessToken', response.data.accessToken);
           originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
           return axios(originalRequest);
