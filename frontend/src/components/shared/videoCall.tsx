@@ -113,6 +113,14 @@ const VideoCall: React.FC<VideoCallProps> = ({ socket, userId, role }) => {
       displayName
     );
     
+    // const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+    //   appID, 
+    //   serverSecret, 
+    //   roomID, 
+    //   userId || randomID(5), 
+    //   displayName
+    // );
+    
     const zp = ZegoUIKitPrebuilt.create(kitToken);
     
     zp.joinRoom({

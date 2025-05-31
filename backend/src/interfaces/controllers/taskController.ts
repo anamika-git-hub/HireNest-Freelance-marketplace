@@ -62,7 +62,8 @@ export const TaskController = {
       const searchTerm = req.query.searchTerm as string || ""; 
       const bookmarkedTaskIds = req.query.bookmarkedTaskIds as string[] | undefined;
       const category = req.query.category as string | undefined;
-      const skills = req.query.skills as string[] | undefined; 
+      const skills = req.query.skills as string[] | undefined;
+      const status = req.query.status as string[] | undefined;  
       const priceRange = req.query.priceRange as { min: string; max: string } | undefined; 
       
       const skip = (page - 1) * limit;
@@ -75,7 +76,8 @@ export const TaskController = {
       const filters: FilterCriteria = {};
       if (category) filters.category = category;
       if (skills) filters.skills = { $all: skills }; 
-  
+      if (status) filters.status = { $in: status };
+      
       if (priceRange) {
         const minRate = parseFloat(priceRange.min);
         const maxRate = parseFloat(priceRange.max);

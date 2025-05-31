@@ -60,6 +60,7 @@ const TaskList: React.FC = () => {
     try {
       const response = await axiosConfig.get("/freelancers/tasks-list", {
         params: {
+          status:['pending','onhold'],
           page: currentPage,
           limit: ITEMS_PER_PAGE,
           sortOption,
